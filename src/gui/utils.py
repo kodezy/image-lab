@@ -90,7 +90,7 @@ def create_combobox(
     combobox.pack(side=tk.LEFT, padx=(10, 0))
 
     if command:
-        combobox.bind("<<ComboboxSelected>>", lambda e: command())
+        combobox.bind("<<ComboboxSelected>>", lambda e: command(combobox.get()))
 
     return frame, combobox
 

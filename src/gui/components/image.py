@@ -295,10 +295,20 @@ class ImagePanel:
         h, w = image.shape[:2]
         channels = image.shape[2] if len(image.shape) == 3 else 1
 
+        # Detect image type
+        unique_values = np.unique(image)
+        is_binary = len(unique_values) == 2 and (unique_values == [0, 255]).all()
+
         if channels == 1:
-            info_text = f"{w}×{h}px (Grayscale)"
+            if is_binary:
+                info_text = f"{w}×{h}px (Binary)"
+            else:
+                info_text = f"{w}×{h}px (Grayscale)"
         else:
-            info_text = f"{w}×{h}px ({channels} channels)"
+            if is_binary:
+                info_text = f"{w}×{h}px (Binary, {channels} channels)"
+            else:
+                info_text = f"{w}×{h}px ({channels} channels)"
 
         self.image_info_label.config(text=info_text, foreground="blue")
         self.status_label.config(text="Image loaded", foreground="green")

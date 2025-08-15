@@ -58,7 +58,7 @@ class ProcessingConfig(Config):
     """Image processing configuration organized by processing stages"""
 
     # Basic transformations
-    grayscale: bool = False
+    color_space: Literal["Grayscale", "RGB", "BGR", "HSV", "LAB", "YUV", "YCrCb"] = "BGR"
     crop_enabled: bool = False
     crop_x1: int = 0
     crop_y1: int = 0

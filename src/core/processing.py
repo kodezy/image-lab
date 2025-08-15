@@ -17,7 +17,7 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
     processors = [
         _apply_crop,
         _apply_resize,
-        _apply_grayscale,
+        _apply_color_space,
         _apply_gamma_correction,
         _apply_denoising,
         _apply_filters,
@@ -111,12 +111,40 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
 
 
 @image_cache(max_size=128)
-def _apply_grayscale(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply grayscale to image based on configuration"""
-    if config.grayscale and len(image.shape) == 3:
-        return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
+    """Apply color space conversion to image based on configuration"""
+    if config.color_space == "Original":
+        return image
 
-    return image
+    match config.color_space:
+        case "Grayscale":
+            if len(image.shape) == 3:
+                return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            return image
+        case "RGB":
+            if len(image.shape) == 3:
+                return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            return image
+        case "BGR":
+            return image  # Already in BGR format
+        case "HSV":
+            if len(image.shape) == 3:
+                return cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+            return image
+        case "LAB":
+            if len(image.shape) == 3:
+                return cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+            return image
+        case "YUV":
+            if len(image.shape) == 3:
+                return cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+            return image
+        case "YCrCb":
+            if len(image.shape) == 3:
+                return cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+            return image
+        case _:
+            return image
 
 
 @image_cache(max_size=128)

@@ -59,6 +59,7 @@ class ImageLabGUI:
         try:
             self.current_image = capture_image(self.capture_config)
             self.update_image_display()
+            self.image_panel.reset_zoom()
 
         except Exception as exception:
             show_error(f"Capture failed: {exception}")
@@ -83,6 +84,7 @@ class ImageLabGUI:
             if image is not None:
                 self.current_image = image
                 self.update_image_display()
+                self.image_panel.reset_zoom()
             else:
                 show_error("Failed to load image")
 

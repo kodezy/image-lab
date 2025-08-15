@@ -19,10 +19,10 @@ class ProcessingPanel:
         """Refresh panel with current configuration"""
         config = self.app.processing_config
 
-        self.grayscale_var.set(config.grayscale)
+        self.color_space_var.set(config.color_space)
+        self.crop_enabled_var.set(config.crop_enabled)
 
         # Update crop variables
-        self.crop_enabled_var.set(config.crop_enabled)
         self.crop_x1_var.set(config.crop_x1)
         self.crop_y1_var.set(config.crop_y1)
         self.crop_x2_var.set(config.crop_x2)
@@ -172,9 +172,7 @@ class ProcessingPanel:
         """Setup tkinter variables for all processing options"""
         config = self.app.processing_config
 
-        self.grayscale_var = tk.BooleanVar(value=config.grayscale)
-
-        # Crop variables
+        self.color_space_var = tk.StringVar(value=config.color_space)
         self.crop_enabled_var = tk.BooleanVar(value=config.crop_enabled)
         self.crop_x1_var = tk.IntVar(value=config.crop_x1)
         self.crop_y1_var = tk.IntVar(value=config.crop_y1)
@@ -340,16 +338,19 @@ class ProcessingPanel:
         input_frame = create_labeled_frame(self.scrollable_frame, "📥 Format")
         input_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        create_checkbox(
+        # Color space conversion
+        color_frame, self.color_space_combobox = create_combobox(
             input_frame,
-            "Grayscale",
-            self.grayscale_var,
-            self._on_grayscale_changed,
-        ).pack(anchor=tk.W, pady=2)
+            "Color Space",
+            self.color_space_var,
+            ["Grayscale", "RGB", "BGR", "HSV", "LAB", "YUV", "YCrCb"],
+            self._on_color_space_changed,
+        )
+        color_frame.pack(fill=tk.X, pady=2)
 
-    def _on_grayscale_changed(self) -> None:
-        """Handle grayscale change"""
-        self.app.processing_config.grayscale = self.grayscale_var.get()
+    def _on_color_space_changed(self, value) -> None:
+        """Handle color space change"""
+        self.app.processing_config.color_space = value
         self._update_grayscale_dependent_controls()
         self.app.update_image_display()
 
@@ -2402,7 +2403,7 @@ class ProcessingPanel:
 
     def _update_grayscale_dependent_controls(self) -> None:
         """Update state of controls that depend on grayscale"""
-        is_grayscale = self.grayscale_var.get()
+        is_grayscale = self.color_space_var.get() == "Grayscale"
 
         # Enable/disable grayscale-dependent controls
         state = tk.NORMAL if is_grayscale else tk.DISABLED
