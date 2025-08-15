@@ -60,10 +60,7 @@ class ProcessingConfig(Config):
     # Basic transformations
     color_space: Literal["Grayscale", "RGB", "BGR", "HSV", "LAB", "YUV", "YCrCb"] = "BGR"
     crop_enabled: bool = False
-    crop_x1: int = 0
-    crop_y1: int = 0
-    crop_x2: int = 0
-    crop_y2: int = 0
+    bbox: tuple[int, int, int, int] | None = None  # (x1, y1, x2, y2) or None
     resize_enabled: bool = False
     resize_width: int = 1920
     resize_height: int = 1080

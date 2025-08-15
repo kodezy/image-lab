@@ -15,8 +15,8 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
     image_processed = image.copy()
 
     processors = [
-        _apply_crop,
         _apply_resize,
+        _apply_crop,
         _apply_color_space,
         _apply_gamma_correction,
         _apply_denoising,
@@ -63,15 +63,16 @@ def _ensure_grayscale(image: np.ndarray) -> np.ndarray:
 @image_cache(max_size=128)
 def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     """Apply crop to image based on configuration"""
-    if not config.crop_enabled:
+    if not config.crop_enabled or config.bbox is None:
         return image
 
     h, w = image.shape[:2]
+    x1, y1, x2, y2 = config.bbox
 
-    x1 = max(0, config.crop_x1)
-    y1 = max(0, config.crop_y1)
-    x2 = min(w, config.crop_x2)
-    y2 = min(h, config.crop_y2)
+    x1 = max(0, x1)
+    y1 = max(0, y1)
+    x2 = min(w, x2)
+    y2 = min(h, y2)
 
     if x2 > x1 and y2 > y1:
         return image[y1:y2, x1:x2]

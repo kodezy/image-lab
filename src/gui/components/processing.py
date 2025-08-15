@@ -23,10 +23,7 @@ class ProcessingPanel:
         self.crop_enabled_var.set(config.crop_enabled)
 
         # Update crop variables
-        self.crop_x1_var.set(config.crop_x1)
-        self.crop_y1_var.set(config.crop_y1)
-        self.crop_x2_var.set(config.crop_x2)
-        self.crop_y2_var.set(config.crop_y2)
+        self.bbox_var.set(self._format_bbox(config.bbox))
 
         self.threshold_enabled_var.set(config.threshold_enabled)
         self.threshold_type_var.set(config.threshold_type)
@@ -42,16 +39,16 @@ class ProcessingPanel:
         self.median_kernel_var.set(config.median_kernel)
 
         self.clahe_var.set(config.clahe)
-        self.clahe_clip_var.set(config.clahe_clip_limit)
+        self.clahe_clip_limit_var.set(config.clahe_clip_limit)
 
         self.sharpen_var.set(config.sharpen)
         self.sharpen_strength_var.set(config.sharpen_strength)
 
         self.edge_enhancement_var.set(config.edge_enhancement)
-        self.histogram_eq_var.set(config.histogram_equalization)
+        self.histogram_equalization_var.set(config.histogram_equalization)
 
         self.morphology_var.set(config.morphology)
-        self.morph_kernel_var.set(config.morph_kernel_size)
+        self.morph_kernel_size_var.set(config.morph_kernel_size)
 
         self.character_separation_var.set(config.character_separation)
         self.vertical_line_removal_var.set(config.vertical_line_removal)
@@ -66,7 +63,7 @@ class ProcessingPanel:
         self.resize_enabled_var.set(config.resize_enabled)
         self.resize_width_var.set(config.resize_width)
         self.resize_height_var.set(config.resize_height)
-        self.resize_maintain_aspect_ratio_var.set(config.resize_maintain_aspect_ratio)
+        self.resize_maintain_aspect_var.set(config.resize_maintain_aspect_ratio)
         self.gamma_correction_var.set(config.gamma_correction)
         self.gamma_value_var.set(config.gamma_value)
 
@@ -174,55 +171,15 @@ class ProcessingPanel:
 
         self.color_space_var = tk.StringVar(value=config.color_space)
         self.crop_enabled_var = tk.BooleanVar(value=config.crop_enabled)
-        self.crop_x1_var = tk.IntVar(value=config.crop_x1)
-        self.crop_y1_var = tk.IntVar(value=config.crop_y1)
-        self.crop_x2_var = tk.IntVar(value=config.crop_x2)
-        self.crop_y2_var = tk.IntVar(value=config.crop_y2)
-
-        self.threshold_enabled_var = tk.BooleanVar(value=config.threshold_enabled)
-        self.threshold_type_var = tk.StringVar(value=config.threshold_type)
-        self.threshold_value_var = tk.IntVar(value=config.threshold_value)
-
-        self.bilateral_filter_var = tk.BooleanVar(value=config.bilateral_filter)
-        self.bilateral_d_var = tk.IntVar(value=config.bilateral_d)
-
-        self.gaussian_blur_var = tk.BooleanVar(value=config.gaussian_blur)
-        self.gaussian_kernel_var = tk.IntVar(value=config.gaussian_kernel)
-
-        self.median_filter_var = tk.BooleanVar(value=config.median_filter)
-        self.median_kernel_var = tk.IntVar(value=config.median_kernel)
-
-        self.clahe_var = tk.BooleanVar(value=config.clahe)
-        self.clahe_clip_var = tk.DoubleVar(value=config.clahe_clip_limit)
-
-        self.sharpen_var = tk.BooleanVar(value=config.sharpen)
-        self.sharpen_strength_var = tk.DoubleVar(value=config.sharpen_strength)
-
-        self.edge_enhancement_var = tk.BooleanVar(value=config.edge_enhancement)
-        self.histogram_eq_var = tk.BooleanVar(value=config.histogram_equalization)
-
-        # Variables for grayscale-dependent operations
-        self.adaptive_hist_eq_var = tk.BooleanVar(value=config.adaptive_hist_eq)
-        self.multi_otsu_var = tk.BooleanVar(value=config.multi_otsu)
-        self.local_binary_pattern_var = tk.BooleanVar(value=config.local_binary_pattern)
-
-        self.morphology_var = tk.BooleanVar(value=config.morphology)
-        self.morph_kernel_var = tk.IntVar(value=config.morph_kernel_size)
-
-        self.character_separation_var = tk.BooleanVar(value=config.character_separation)
-        self.vertical_line_removal_var = tk.BooleanVar(value=config.vertical_line_removal)
-        self.horizontal_line_removal_var = tk.BooleanVar(value=config.horizontal_line_removal)
-        self.noise_dots_removal_var = tk.BooleanVar(value=config.noise_dots_removal)
-
-        # Basic transformations
+        self.bbox_var = tk.StringVar(value=self._format_bbox(config.bbox))
         self.resize_enabled_var = tk.BooleanVar(value=config.resize_enabled)
         self.resize_width_var = tk.IntVar(value=config.resize_width)
         self.resize_height_var = tk.IntVar(value=config.resize_height)
-        self.resize_maintain_aspect_ratio_var = tk.BooleanVar(value=config.resize_maintain_aspect_ratio)
+        self.resize_maintain_aspect_var = tk.BooleanVar(value=config.resize_maintain_aspect_ratio)
         self.gamma_correction_var = tk.BooleanVar(value=config.gamma_correction)
         self.gamma_value_var = tk.DoubleVar(value=config.gamma_value)
 
-        # Advanced noise reduction
+        # Noise reduction variables
         self.denoise_nl_means_var = tk.BooleanVar(value=config.denoise_nl_means)
         self.denoise_h_var = tk.DoubleVar(value=config.denoise_h)
         self.denoise_template_window_var = tk.IntVar(value=config.denoise_template_window)
@@ -234,16 +191,27 @@ class ProcessingPanel:
         self.noise_reduction_bilateral_var = tk.BooleanVar(value=config.noise_reduction_bilateral)
         self.bilateral_iterations_var = tk.IntVar(value=config.bilateral_iterations)
 
-        # Advanced filters
+        # Filter variables
+        self.bilateral_filter_var = tk.BooleanVar(value=config.bilateral_filter)
+        self.bilateral_d_var = tk.IntVar(value=config.bilateral_d)
         self.bilateral_sigma_color_var = tk.IntVar(value=config.bilateral_sigma_color)
         self.bilateral_sigma_space_var = tk.IntVar(value=config.bilateral_sigma_space)
+        self.gaussian_blur_var = tk.BooleanVar(value=config.gaussian_blur)
+        self.gaussian_kernel_var = tk.IntVar(value=config.gaussian_kernel)
         self.gaussian_sigma_var = tk.DoubleVar(value=config.gaussian_sigma)
+        self.median_filter_var = tk.BooleanVar(value=config.median_filter)
+        self.median_kernel_var = tk.IntVar(value=config.median_kernel)
         self.background_subtraction_var = tk.BooleanVar(value=config.background_subtraction)
         self.bg_threshold_var = tk.IntVar(value=config.bg_threshold)
 
-        # Advanced histogram and contrast
+        # Histogram and contrast variables
+        self.histogram_equalization_var = tk.BooleanVar(value=config.histogram_equalization)
+        self.clahe_var = tk.BooleanVar(value=config.clahe)
+        self.clahe_clip_limit_var = tk.DoubleVar(value=config.clahe_clip_limit)
         self.clahe_tile_size_var = tk.IntVar(value=config.clahe_tile_size)
+        self.adaptive_hist_eq_var = tk.BooleanVar(value=config.adaptive_hist_eq)
         self.adaptive_hist_kernel_var = tk.IntVar(value=config.adaptive_hist_kernel)
+        self.multi_otsu_var = tk.BooleanVar(value=config.multi_otsu)
         self.multi_otsu_classes_var = tk.IntVar(value=config.multi_otsu_classes)
         self.intensity_normalization_var = tk.BooleanVar(value=config.intensity_normalization)
         self.norm_min_var = tk.IntVar(value=config.norm_min)
@@ -252,17 +220,21 @@ class ProcessingPanel:
         self.stretch_min_percentile_var = tk.DoubleVar(value=config.stretch_min_percentile)
         self.stretch_max_percentile_var = tk.DoubleVar(value=config.stretch_max_percentile)
 
-        # Advanced line removal
+        # Line removal variables
+        self.vertical_line_removal_var = tk.BooleanVar(value=config.vertical_line_removal)
         self.vertical_kernel_size_var = tk.IntVar(value=config.vertical_kernel_size)
+        self.horizontal_line_removal_var = tk.BooleanVar(value=config.horizontal_line_removal)
         self.horizontal_kernel_size_var = tk.IntVar(value=config.horizontal_kernel_size)
         self.hough_lines_removal_var = tk.BooleanVar(value=config.hough_lines_removal)
         self.hough_threshold_var = tk.IntVar(value=config.hough_threshold)
         self.hough_min_line_length_var = tk.IntVar(value=config.hough_min_line_length)
         self.hough_max_line_gap_var = tk.IntVar(value=config.hough_max_line_gap)
 
-        # Advanced morphology
+        # Morphological operations variables
         self.stroke_width_normalization_var = tk.BooleanVar(value=config.stroke_width_normalization)
         self.stroke_iterations_var = tk.IntVar(value=config.stroke_iterations)
+        self.morphology_var = tk.BooleanVar(value=config.morphology)
+        self.morph_kernel_size_var = tk.IntVar(value=config.morph_kernel_size)
         self.morph_open_var = tk.BooleanVar(value=config.morph_open)
         self.morph_close_var = tk.BooleanVar(value=config.morph_close)
         self.tophat_var = tk.BooleanVar(value=config.tophat)
@@ -274,7 +246,8 @@ class ProcessingPanel:
         self.morphological_gradient_var = tk.BooleanVar(value=config.morphological_gradient)
         self.morphological_gradient_kernel_var = tk.IntVar(value=config.morphological_gradient_kernel)
 
-        # Advanced character operations
+        # Character operations variables
+        self.character_separation_var = tk.BooleanVar(value=config.character_separation)
         self.char_sep_kernel_size_var = tk.IntVar(value=config.char_sep_kernel_size)
         self.character_dilation_var = tk.BooleanVar(value=config.character_dilation)
         self.dilation_kernel_size_var = tk.IntVar(value=config.dilation_kernel_size)
@@ -282,23 +255,30 @@ class ProcessingPanel:
         self.character_erosion_var = tk.BooleanVar(value=config.character_erosion)
         self.erosion_kernel_size_var = tk.IntVar(value=config.erosion_kernel_size)
         self.erosion_iterations_var = tk.IntVar(value=config.erosion_iterations)
+        self.noise_dots_removal_var = tk.BooleanVar(value=config.noise_dots_removal)
         self.min_contour_area_var = tk.IntVar(value=config.min_contour_area)
 
-        # Advanced enhancement
+        # Enhancement variables
         self.text_enhancement_var = tk.BooleanVar(value=config.text_enhancement)
         self.text_kernel_size_var = tk.IntVar(value=config.text_kernel_size)
         self.detail_enhancement_var = tk.BooleanVar(value=config.detail_enhancement)
         self.detail_sigma_s_var = tk.DoubleVar(value=config.detail_sigma_s)
         self.detail_sigma_r_var = tk.DoubleVar(value=config.detail_sigma_r)
+        self.edge_enhancement_var = tk.BooleanVar(value=config.edge_enhancement)
         self.edge_strength_var = tk.DoubleVar(value=config.edge_strength)
         self.unsharp_mask_var = tk.BooleanVar(value=config.unsharp_mask)
         self.unsharp_strength_var = tk.DoubleVar(value=config.unsharp_strength)
+        self.sharpen_var = tk.BooleanVar(value=config.sharpen)
+        self.sharpen_strength_var = tk.DoubleVar(value=config.sharpen_strength)
 
-        # Advanced threshold
+        # Threshold variables
+        self.threshold_enabled_var = tk.BooleanVar(value=config.threshold_enabled)
+        self.threshold_type_var = tk.StringVar(value=config.threshold_type)
+        self.threshold_value_var = tk.IntVar(value=config.threshold_value)
         self.adaptive_block_size_var = tk.IntVar(value=config.adaptive_block_size)
         self.adaptive_c_var = tk.IntVar(value=config.adaptive_c)
 
-        # Contour filtering
+        # Contour filtering variables
         self.contour_filtering_var = tk.BooleanVar(value=config.contour_filtering)
         self.contour_area_min_var = tk.IntVar(value=config.contour_area_min)
         self.contour_area_max_var = tk.IntVar(value=config.contour_area_max)
@@ -309,11 +289,12 @@ class ProcessingPanel:
         self.min_aspect_ratio_var = tk.DoubleVar(value=config.min_aspect_ratio)
         self.max_aspect_ratio_var = tk.DoubleVar(value=config.max_aspect_ratio)
 
-        # Advanced operations
+        # Advanced operations variables
         self.distance_transform_var = tk.BooleanVar(value=config.distance_transform)
         self.distance_transform_type_var = tk.IntVar(value=config.distance_transform_type)
         self.skeletonize_var = tk.BooleanVar(value=config.skeletonize)
         self.watershed_markers_var = tk.BooleanVar(value=config.watershed_markers)
+        self.local_binary_pattern_var = tk.BooleanVar(value=config.local_binary_pattern)
         self.lbp_radius_var = tk.IntVar(value=config.lbp_radius)
         self.lbp_n_points_var = tk.IntVar(value=config.lbp_n_points)
 
@@ -370,6 +351,13 @@ class ProcessingPanel:
         resize_controls = ttk.Frame(preprocess_frame)
         resize_controls.pack(fill=tk.X, pady=2)
 
+        create_checkbox(
+            resize_controls,
+            "Maintain Ratio",
+            self.resize_maintain_aspect_var,
+            self._on_resize_maintain_aspect_ratio_changed,
+        ).pack(anchor=tk.W, pady=2)
+
         width_frame, _, _ = create_slider(
             resize_controls,
             "Width",
@@ -390,13 +378,6 @@ class ProcessingPanel:
         )
         height_frame.pack(fill=tk.X, pady=1)
 
-        create_checkbox(
-            preprocess_frame,
-            "Maintain Aspect Ratio",
-            self.resize_maintain_aspect_ratio_var,
-            self._on_resize_maintain_aspect_ratio_changed,
-        ).pack(anchor=tk.W, pady=2)
-
         # Crop controls
         ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
 
@@ -407,62 +388,24 @@ class ProcessingPanel:
             self._on_crop_enabled_changed,
         ).pack(anchor=tk.W, pady=2)
 
-        crop_coords = ttk.Frame(preprocess_frame)
-        crop_coords.pack(fill=tk.X, pady=2)
+        # Bbox input
+        bbox_frame = ttk.Frame(preprocess_frame)
+        bbox_frame.pack(fill=tk.X, pady=2)
 
-        coord_row1 = ttk.Frame(crop_coords)
-        coord_row1.pack(fill=tk.X, pady=1)
-
-        ttk.Label(coord_row1, text="X1:").pack(side=tk.LEFT, padx=(0, 5))
-        x1_spinbox = ttk.Spinbox(
-            coord_row1,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_x1_var,
-            width=8,
-            command=self._on_crop_x1_changed,
+        ttk.Label(bbox_frame, text="(x1,y1,x2,y2):").pack(side=tk.LEFT, padx=(0, 5))
+        bbox_entry = ttk.Entry(
+            bbox_frame,
+            textvariable=self.bbox_var,
+            width=20,
         )
-        x1_spinbox.pack(side=tk.LEFT, padx=(0, 15))
-        x1_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_x1_changed())
+        bbox_entry.pack(side=tk.LEFT, padx=(0, 5))
+        bbox_entry.bind("<KeyRelease>", self._on_bbox_key_release)
+        bbox_entry.bind("<FocusOut>", self._on_bbox_focus_out)
+        bbox_entry.bind("<Return>", self._on_bbox_enter)
+        bbox_entry.bind("<Key>", self._on_bbox_key)
 
-        ttk.Label(coord_row1, text="Y1:").pack(side=tk.LEFT, padx=(0, 5))
-        y1_spinbox = ttk.Spinbox(
-            coord_row1,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_y1_var,
-            width=8,
-            command=self._on_crop_y1_changed,
-        )
-        y1_spinbox.pack(side=tk.LEFT)
-        y1_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_y1_changed())
-
-        coord_row2 = ttk.Frame(crop_coords)
-        coord_row2.pack(fill=tk.X, pady=1)
-
-        ttk.Label(coord_row2, text="X2:").pack(side=tk.LEFT, padx=(0, 5))
-        x2_spinbox = ttk.Spinbox(
-            coord_row2,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_x2_var,
-            width=8,
-            command=self._on_crop_x2_changed,
-        )
-        x2_spinbox.pack(side=tk.LEFT, padx=(0, 15))
-        x2_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_x2_changed())
-
-        ttk.Label(coord_row2, text="Y2:").pack(side=tk.LEFT, padx=(0, 5))
-        y2_spinbox = ttk.Spinbox(
-            coord_row2,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_y2_var,
-            width=8,
-            command=self._on_crop_y2_changed,
-        )
-        y2_spinbox.pack(side=tk.LEFT)
-        y2_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_y2_changed())
+        # Add variable trace for more reliable updates
+        self.bbox_var.trace_add("write", self._on_bbox_variable_changed)
 
         self.crop_status_label = ttk.Label(preprocess_frame, text="Crop: Disabled", foreground="gray")
         self.crop_status_label.pack(anchor=tk.W, pady=2)
@@ -491,20 +434,23 @@ class ProcessingPanel:
         """Handle resize enabled change"""
         self.app.processing_config.resize_enabled = self.resize_enabled_var.get()
         self.app.update_image_display()
+        self._update_crop_status()
 
     def _on_resize_width_changed(self, value) -> None:
         """Handle resize width change"""
         self.app.processing_config.resize_width = int(float(value))
         self.app.update_image_display()
+        self._update_crop_status()
 
     def _on_resize_height_changed(self, value) -> None:
         """Handle resize height change"""
         self.app.processing_config.resize_height = int(float(value))
         self.app.update_image_display()
+        self._update_crop_status()
 
     def _on_resize_maintain_aspect_ratio_changed(self) -> None:
         """Handle maintain aspect ratio change"""
-        self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_ratio_var.get()
+        self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_var.get()
         self.app.update_image_display()
 
     def _on_gamma_correction_changed(self) -> None:
@@ -529,142 +475,150 @@ class ProcessingPanel:
             self._on_crop_enabled_changed,
         ).pack(anchor=tk.W, pady=2)
 
-        coords_frame = ttk.Frame(crop_frame)
-        coords_frame.pack(fill=tk.X, pady=5)
+        # Bbox input
+        bbox_frame = ttk.Frame(crop_frame)
+        bbox_frame.pack(fill=tk.X, pady=5)
 
-        coord_row1 = ttk.Frame(coords_frame)
-        coord_row1.pack(fill=tk.X, pady=2)
-
-        ttk.Label(coord_row1, text="X1:").pack(side=tk.LEFT, padx=(0, 5))
-        x1_spinbox = ttk.Spinbox(
-            coord_row1,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_x1_var,
-            width=8,
-            command=self._on_crop_x1_changed,
+        ttk.Label(bbox_frame, text="(x1,y1,x2,y2):").pack(side=tk.LEFT, padx=(0, 5))
+        bbox_entry = ttk.Entry(
+            bbox_frame,
+            textvariable=self.bbox_var,
+            width=20,
         )
-        x1_spinbox.pack(side=tk.LEFT, padx=(0, 15))
-        x1_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_x1_changed())
+        bbox_entry.pack(side=tk.LEFT, padx=(0, 5))
+        bbox_entry.bind("<KeyRelease>", self._on_bbox_key_release)
+        bbox_entry.bind("<FocusOut>", self._on_bbox_focus_out)
+        bbox_entry.bind("<Return>", self._on_bbox_enter)
+        bbox_entry.bind("<Key>", self._on_bbox_key)
 
-        ttk.Label(coord_row1, text="Y1:").pack(side=tk.LEFT, padx=(0, 5))
-        y1_spinbox = ttk.Spinbox(
-            coord_row1,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_y1_var,
-            width=8,
-            command=self._on_crop_y1_changed,
-        )
-
-        y1_spinbox.pack(side=tk.LEFT)
-        y1_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_y1_changed())
-
-        coord_row2 = ttk.Frame(coords_frame)
-        coord_row2.pack(fill=tk.X, pady=2)
-
-        ttk.Label(coord_row2, text="X2:").pack(side=tk.LEFT, padx=(0, 5))
-        x2_spinbox = ttk.Spinbox(
-            coord_row2,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_x2_var,
-            width=8,
-            command=self._on_crop_x2_changed,
-        )
-        x2_spinbox.pack(side=tk.LEFT, padx=(0, 15))
-        x2_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_x2_changed())
-
-        ttk.Label(coord_row2, text="Y2:").pack(side=tk.LEFT, padx=(0, 5))
-        y2_spinbox = ttk.Spinbox(
-            coord_row2,
-            from_=0,
-            to=9999,
-            textvariable=self.crop_y2_var,
-            width=8,
-            command=self._on_crop_y2_changed,
-        )
-        y2_spinbox.pack(side=tk.LEFT)
-        y2_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_y2_changed())
+        # Add variable trace for more reliable updates
+        self.bbox_var.trace_add("write", self._on_bbox_variable_changed)
 
         # Status label
         self.crop_status_label = ttk.Label(crop_frame, text="Crop: Disabled", foreground="gray")
         self.crop_status_label.pack(anchor=tk.W, pady=2)
 
-    def _on_crop_enabled_changed(self):
+    def _on_crop_enabled_changed(self) -> None:
         """Handle crop enabled change"""
         self.app.processing_config.crop_enabled = self.crop_enabled_var.get()
         self._update_crop_status()
         self.app.update_image_display()
 
-    def _on_crop_x1_changed(self):
-        """Handle crop X1 change"""
-        self.app.processing_config.crop_x1 = self.crop_x1_var.get()
-        self._update_crop_status()
-        self.app.update_image_display()
-
-    def _on_crop_y1_changed(self):
-        """Handle crop Y1 change"""
-        self.app.processing_config.crop_y1 = self.crop_y1_var.get()
-        self._update_crop_status()
-        self.app.update_image_display()
-
-    def _on_crop_x2_changed(self):
-        """Handle crop X2 change"""
-        self.app.processing_config.crop_x2 = self.crop_x2_var.get()
-        self._update_crop_status()
-        self.app.update_image_display()
-
-    def _on_crop_y2_changed(self):
-        """Handle crop Y2 change"""
-        self.app.processing_config.crop_y2 = self.crop_y2_var.get()
-        self._update_crop_status()
-        self.app.update_image_display()
-
-    def _update_crop_status(self):
-        """Update crop status label"""
+    def _update_crop_status(self) -> None:
+        """Update crop status label with real-time feedback"""
         if not self.crop_enabled_var.get():
             self.crop_status_label.config(text="Crop: Disabled", foreground="gray")
             return
 
-        x1 = self.crop_x1_var.get()
-        y1 = self.crop_y1_var.get()
-        x2 = self.crop_x2_var.get()
-        y2 = self.crop_y2_var.get()
+        if self.app.processed_image is None:
+            self.crop_status_label.config(text="Crop: No image", foreground="gray")
+            return
 
-        if x2 > x1 and y2 > y1:
-            width = x2 - x1
-            height = y2 - y1
+        bbox_str = self.bbox_var.get()
+        bbox = self._parse_bbox(bbox_str)
+
+        if bbox is None:
+            if bbox_str.strip():
+                self.crop_status_label.config(text="Crop: Invalid format - use x1,y1,x2,y2", foreground="red")
+            else:
+                self.crop_status_label.config(text="Crop: Enter coordinates", foreground="orange")
+            return
+
+        x1, y1, x2, y2 = bbox
+
+        # Get current image dimensions for validation
+        img_height, img_width = self.app.processed_image.shape[:2]
+
+        # Check if coordinates are within image bounds
+        if x1 < 0 or y1 < 0 or x2 > img_width or y2 > img_height:
             self.crop_status_label.config(
-                text=f"Crop: ({x1},{y1}) -> ({x2},{y2}) | {width}x{height}px", foreground="blue"
+                text=f"Crop: Out of bounds - Image: {img_width}×{img_height}",
+                foreground="red",
             )
+            return
+
+        # Check if coordinates are valid (x2 > x1 and y2 > y1)
+        if x2 <= x1 or y2 <= y1:
+            self.crop_status_label.config(
+                text=f"Crop: Invalid coordinates ({x1},{y1}) to ({x2},{y2})",
+                foreground="red",
+            )
+            return
+
+        # Calculate dimensions
+        width = x2 - x1
+        height = y2 - y1
+
+        # Show crop dimensions and image dimensions
+        self.crop_status_label.config(
+            text=f"Crop: {width}×{height} | Image: {img_width}×{img_height}",
+            foreground="green",
+        )
+
+    def _format_bbox(self, bbox) -> str:
+        """Format bbox tuple to string for display"""
+        if bbox is None:
+            return ""
+
+        return f"{bbox[0]},{bbox[1]},{bbox[2]},{bbox[3]}"
+
+    def _parse_bbox(self, bbox_str: str) -> tuple[int, int, int, int] | None:
+        """Parse bbox string to tuple with flexible formatting"""
+        if not bbox_str or bbox_str.strip() == "":
+            return None
+
+        try:
+            # Remove extra spaces and split by comma
+            cleaned_str = bbox_str.replace(" ", "").replace("(", "").replace(")", "")
+            coords = [int(x.strip()) for x in cleaned_str.split(",") if x.strip()]
+
+            if len(coords) == 4:
+                return (coords[0], coords[1], coords[2], coords[3])
+            elif len(coords) > 4:
+                # Take first 4 coordinates if more are provided
+                return (coords[0], coords[1], coords[2], coords[3])
+        except (ValueError, AttributeError):
+            pass
+        return None
+
+    def _on_bbox_key_release(self, event) -> None:
+        """Handle bbox key release"""
+        self._on_bbox_changed()
+
+    def _on_bbox_focus_out(self, event) -> None:
+        """Handle bbox focus out"""
+        self._on_bbox_changed()
+
+    def _on_bbox_enter(self, event) -> None:
+        """Handle bbox enter"""
+        self._on_bbox_changed()
+
+    def _on_bbox_key(self, event) -> None:
+        """Handle bbox key"""
+        self._on_bbox_changed()
+
+    def _on_bbox_variable_changed(self, *args) -> None:
+        """Handle bbox variable change"""
+        self._on_bbox_changed()
+
+    def _on_bbox_changed(self) -> None:
+        """Handle bbox change with real-time updates"""
+        bbox_str = self.bbox_var.get()
+        bbox = self._parse_bbox(bbox_str)
+
+        if bbox is not None:
+            x1, y1, x2, y2 = bbox
+
+            # Update config with user input (don't force correction)
+            self.app.processing_config.bbox = bbox
+            self._update_crop_status()
+
+            # Only update image display if we have valid coordinates
+            if x2 > x1 and y2 > y1:
+                self.app.update_image_display()
         else:
-            self.crop_status_label.config(text="Crop: Invalid coordinates", foreground="red")
-
-    def _on_threshold_enabled_changed(self) -> None:
-        """Handle threshold enabled change"""
-        self.app.processing_config.threshold_enabled = self.threshold_enabled_var.get()
-        self.app.update_image_display()
-
-    def _on_threshold_type_changed(self) -> None:
-        """Handle threshold type change"""
-        self.app.processing_config.threshold_type = self.threshold_type_var.get()
-        self.app.update_image_display()
-
-    def _on_threshold_value_changed(self, value) -> None:
-        """Handle threshold value change"""
-        self.app.processing_config.threshold_value = int(float(value))
-        self.app.update_image_display()
-
-    def _on_adaptive_block_size_changed(self, value) -> None:
-        """Handle adaptive block size change"""
-        self.app.processing_config.adaptive_block_size = int(float(value))
-        self.app.update_image_display()
-
-    def _on_adaptive_c_changed(self, value) -> None:
-        """Handle adaptive C change"""
-        self.app.processing_config.adaptive_c = int(float(value))
-        self.app.update_image_display()
+            # Update status even with invalid input for real-time feedback
+            self._update_crop_status()
 
     def _create_threshold_section(self) -> None:
         """Create consolidated threshold section"""
@@ -740,6 +694,31 @@ class ProcessingPanel:
             self._on_multi_otsu_classes_changed,
         )
         multi_otsu_classes_frame.pack(fill=tk.X, pady=1)
+
+    def _on_threshold_enabled_changed(self) -> None:
+        """Handle threshold enabled change"""
+        self.app.processing_config.threshold_enabled = self.threshold_enabled_var.get()
+        self.app.update_image_display()
+
+    def _on_threshold_type_changed(self) -> None:
+        """Handle threshold type change"""
+        self.app.processing_config.threshold_type = self.threshold_type_var.get()
+        self.app.update_image_display()
+
+    def _on_threshold_value_changed(self, value) -> None:
+        """Handle threshold value change"""
+        self.app.processing_config.threshold_value = int(float(value))
+        self.app.update_image_display()
+
+    def _on_adaptive_block_size_changed(self, value) -> None:
+        """Handle adaptive block size change"""
+        self.app.processing_config.adaptive_block_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_adaptive_c_changed(self, value) -> None:
+        """Handle adaptive C change"""
+        self.app.processing_config.adaptive_c = int(float(value))
+        self.app.update_image_display()
 
     def _on_multi_otsu_classes_changed(self, value) -> None:
         """Handle multi-OTSU classes change"""
@@ -1233,13 +1212,13 @@ class ProcessingPanel:
         enhance_frame.pack(fill=tk.X, pady=5, padx=5)
 
         # Histogram equalization
-        self.histogram_eq_checkbox = create_checkbox(
+        self.histogram_equalization_checkbox = create_checkbox(
             enhance_frame,
             "Histogram Equalization",
-            self.histogram_eq_var,
+            self.histogram_equalization_var,
             self._on_histogram_eq_changed,
         )
-        self.histogram_eq_checkbox.pack(anchor=tk.W, pady=1)
+        self.histogram_equalization_checkbox.pack(anchor=tk.W, pady=1)
 
         # CLAHE
         self.clahe_checkbox = create_checkbox(enhance_frame, "CLAHE", self.clahe_var, self._on_clahe_changed)
@@ -1251,7 +1230,7 @@ class ProcessingPanel:
         clahe_clip_frame, _, _ = create_slider(
             clahe_controls,
             "Clip Limit",
-            self.clahe_clip_var,
+            self.clahe_clip_limit_var,
             0.5,
             10.0,
             self._on_clahe_clip_changed,
@@ -1550,7 +1529,7 @@ class ProcessingPanel:
         morph_kernel_frame, _, _ = create_slider(
             basic_morph_controls,
             "Kernel Size",
-            self.morph_kernel_var,
+            self.morph_kernel_size_var,
             1,
             10,
             self._on_morph_kernel_changed,
@@ -2296,13 +2275,13 @@ class ProcessingPanel:
         )
         self.edge_enhancement_checkbox.pack(anchor=tk.W, pady=2)
 
-        self.histogram_eq_checkbox = create_checkbox(
+        self.histogram_equalization_checkbox = create_checkbox(
             misc_frame,
             "Histogram Equalization",
-            self.histogram_eq_var,
+            self.histogram_equalization_var,
             self._on_histogram_eq_changed,
         )
-        self.histogram_eq_checkbox.pack(anchor=tk.W, pady=2)
+        self.histogram_equalization_checkbox.pack(anchor=tk.W, pady=2)
 
         self.adaptive_hist_eq_checkbox = create_checkbox(
             misc_frame,
@@ -2363,7 +2342,7 @@ class ProcessingPanel:
 
     def _on_histogram_eq_changed(self) -> None:
         """Handle histogram equalization change"""
-        self.app.processing_config.histogram_equalization = self.histogram_eq_var.get()
+        self.app.processing_config.histogram_equalization = self.histogram_equalization_var.get()
         self.app.update_image_display()
 
     def _on_character_separation_changed(self) -> None:
@@ -2411,7 +2390,7 @@ class ProcessingPanel:
         self.threshold_enabled_checkbox.config(state=state)
         self.clahe_checkbox.config(state=state)
         self.edge_enhancement_checkbox.config(state=state)
-        self.histogram_eq_checkbox.config(state=state)
+        self.histogram_equalization_checkbox.config(state=state)
         self.adaptive_hist_eq_checkbox.config(state=state)
         self.multi_otsu_checkbox.config(state=state)
         self.local_binary_pattern_checkbox.config(state=state)
