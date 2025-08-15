@@ -19,8 +19,6 @@ class CaptureConfig(Config):
 
     device_enabled: bool = False
     device_id: int = 0
-    device_max_width: int = 1920
-    device_max_height: int = 1080
 
 
 @dataclass
@@ -66,10 +64,10 @@ class ProcessingConfig(Config):
     crop_y1: int = 0
     crop_x2: int = 0
     crop_y2: int = 0
-    resize_before_process: bool = False
+    resize_enabled: bool = False
     resize_width: int = 1920
     resize_height: int = 1080
-    maintain_aspect_ratio: bool = True
+    resize_maintain_aspect_ratio: bool = True
     gamma_correction: bool = False
     gamma_value: float = 1.0
 

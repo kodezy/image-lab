@@ -62,6 +62,109 @@ class ProcessingPanel:
         self.multi_otsu_var.set(config.multi_otsu)
         self.local_binary_pattern_var.set(config.local_binary_pattern)
 
+        # Basic transformations
+        self.resize_enabled_var.set(config.resize_enabled)
+        self.resize_width_var.set(config.resize_width)
+        self.resize_height_var.set(config.resize_height)
+        self.resize_maintain_aspect_ratio_var.set(config.resize_maintain_aspect_ratio)
+        self.gamma_correction_var.set(config.gamma_correction)
+        self.gamma_value_var.set(config.gamma_value)
+
+        # Advanced noise reduction
+        self.denoise_nl_means_var.set(config.denoise_nl_means)
+        self.denoise_h_var.set(config.denoise_h)
+        self.denoise_template_window_var.set(config.denoise_template_window)
+        self.denoise_search_window_var.set(config.denoise_search_window)
+        self.edge_preserving_filter_var.set(config.edge_preserving_filter)
+        self.edge_filter_flags_var.set(config.edge_filter_flags)
+        self.edge_sigma_s_var.set(config.edge_sigma_s)
+        self.edge_sigma_r_var.set(config.edge_sigma_r)
+        self.noise_reduction_bilateral_var.set(config.noise_reduction_bilateral)
+        self.bilateral_iterations_var.set(config.bilateral_iterations)
+
+        # Advanced filters
+        self.bilateral_sigma_color_var.set(config.bilateral_sigma_color)
+        self.bilateral_sigma_space_var.set(config.bilateral_sigma_space)
+        self.gaussian_sigma_var.set(config.gaussian_sigma)
+        self.background_subtraction_var.set(config.background_subtraction)
+        self.bg_threshold_var.set(config.bg_threshold)
+
+        # Advanced histogram and contrast
+        self.clahe_tile_size_var.set(config.clahe_tile_size)
+        self.adaptive_hist_kernel_var.set(config.adaptive_hist_kernel)
+        self.multi_otsu_classes_var.set(config.multi_otsu_classes)
+        self.intensity_normalization_var.set(config.intensity_normalization)
+        self.norm_min_var.set(config.norm_min)
+        self.norm_max_var.set(config.norm_max)
+        self.contrast_stretching_var.set(config.contrast_stretching)
+        self.stretch_min_percentile_var.set(config.stretch_min_percentile)
+        self.stretch_max_percentile_var.set(config.stretch_max_percentile)
+
+        # Advanced line removal
+        self.vertical_kernel_size_var.set(config.vertical_kernel_size)
+        self.horizontal_kernel_size_var.set(config.horizontal_kernel_size)
+        self.hough_lines_removal_var.set(config.hough_lines_removal)
+        self.hough_threshold_var.set(config.hough_threshold)
+        self.hough_min_line_length_var.set(config.hough_min_line_length)
+        self.hough_max_line_gap_var.set(config.hough_max_line_gap)
+
+        # Advanced morphology
+        self.stroke_width_normalization_var.set(config.stroke_width_normalization)
+        self.stroke_iterations_var.set(config.stroke_iterations)
+        self.morph_open_var.set(config.morph_open)
+        self.morph_close_var.set(config.morph_close)
+        self.tophat_var.set(config.tophat)
+        self.tophat_kernel_size_var.set(config.tophat_kernel_size)
+        self.blackhat_var.set(config.blackhat)
+        self.blackhat_kernel_size_var.set(config.blackhat_kernel_size)
+        self.gradient_var.set(config.gradient)
+        self.gradient_kernel_size_var.set(config.gradient_kernel_size)
+        self.morphological_gradient_var.set(config.morphological_gradient)
+        self.morphological_gradient_kernel_var.set(config.morphological_gradient_kernel)
+
+        # Advanced character operations
+        self.char_sep_kernel_size_var.set(config.char_sep_kernel_size)
+        self.character_dilation_var.set(config.character_dilation)
+        self.dilation_kernel_size_var.set(config.dilation_kernel_size)
+        self.dilation_iterations_var.set(config.dilation_iterations)
+        self.character_erosion_var.set(config.character_erosion)
+        self.erosion_kernel_size_var.set(config.erosion_kernel_size)
+        self.erosion_iterations_var.set(config.erosion_iterations)
+        self.min_contour_area_var.set(config.min_contour_area)
+
+        # Advanced enhancement
+        self.text_enhancement_var.set(config.text_enhancement)
+        self.text_kernel_size_var.set(config.text_kernel_size)
+        self.detail_enhancement_var.set(config.detail_enhancement)
+        self.detail_sigma_s_var.set(config.detail_sigma_s)
+        self.detail_sigma_r_var.set(config.detail_sigma_r)
+        self.edge_strength_var.set(config.edge_strength)
+        self.unsharp_mask_var.set(config.unsharp_mask)
+        self.unsharp_strength_var.set(config.unsharp_strength)
+
+        # Advanced threshold
+        self.adaptive_block_size_var.set(config.adaptive_block_size)
+        self.adaptive_c_var.set(config.adaptive_c)
+
+        # Contour filtering
+        self.contour_filtering_var.set(config.contour_filtering)
+        self.contour_area_min_var.set(config.contour_area_min)
+        self.contour_area_max_var.set(config.contour_area_max)
+        self.connected_components_filtering_var.set(config.connected_components_filtering)
+        self.cc_min_area_var.set(config.cc_min_area)
+        self.cc_max_area_var.set(config.cc_max_area)
+        self.aspect_ratio_filtering_var.set(config.aspect_ratio_filtering)
+        self.min_aspect_ratio_var.set(config.min_aspect_ratio)
+        self.max_aspect_ratio_var.set(config.max_aspect_ratio)
+
+        # Advanced operations
+        self.distance_transform_var.set(config.distance_transform)
+        self.distance_transform_type_var.set(config.distance_transform_type)
+        self.skeletonize_var.set(config.skeletonize)
+        self.watershed_markers_var.set(config.watershed_markers)
+        self.lbp_radius_var.set(config.lbp_radius)
+        self.lbp_n_points_var.set(config.lbp_n_points)
+
         self._update_grayscale_dependent_controls()
         self._update_crop_status()
 
@@ -113,29 +216,132 @@ class ProcessingPanel:
         self.horizontal_line_removal_var = tk.BooleanVar(value=config.horizontal_line_removal)
         self.noise_dots_removal_var = tk.BooleanVar(value=config.noise_dots_removal)
 
+        # Basic transformations
+        self.resize_enabled_var = tk.BooleanVar(value=config.resize_enabled)
+        self.resize_width_var = tk.IntVar(value=config.resize_width)
+        self.resize_height_var = tk.IntVar(value=config.resize_height)
+        self.resize_maintain_aspect_ratio_var = tk.BooleanVar(value=config.resize_maintain_aspect_ratio)
+        self.gamma_correction_var = tk.BooleanVar(value=config.gamma_correction)
+        self.gamma_value_var = tk.DoubleVar(value=config.gamma_value)
+
+        # Advanced noise reduction
+        self.denoise_nl_means_var = tk.BooleanVar(value=config.denoise_nl_means)
+        self.denoise_h_var = tk.DoubleVar(value=config.denoise_h)
+        self.denoise_template_window_var = tk.IntVar(value=config.denoise_template_window)
+        self.denoise_search_window_var = tk.IntVar(value=config.denoise_search_window)
+        self.edge_preserving_filter_var = tk.BooleanVar(value=config.edge_preserving_filter)
+        self.edge_filter_flags_var = tk.IntVar(value=config.edge_filter_flags)
+        self.edge_sigma_s_var = tk.DoubleVar(value=config.edge_sigma_s)
+        self.edge_sigma_r_var = tk.DoubleVar(value=config.edge_sigma_r)
+        self.noise_reduction_bilateral_var = tk.BooleanVar(value=config.noise_reduction_bilateral)
+        self.bilateral_iterations_var = tk.IntVar(value=config.bilateral_iterations)
+
+        # Advanced filters
+        self.bilateral_sigma_color_var = tk.IntVar(value=config.bilateral_sigma_color)
+        self.bilateral_sigma_space_var = tk.IntVar(value=config.bilateral_sigma_space)
+        self.gaussian_sigma_var = tk.DoubleVar(value=config.gaussian_sigma)
+        self.background_subtraction_var = tk.BooleanVar(value=config.background_subtraction)
+        self.bg_threshold_var = tk.IntVar(value=config.bg_threshold)
+
+        # Advanced histogram and contrast
+        self.clahe_tile_size_var = tk.IntVar(value=config.clahe_tile_size)
+        self.adaptive_hist_kernel_var = tk.IntVar(value=config.adaptive_hist_kernel)
+        self.multi_otsu_classes_var = tk.IntVar(value=config.multi_otsu_classes)
+        self.intensity_normalization_var = tk.BooleanVar(value=config.intensity_normalization)
+        self.norm_min_var = tk.IntVar(value=config.norm_min)
+        self.norm_max_var = tk.IntVar(value=config.norm_max)
+        self.contrast_stretching_var = tk.BooleanVar(value=config.contrast_stretching)
+        self.stretch_min_percentile_var = tk.DoubleVar(value=config.stretch_min_percentile)
+        self.stretch_max_percentile_var = tk.DoubleVar(value=config.stretch_max_percentile)
+
+        # Advanced line removal
+        self.vertical_kernel_size_var = tk.IntVar(value=config.vertical_kernel_size)
+        self.horizontal_kernel_size_var = tk.IntVar(value=config.horizontal_kernel_size)
+        self.hough_lines_removal_var = tk.BooleanVar(value=config.hough_lines_removal)
+        self.hough_threshold_var = tk.IntVar(value=config.hough_threshold)
+        self.hough_min_line_length_var = tk.IntVar(value=config.hough_min_line_length)
+        self.hough_max_line_gap_var = tk.IntVar(value=config.hough_max_line_gap)
+
+        # Advanced morphology
+        self.stroke_width_normalization_var = tk.BooleanVar(value=config.stroke_width_normalization)
+        self.stroke_iterations_var = tk.IntVar(value=config.stroke_iterations)
+        self.morph_open_var = tk.BooleanVar(value=config.morph_open)
+        self.morph_close_var = tk.BooleanVar(value=config.morph_close)
+        self.tophat_var = tk.BooleanVar(value=config.tophat)
+        self.tophat_kernel_size_var = tk.IntVar(value=config.tophat_kernel_size)
+        self.blackhat_var = tk.BooleanVar(value=config.blackhat)
+        self.blackhat_kernel_size_var = tk.IntVar(value=config.blackhat_kernel_size)
+        self.gradient_var = tk.BooleanVar(value=config.gradient)
+        self.gradient_kernel_size_var = tk.IntVar(value=config.gradient_kernel_size)
+        self.morphological_gradient_var = tk.BooleanVar(value=config.morphological_gradient)
+        self.morphological_gradient_kernel_var = tk.IntVar(value=config.morphological_gradient_kernel)
+
+        # Advanced character operations
+        self.char_sep_kernel_size_var = tk.IntVar(value=config.char_sep_kernel_size)
+        self.character_dilation_var = tk.BooleanVar(value=config.character_dilation)
+        self.dilation_kernel_size_var = tk.IntVar(value=config.dilation_kernel_size)
+        self.dilation_iterations_var = tk.IntVar(value=config.dilation_iterations)
+        self.character_erosion_var = tk.BooleanVar(value=config.character_erosion)
+        self.erosion_kernel_size_var = tk.IntVar(value=config.erosion_kernel_size)
+        self.erosion_iterations_var = tk.IntVar(value=config.erosion_iterations)
+        self.min_contour_area_var = tk.IntVar(value=config.min_contour_area)
+
+        # Advanced enhancement
+        self.text_enhancement_var = tk.BooleanVar(value=config.text_enhancement)
+        self.text_kernel_size_var = tk.IntVar(value=config.text_kernel_size)
+        self.detail_enhancement_var = tk.BooleanVar(value=config.detail_enhancement)
+        self.detail_sigma_s_var = tk.DoubleVar(value=config.detail_sigma_s)
+        self.detail_sigma_r_var = tk.DoubleVar(value=config.detail_sigma_r)
+        self.edge_strength_var = tk.DoubleVar(value=config.edge_strength)
+        self.unsharp_mask_var = tk.BooleanVar(value=config.unsharp_mask)
+        self.unsharp_strength_var = tk.DoubleVar(value=config.unsharp_strength)
+
+        # Advanced threshold
+        self.adaptive_block_size_var = tk.IntVar(value=config.adaptive_block_size)
+        self.adaptive_c_var = tk.IntVar(value=config.adaptive_c)
+
+        # Contour filtering
+        self.contour_filtering_var = tk.BooleanVar(value=config.contour_filtering)
+        self.contour_area_min_var = tk.IntVar(value=config.contour_area_min)
+        self.contour_area_max_var = tk.IntVar(value=config.contour_area_max)
+        self.connected_components_filtering_var = tk.BooleanVar(value=config.connected_components_filtering)
+        self.cc_min_area_var = tk.IntVar(value=config.cc_min_area)
+        self.cc_max_area_var = tk.IntVar(value=config.cc_max_area)
+        self.aspect_ratio_filtering_var = tk.BooleanVar(value=config.aspect_ratio_filtering)
+        self.min_aspect_ratio_var = tk.DoubleVar(value=config.min_aspect_ratio)
+        self.max_aspect_ratio_var = tk.DoubleVar(value=config.max_aspect_ratio)
+
+        # Advanced operations
+        self.distance_transform_var = tk.BooleanVar(value=config.distance_transform)
+        self.distance_transform_type_var = tk.IntVar(value=config.distance_transform_type)
+        self.skeletonize_var = tk.BooleanVar(value=config.skeletonize)
+        self.watershed_markers_var = tk.BooleanVar(value=config.watershed_markers)
+        self.lbp_radius_var = tk.IntVar(value=config.lbp_radius)
+        self.lbp_n_points_var = tk.IntVar(value=config.lbp_n_points)
+
     def _create_frame(self) -> None:
         """Create processing frame"""
         self.frame = ttk.Frame(self.parent)
         _, self.scrollable_frame, _ = create_scrollable_frame(self.frame)
 
         self._create_format_section()
-        self._create_crop_section()
-        self._create_threshold_section()
-        self._create_noise_filters_section()
+        self._create_preprocessing_section()
+        self._create_noise_reduction_section()
         self._create_enhancement_section()
         self._create_morphology_section()
-        self._create_misc_section()
+        self._create_threshold_section()
+        self._create_advanced_operations_section()
 
         # Initialize control states
         self._update_grayscale_dependent_controls()
 
     def _create_format_section(self) -> None:
-        """Create format section"""
-        format_frame = create_labeled_frame(self.scrollable_frame, "📤 Format")
-        format_frame.pack(fill=tk.X, pady=5, padx=5)
+        """Create input and format section"""
+        input_frame = create_labeled_frame(self.scrollable_frame, "📥 Format")
+        input_frame.pack(fill=tk.X, pady=5, padx=5)
 
         create_checkbox(
-            format_frame,
+            input_frame,
             "Grayscale",
             self.grayscale_var,
             self._on_grayscale_changed,
@@ -145,6 +351,169 @@ class ProcessingPanel:
         """Handle grayscale change"""
         self.app.processing_config.grayscale = self.grayscale_var.get()
         self._update_grayscale_dependent_controls()
+        self.app.update_image_display()
+
+    def _create_preprocessing_section(self) -> None:
+        """Create preprocessing section with resize, crop, and gamma correction"""
+        preprocess_frame = create_labeled_frame(self.scrollable_frame, "🔧 Preprocessing")
+        preprocess_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        # Resize controls
+        create_checkbox(
+            preprocess_frame,
+            "Resize",
+            self.resize_enabled_var,
+            self._on_resize_enabled_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        resize_controls = ttk.Frame(preprocess_frame)
+        resize_controls.pack(fill=tk.X, pady=2)
+
+        width_frame, _, _ = create_slider(
+            resize_controls,
+            "Width",
+            self.resize_width_var,
+            320,
+            3840,
+            self._on_resize_width_changed,
+        )
+        width_frame.pack(fill=tk.X, pady=1)
+
+        height_frame, _, _ = create_slider(
+            resize_controls,
+            "Height",
+            self.resize_height_var,
+            240,
+            2160,
+            self._on_resize_height_changed,
+        )
+        height_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            preprocess_frame,
+            "Maintain Aspect Ratio",
+            self.resize_maintain_aspect_ratio_var,
+            self._on_resize_maintain_aspect_ratio_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        # Crop controls
+        ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
+
+        create_checkbox(
+            preprocess_frame,
+            "Crop",
+            self.crop_enabled_var,
+            self._on_crop_enabled_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        crop_coords = ttk.Frame(preprocess_frame)
+        crop_coords.pack(fill=tk.X, pady=2)
+
+        coord_row1 = ttk.Frame(crop_coords)
+        coord_row1.pack(fill=tk.X, pady=1)
+
+        ttk.Label(coord_row1, text="X1:").pack(side=tk.LEFT, padx=(0, 5))
+        x1_spinbox = ttk.Spinbox(
+            coord_row1,
+            from_=0,
+            to=9999,
+            textvariable=self.crop_x1_var,
+            width=8,
+            command=self._on_crop_x1_changed,
+        )
+        x1_spinbox.pack(side=tk.LEFT, padx=(0, 15))
+        x1_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_x1_changed())
+
+        ttk.Label(coord_row1, text="Y1:").pack(side=tk.LEFT, padx=(0, 5))
+        y1_spinbox = ttk.Spinbox(
+            coord_row1,
+            from_=0,
+            to=9999,
+            textvariable=self.crop_y1_var,
+            width=8,
+            command=self._on_crop_y1_changed,
+        )
+        y1_spinbox.pack(side=tk.LEFT)
+        y1_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_y1_changed())
+
+        coord_row2 = ttk.Frame(crop_coords)
+        coord_row2.pack(fill=tk.X, pady=1)
+
+        ttk.Label(coord_row2, text="X2:").pack(side=tk.LEFT, padx=(0, 5))
+        x2_spinbox = ttk.Spinbox(
+            coord_row2,
+            from_=0,
+            to=9999,
+            textvariable=self.crop_x2_var,
+            width=8,
+            command=self._on_crop_x2_changed,
+        )
+        x2_spinbox.pack(side=tk.LEFT, padx=(0, 15))
+        x2_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_x2_changed())
+
+        ttk.Label(coord_row2, text="Y2:").pack(side=tk.LEFT, padx=(0, 5))
+        y2_spinbox = ttk.Spinbox(
+            coord_row2,
+            from_=0,
+            to=9999,
+            textvariable=self.crop_y2_var,
+            width=8,
+            command=self._on_crop_y2_changed,
+        )
+        y2_spinbox.pack(side=tk.LEFT)
+        y2_spinbox.bind("<KeyRelease>", lambda e: self._on_crop_y2_changed())
+
+        self.crop_status_label = ttk.Label(preprocess_frame, text="Crop: Disabled", foreground="gray")
+        self.crop_status_label.pack(anchor=tk.W, pady=2)
+
+        # Gamma correction
+        ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
+
+        create_checkbox(
+            preprocess_frame,
+            "Gamma Correction",
+            self.gamma_correction_var,
+            self._on_gamma_correction_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        gamma_frame, _, _ = create_slider(
+            preprocess_frame,
+            "Gamma Value",
+            self.gamma_value_var,
+            0.1,
+            3.0,
+            self._on_gamma_value_changed,
+        )
+        gamma_frame.pack(fill=tk.X, pady=2)
+
+    def _on_resize_enabled_changed(self) -> None:
+        """Handle resize enabled change"""
+        self.app.processing_config.resize_enabled = self.resize_enabled_var.get()
+        self.app.update_image_display()
+
+    def _on_resize_width_changed(self, value) -> None:
+        """Handle resize width change"""
+        self.app.processing_config.resize_width = int(float(value))
+        self.app.update_image_display()
+
+    def _on_resize_height_changed(self, value) -> None:
+        """Handle resize height change"""
+        self.app.processing_config.resize_height = int(float(value))
+        self.app.update_image_display()
+
+    def _on_resize_maintain_aspect_ratio_changed(self) -> None:
+        """Handle maintain aspect ratio change"""
+        self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_ratio_var.get()
+        self.app.update_image_display()
+
+    def _on_gamma_correction_changed(self) -> None:
+        """Handle gamma correction change"""
+        self.app.processing_config.gamma_correction = self.gamma_correction_var.get()
+        self.app.update_image_display()
+
+    def _on_gamma_value_changed(self, value) -> None:
+        """Handle gamma value change"""
+        self.app.processing_config.gamma_value = float(value)
         self.app.update_image_display()
 
     def _create_crop_section(self) -> None:
@@ -271,38 +640,6 @@ class ProcessingPanel:
         else:
             self.crop_status_label.config(text="Crop: Invalid coordinates", foreground="red")
 
-    def _create_threshold_section(self) -> None:
-        """Create threshold section"""
-        threshold_frame = create_labeled_frame(self.scrollable_frame, "🎯 Threshold")
-        threshold_frame.pack(fill=tk.X, pady=5, padx=5)
-
-        self.threshold_enabled_checkbox = create_checkbox(
-            threshold_frame,
-            "Threshold",
-            self.threshold_enabled_var,
-            self._on_threshold_enabled_changed,
-        )
-        self.threshold_enabled_checkbox.pack(anchor=tk.W, pady=2)
-
-        threshold_type_frame, self.threshold_combobox = create_combobox(
-            threshold_frame,
-            "Type",
-            self.threshold_type_var,
-            ["BINARY", "OTSU_BINARY", "ADAPTIVE_MEAN", "ADAPTIVE_GAUSSIAN"],
-            self._on_threshold_type_changed,
-        )
-        threshold_type_frame.pack(fill=tk.X, pady=2)
-
-        threshold_value_frame, _, _ = create_slider(
-            threshold_frame,
-            "Threshold Value",
-            self.threshold_value_var,
-            0,
-            255,
-            self._on_threshold_value_changed,
-        )
-        threshold_value_frame.pack(fill=tk.X, pady=2)
-
     def _on_threshold_enabled_changed(self) -> None:
         """Handle threshold enabled change"""
         self.app.processing_config.threshold_enabled = self.threshold_enabled_var.get()
@@ -316,6 +653,96 @@ class ProcessingPanel:
     def _on_threshold_value_changed(self, value) -> None:
         """Handle threshold value change"""
         self.app.processing_config.threshold_value = int(float(value))
+        self.app.update_image_display()
+
+    def _on_adaptive_block_size_changed(self, value) -> None:
+        """Handle adaptive block size change"""
+        self.app.processing_config.adaptive_block_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_adaptive_c_changed(self, value) -> None:
+        """Handle adaptive C change"""
+        self.app.processing_config.adaptive_c = int(float(value))
+        self.app.update_image_display()
+
+    def _create_threshold_section(self) -> None:
+        """Create consolidated threshold section"""
+        threshold_frame = create_labeled_frame(self.scrollable_frame, "🎯 Threshold")
+        threshold_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        # Basic threshold
+        self.threshold_enabled_checkbox = create_checkbox(
+            threshold_frame,
+            "Threshold",
+            self.threshold_enabled_var,
+            self._on_threshold_enabled_changed,
+        )
+        self.threshold_enabled_checkbox.pack(anchor=tk.W, pady=1)
+
+        threshold_type_frame, self.threshold_combobox = create_combobox(
+            threshold_frame,
+            "Threshold Type",
+            self.threshold_type_var,
+            ["BINARY", "OTSU_BINARY", "ADAPTIVE_MEAN", "ADAPTIVE_GAUSSIAN"],
+            self._on_threshold_type_changed,
+        )
+        threshold_type_frame.pack(fill=tk.X, pady=1)
+
+        threshold_value_frame, _, _ = create_slider(
+            threshold_frame,
+            "Threshold Value",
+            self.threshold_value_var,
+            0,
+            255,
+            self._on_threshold_value_changed,
+        )
+        threshold_value_frame.pack(fill=tk.X, pady=1)
+
+        # Adaptive parameters
+        adaptive_block_frame, _, _ = create_slider(
+            threshold_frame,
+            "Adaptive Block Size",
+            self.adaptive_block_size_var,
+            3,
+            31,
+            self._on_adaptive_block_size_changed,
+        )
+        adaptive_block_frame.pack(fill=tk.X, pady=1)
+
+        adaptive_c_frame, _, _ = create_slider(
+            threshold_frame,
+            "Adaptive C",
+            self.adaptive_c_var,
+            0,
+            20,
+            self._on_adaptive_c_changed,
+        )
+        adaptive_c_frame.pack(fill=tk.X, pady=1)
+
+        # Multi-OTSU
+        ttk.Separator(threshold_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        self.multi_otsu_checkbox = create_checkbox(
+            threshold_frame,
+            "Multi-OTSU Thresholding",
+            self.multi_otsu_var,
+            self._on_multi_otsu_changed,
+        )
+        self.multi_otsu_checkbox.pack(anchor=tk.W, pady=1)
+
+        multi_otsu_classes_frame, _, _ = create_slider(
+            threshold_frame,
+            "OTSU Classes",
+            self.multi_otsu_classes_var,
+            2,
+            5,
+            self._on_multi_otsu_classes_changed,
+        )
+        multi_otsu_classes_frame.pack(fill=tk.X, pady=1)
+
+    def _on_multi_otsu_classes_changed(self, value) -> None:
+        """Handle multi-OTSU classes change"""
+        self.app.processing_config.multi_otsu_classes = int(float(value))
         self.app.update_image_display()
 
     def _create_noise_filters_section(self) -> None:
@@ -374,6 +801,137 @@ class ProcessingPanel:
         )
         median_kernel_frame.pack(fill=tk.X, pady=2)
 
+    def _create_advanced_noise_section(self) -> None:
+        """Create advanced noise reduction section"""
+        noise_advanced_frame = create_labeled_frame(self.scrollable_frame, "🔧 Advanced Noise Reduction")
+        noise_advanced_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        create_checkbox(
+            noise_advanced_frame,
+            "NL-Means Denoising",
+            self.denoise_nl_means_var,
+            self._on_denoise_nl_means_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        denoise_h_frame, _, _ = create_slider(
+            noise_advanced_frame,
+            "Denoise H",
+            self.denoise_h_var,
+            1.0,
+            30.0,
+            self._on_denoise_h_changed,
+        )
+        denoise_h_frame.pack(fill=tk.X, pady=2)
+
+        denoise_template_frame, _, _ = create_slider(
+            noise_advanced_frame,
+            "Template Window",
+            self.denoise_template_window_var,
+            3,
+            15,
+            self._on_denoise_template_window_changed,
+        )
+        denoise_template_frame.pack(fill=tk.X, pady=2)
+
+        denoise_search_frame, _, _ = create_slider(
+            noise_advanced_frame,
+            "Search Window",
+            self.denoise_search_window_var,
+            7,
+            35,
+            self._on_denoise_search_window_changed,
+        )
+        denoise_search_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            noise_advanced_frame,
+            "Edge Preserving Filter",
+            self.edge_preserving_filter_var,
+            self._on_edge_preserving_filter_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        edge_sigma_s_frame, _, _ = create_slider(
+            noise_advanced_frame,
+            "Edge Sigma S",
+            self.edge_sigma_s_var,
+            10.0,
+            200.0,
+            self._on_edge_sigma_s_changed,
+        )
+        edge_sigma_s_frame.pack(fill=tk.X, pady=2)
+
+        edge_sigma_r_frame, _, _ = create_slider(
+            noise_advanced_frame,
+            "Edge Sigma R",
+            self.edge_sigma_r_var,
+            0.1,
+            1.0,
+            self._on_edge_sigma_r_changed,
+        )
+        edge_sigma_r_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            noise_advanced_frame,
+            "Noise Reduction Bilateral",
+            self.noise_reduction_bilateral_var,
+            self._on_noise_reduction_bilateral_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        bilateral_iterations_frame, _, _ = create_slider(
+            noise_advanced_frame,
+            "Bilateral Iterations",
+            self.bilateral_iterations_var,
+            1,
+            5,
+            self._on_bilateral_iterations_changed,
+        )
+        bilateral_iterations_frame.pack(fill=tk.X, pady=2)
+
+    def _on_denoise_nl_means_changed(self) -> None:
+        """Handle NL-means denoising change"""
+        self.app.processing_config.denoise_nl_means = self.denoise_nl_means_var.get()
+        self.app.update_image_display()
+
+    def _on_denoise_h_changed(self, value) -> None:
+        """Handle denoise H change"""
+        self.app.processing_config.denoise_h = float(value)
+        self.app.update_image_display()
+
+    def _on_denoise_template_window_changed(self, value) -> None:
+        """Handle denoise template window change"""
+        self.app.processing_config.denoise_template_window = int(float(value))
+        self.app.update_image_display()
+
+    def _on_denoise_search_window_changed(self, value) -> None:
+        """Handle denoise search window change"""
+        self.app.processing_config.denoise_search_window = int(float(value))
+        self.app.update_image_display()
+
+    def _on_edge_preserving_filter_changed(self) -> None:
+        """Handle edge preserving filter change"""
+        self.app.processing_config.edge_preserving_filter = self.edge_preserving_filter_var.get()
+        self.app.update_image_display()
+
+    def _on_edge_sigma_s_changed(self, value) -> None:
+        """Handle edge sigma S change"""
+        self.app.processing_config.edge_sigma_s = float(value)
+        self.app.update_image_display()
+
+    def _on_edge_sigma_r_changed(self, value) -> None:
+        """Handle edge sigma R change"""
+        self.app.processing_config.edge_sigma_r = float(value)
+        self.app.update_image_display()
+
+    def _on_noise_reduction_bilateral_changed(self) -> None:
+        """Handle noise reduction bilateral change"""
+        self.app.processing_config.noise_reduction_bilateral = self.noise_reduction_bilateral_var.get()
+        self.app.update_image_display()
+
+    def _on_bilateral_iterations_changed(self, value) -> None:
+        """Handle bilateral iterations change"""
+        self.app.processing_config.bilateral_iterations = int(float(value))
+        self.app.update_image_display()
+
     def _on_bilateral_filter_changed(self) -> None:
         """Handle bilateral filter change"""
         self.app.processing_config.bilateral_filter = self.bilateral_filter_var.get()
@@ -404,25 +962,341 @@ class ProcessingPanel:
         self.app.processing_config.median_kernel = int(float(value))
         self.app.update_image_display()
 
+    def _create_advanced_filters_section(self) -> None:
+        """Create advanced filters section"""
+        filters_advanced_frame = create_labeled_frame(self.scrollable_frame, "🔧 Advanced Filters")
+        filters_advanced_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        bilateral_sigma_color_frame, _, _ = create_slider(
+            filters_advanced_frame,
+            "Bilateral Sigma Color",
+            self.bilateral_sigma_color_var,
+            10,
+            150,
+            self._on_bilateral_sigma_color_changed,
+        )
+        bilateral_sigma_color_frame.pack(fill=tk.X, pady=2)
+
+        bilateral_sigma_space_frame, _, _ = create_slider(
+            filters_advanced_frame,
+            "Bilateral Sigma Space",
+            self.bilateral_sigma_space_var,
+            10,
+            150,
+            self._on_bilateral_sigma_space_changed,
+        )
+        bilateral_sigma_space_frame.pack(fill=tk.X, pady=2)
+
+        gaussian_sigma_frame, _, _ = create_slider(
+            filters_advanced_frame,
+            "Gaussian Sigma",
+            self.gaussian_sigma_var,
+            0.0,
+            5.0,
+            self._on_gaussian_sigma_changed,
+        )
+        gaussian_sigma_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            filters_advanced_frame,
+            "Background Subtraction",
+            self.background_subtraction_var,
+            self._on_background_subtraction_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        bg_threshold_frame, _, _ = create_slider(
+            filters_advanced_frame,
+            "BG Threshold",
+            self.bg_threshold_var,
+            0,
+            100,
+            self._on_bg_threshold_changed,
+        )
+        bg_threshold_frame.pack(fill=tk.X, pady=2)
+
+    def _on_bilateral_sigma_color_changed(self, value) -> None:
+        """Handle bilateral sigma color change"""
+        self.app.processing_config.bilateral_sigma_color = int(float(value))
+        self.app.update_image_display()
+
+    def _on_bilateral_sigma_space_changed(self, value) -> None:
+        """Handle bilateral sigma space change"""
+        self.app.processing_config.bilateral_sigma_space = int(float(value))
+        self.app.update_image_display()
+
+    def _on_gaussian_sigma_changed(self, value) -> None:
+        """Handle gaussian sigma change"""
+        self.app.processing_config.gaussian_sigma = float(value)
+        self.app.update_image_display()
+
+    def _on_background_subtraction_changed(self) -> None:
+        """Handle background subtraction change"""
+        self.app.processing_config.background_subtraction = self.background_subtraction_var.get()
+        self.app.update_image_display()
+
+    def _on_bg_threshold_changed(self, value) -> None:
+        """Handle background threshold change"""
+        self.app.processing_config.bg_threshold = int(float(value))
+        self.app.update_image_display()
+
+    def _create_noise_reduction_section(self) -> None:
+        """Create consolidated noise reduction section"""
+        noise_frame = create_labeled_frame(self.scrollable_frame, "🔇 Noise Reduction")
+        noise_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        # Basic filters
+        create_checkbox(
+            noise_frame,
+            "Bilateral Filter",
+            self.bilateral_filter_var,
+            self._on_bilateral_filter_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        bilateral_controls = ttk.Frame(noise_frame)
+        bilateral_controls.pack(fill=tk.X, pady=1)
+
+        bilateral_d_frame, _, _ = create_slider(
+            bilateral_controls,
+            "Bilateral D",
+            self.bilateral_d_var,
+            1,
+            15,
+            self._on_bilateral_d_changed,
+        )
+        bilateral_d_frame.pack(fill=tk.X, pady=1)
+
+        bilateral_sigma_color_frame, _, _ = create_slider(
+            bilateral_controls,
+            "Sigma Color",
+            self.bilateral_sigma_color_var,
+            10,
+            150,
+            self._on_bilateral_sigma_color_changed,
+        )
+        bilateral_sigma_color_frame.pack(fill=tk.X, pady=1)
+
+        bilateral_sigma_space_frame, _, _ = create_slider(
+            bilateral_controls,
+            "Sigma Space",
+            self.bilateral_sigma_space_var,
+            10,
+            150,
+            self._on_bilateral_sigma_space_changed,
+        )
+        bilateral_sigma_space_frame.pack(fill=tk.X, pady=1)
+
+        # Gaussian blur
+        create_checkbox(
+            noise_frame,
+            "Gaussian Blur",
+            self.gaussian_blur_var,
+            self._on_gaussian_blur_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        gaussian_controls = ttk.Frame(noise_frame)
+        gaussian_controls.pack(fill=tk.X, pady=1)
+
+        gaussian_kernel_frame, _, _ = create_slider(
+            gaussian_controls,
+            "Kernel Size",
+            self.gaussian_kernel_var,
+            1,
+            10,
+            self._on_gaussian_kernel_changed,
+        )
+        gaussian_kernel_frame.pack(fill=tk.X, pady=1)
+
+        gaussian_sigma_frame, _, _ = create_slider(
+            gaussian_controls,
+            "Sigma",
+            self.gaussian_sigma_var,
+            0.0,
+            5.0,
+            self._on_gaussian_sigma_changed,
+        )
+        gaussian_sigma_frame.pack(fill=tk.X, pady=1)
+
+        # Median filter
+        create_checkbox(
+            noise_frame,
+            "Median Filter",
+            self.median_filter_var,
+            self._on_median_filter_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        median_kernel_frame, _, _ = create_slider(
+            noise_frame,
+            "Median Kernel",
+            self.median_kernel_var,
+            1,
+            10,
+            self._on_median_kernel_changed,
+        )
+        median_kernel_frame.pack(fill=tk.X, pady=1)
+
+        # Advanced denoising
+        ttk.Separator(noise_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            noise_frame,
+            "NL-Means Denoising",
+            self.denoise_nl_means_var,
+            self._on_denoise_nl_means_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        nlmeans_controls = ttk.Frame(noise_frame)
+        nlmeans_controls.pack(fill=tk.X, pady=1)
+
+        denoise_h_frame, _, _ = create_slider(
+            nlmeans_controls,
+            "Denoise H",
+            self.denoise_h_var,
+            1.0,
+            30.0,
+            self._on_denoise_h_changed,
+        )
+        denoise_h_frame.pack(fill=tk.X, pady=1)
+
+        denoise_template_frame, _, _ = create_slider(
+            nlmeans_controls,
+            "Template Window",
+            self.denoise_template_window_var,
+            3,
+            15,
+            self._on_denoise_template_window_changed,
+        )
+        denoise_template_frame.pack(fill=tk.X, pady=1)
+
+        denoise_search_frame, _, _ = create_slider(
+            nlmeans_controls,
+            "Search Window",
+            self.denoise_search_window_var,
+            7,
+            35,
+            self._on_denoise_search_window_changed,
+        )
+        denoise_search_frame.pack(fill=tk.X, pady=1)
+
+        # Edge preserving filter
+        create_checkbox(
+            noise_frame,
+            "Edge Preserving Filter",
+            self.edge_preserving_filter_var,
+            self._on_edge_preserving_filter_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        edge_controls = ttk.Frame(noise_frame)
+        edge_controls.pack(fill=tk.X, pady=1)
+
+        edge_sigma_s_frame, _, _ = create_slider(
+            edge_controls,
+            "Edge Sigma S",
+            self.edge_sigma_s_var,
+            10.0,
+            200.0,
+            self._on_edge_sigma_s_changed,
+        )
+        edge_sigma_s_frame.pack(fill=tk.X, pady=1)
+
+        edge_sigma_r_frame, _, _ = create_slider(
+            edge_controls,
+            "Edge Sigma R",
+            self.edge_sigma_r_var,
+            0.1,
+            1.0,
+            self._on_edge_sigma_r_changed,
+        )
+        edge_sigma_r_frame.pack(fill=tk.X, pady=1)
+
+        # Additional bilateral iterations
+        create_checkbox(
+            noise_frame,
+            "Additional Bilateral Iterations",
+            self.noise_reduction_bilateral_var,
+            self._on_noise_reduction_bilateral_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        bilateral_iterations_frame, _, _ = create_slider(
+            noise_frame,
+            "Iterations",
+            self.bilateral_iterations_var,
+            1,
+            5,
+            self._on_bilateral_iterations_changed,
+        )
+        bilateral_iterations_frame.pack(fill=tk.X, pady=1)
+
     def _create_enhancement_section(self) -> None:
-        """Create enhancement section"""
+        """Create consolidated enhancement section"""
         enhance_frame = create_labeled_frame(self.scrollable_frame, "✨ Enhancement")
         enhance_frame.pack(fill=tk.X, pady=5, padx=5)
 
+        # Histogram equalization
+        self.histogram_eq_checkbox = create_checkbox(
+            enhance_frame,
+            "Histogram Equalization",
+            self.histogram_eq_var,
+            self._on_histogram_eq_changed,
+        )
+        self.histogram_eq_checkbox.pack(anchor=tk.W, pady=1)
+
+        # CLAHE
         self.clahe_checkbox = create_checkbox(enhance_frame, "CLAHE", self.clahe_var, self._on_clahe_changed)
-        self.clahe_checkbox.pack(anchor=tk.W, pady=2)
+        self.clahe_checkbox.pack(anchor=tk.W, pady=1)
+
+        clahe_controls = ttk.Frame(enhance_frame)
+        clahe_controls.pack(fill=tk.X, pady=1)
 
         clahe_clip_frame, _, _ = create_slider(
-            enhance_frame,
-            "CLAHE Clip Limit",
+            clahe_controls,
+            "Clip Limit",
             self.clahe_clip_var,
             0.5,
             10.0,
             self._on_clahe_clip_changed,
         )
-        clahe_clip_frame.pack(fill=tk.X, pady=2)
+        clahe_clip_frame.pack(fill=tk.X, pady=1)
 
-        create_checkbox(enhance_frame, "Sharpen", self.sharpen_var, self._on_sharpen_changed).pack(anchor=tk.W, pady=2)
+        clahe_tile_frame, _, _ = create_slider(
+            clahe_controls,
+            "Tile Size",
+            self.clahe_tile_size_var,
+            4,
+            16,
+            self._on_clahe_tile_size_changed,
+        )
+        clahe_tile_frame.pack(fill=tk.X, pady=1)
+
+        # Adaptive histogram equalization
+        self.adaptive_hist_eq_checkbox = create_checkbox(
+            enhance_frame,
+            "Adaptive Histogram Equalization",
+            self.adaptive_hist_eq_var,
+            self._on_adaptive_hist_eq_changed,
+        )
+        self.adaptive_hist_eq_checkbox.pack(anchor=tk.W, pady=1)
+
+        # Contrast and intensity
+        ttk.Separator(enhance_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            enhance_frame,
+            "Intensity Normalization",
+            self.intensity_normalization_var,
+            self._on_intensity_normalization_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        create_checkbox(
+            enhance_frame,
+            "Contrast Stretching",
+            self.contrast_stretching_var,
+            self._on_contrast_stretching_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        # Sharpening
+        ttk.Separator(enhance_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(enhance_frame, "Sharpen", self.sharpen_var, self._on_sharpen_changed).pack(anchor=tk.W, pady=1)
 
         sharpen_strength_frame, _, _ = create_slider(
             enhance_frame,
@@ -432,7 +1306,93 @@ class ProcessingPanel:
             1.0,
             self._on_sharpen_strength_changed,
         )
-        sharpen_strength_frame.pack(fill=tk.X, pady=2)
+        sharpen_strength_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            enhance_frame,
+            "Unsharp Mask",
+            self.unsharp_mask_var,
+            self._on_unsharp_mask_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        unsharp_strength_frame, _, _ = create_slider(
+            enhance_frame,
+            "Unsharp Strength",
+            self.unsharp_strength_var,
+            0.5,
+            3.0,
+            self._on_unsharp_strength_changed,
+        )
+        unsharp_strength_frame.pack(fill=tk.X, pady=1)
+
+        # Edge enhancement
+        self.edge_enhancement_checkbox = create_checkbox(
+            enhance_frame,
+            "Edge Enhancement",
+            self.edge_enhancement_var,
+            self._on_edge_enhancement_changed,
+        )
+        self.edge_enhancement_checkbox.pack(anchor=tk.W, pady=1)
+
+        edge_strength_frame, _, _ = create_slider(
+            enhance_frame,
+            "Edge Strength",
+            self.edge_strength_var,
+            0.0,
+            3.0,
+            self._on_edge_strength_changed,
+        )
+        edge_strength_frame.pack(fill=tk.X, pady=1)
+
+        # Advanced enhancement
+        ttk.Separator(enhance_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            enhance_frame,
+            "Text Enhancement",
+            self.text_enhancement_var,
+            self._on_text_enhancement_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        text_kernel_frame, _, _ = create_slider(
+            enhance_frame,
+            "Text Kernel Size",
+            self.text_kernel_size_var,
+            1,
+            5,
+            self._on_text_kernel_size_changed,
+        )
+        text_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            enhance_frame,
+            "Detail Enhancement",
+            self.detail_enhancement_var,
+            self._on_detail_enhancement_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        detail_controls = ttk.Frame(enhance_frame)
+        detail_controls.pack(fill=tk.X, pady=1)
+
+        detail_sigma_s_frame, _, _ = create_slider(
+            detail_controls,
+            "Detail Sigma S",
+            self.detail_sigma_s_var,
+            1.0,
+            50.0,
+            self._on_detail_sigma_s_changed,
+        )
+        detail_sigma_s_frame.pack(fill=tk.X, pady=1)
+
+        detail_sigma_r_frame, _, _ = create_slider(
+            detail_controls,
+            "Detail Sigma R",
+            self.detail_sigma_r_var,
+            0.05,
+            1.0,
+            self._on_detail_sigma_r_changed,
+        )
+        detail_sigma_r_frame.pack(fill=tk.X, pady=1)
 
     def _on_clahe_changed(self) -> None:
         """Handle CLAHE change"""
@@ -454,27 +1414,456 @@ class ProcessingPanel:
         self.app.processing_config.sharpen_strength = float(value)
         self.app.update_image_display()
 
+    def _create_advanced_enhancement_section(self) -> None:
+        """Create advanced enhancement section"""
+        enhance_advanced_frame = create_labeled_frame(self.scrollable_frame, "✨ Advanced Enhancement")
+        enhance_advanced_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        create_checkbox(
+            enhance_advanced_frame,
+            "Text Enhancement",
+            self.text_enhancement_var,
+            self._on_text_enhancement_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        text_kernel_frame, _, _ = create_slider(
+            enhance_advanced_frame,
+            "Text Kernel Size",
+            self.text_kernel_size_var,
+            1,
+            5,
+            self._on_text_kernel_size_changed,
+        )
+        text_kernel_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            enhance_advanced_frame,
+            "Detail Enhancement",
+            self.detail_enhancement_var,
+            self._on_detail_enhancement_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        detail_sigma_s_frame, _, _ = create_slider(
+            enhance_advanced_frame,
+            "Detail Sigma S",
+            self.detail_sigma_s_var,
+            1.0,
+            50.0,
+            self._on_detail_sigma_s_changed,
+        )
+        detail_sigma_s_frame.pack(fill=tk.X, pady=2)
+
+        detail_sigma_r_frame, _, _ = create_slider(
+            enhance_advanced_frame,
+            "Detail Sigma R",
+            self.detail_sigma_r_var,
+            0.05,
+            1.0,
+            self._on_detail_sigma_r_changed,
+        )
+        detail_sigma_r_frame.pack(fill=tk.X, pady=2)
+
+        edge_strength_frame, _, _ = create_slider(
+            enhance_advanced_frame,
+            "Edge Strength",
+            self.edge_strength_var,
+            0.0,
+            3.0,
+            self._on_edge_strength_changed,
+        )
+        edge_strength_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            enhance_advanced_frame,
+            "Unsharp Mask",
+            self.unsharp_mask_var,
+            self._on_unsharp_mask_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        unsharp_strength_frame, _, _ = create_slider(
+            enhance_advanced_frame,
+            "Unsharp Strength",
+            self.unsharp_strength_var,
+            0.5,
+            3.0,
+            self._on_unsharp_strength_changed,
+        )
+        unsharp_strength_frame.pack(fill=tk.X, pady=2)
+
+    def _on_text_enhancement_changed(self) -> None:
+        """Handle text enhancement change"""
+        self.app.processing_config.text_enhancement = self.text_enhancement_var.get()
+        self.app.update_image_display()
+
+    def _on_text_kernel_size_changed(self, value) -> None:
+        """Handle text kernel size change"""
+        self.app.processing_config.text_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_detail_enhancement_changed(self) -> None:
+        """Handle detail enhancement change"""
+        self.app.processing_config.detail_enhancement = self.detail_enhancement_var.get()
+        self.app.update_image_display()
+
+    def _on_detail_sigma_s_changed(self, value) -> None:
+        """Handle detail sigma S change"""
+        self.app.processing_config.detail_sigma_s = float(value)
+        self.app.update_image_display()
+
+    def _on_detail_sigma_r_changed(self, value) -> None:
+        """Handle detail sigma R change"""
+        self.app.processing_config.detail_sigma_r = float(value)
+        self.app.update_image_display()
+
+    def _on_edge_strength_changed(self, value) -> None:
+        """Handle edge strength change"""
+        self.app.processing_config.edge_strength = float(value)
+        self.app.update_image_display()
+
+    def _on_unsharp_mask_changed(self) -> None:
+        """Handle unsharp mask change"""
+        self.app.processing_config.unsharp_mask = self.unsharp_mask_var.get()
+        self.app.update_image_display()
+
+    def _on_unsharp_strength_changed(self, value) -> None:
+        """Handle unsharp strength change"""
+        self.app.processing_config.unsharp_strength = float(value)
+        self.app.update_image_display()
+
     def _create_morphology_section(self) -> None:
-        """Create morphology section"""
+        """Create consolidated morphology section"""
         morph_frame = create_labeled_frame(self.scrollable_frame, "🔄 Morphology")
         morph_frame.pack(fill=tk.X, pady=5, padx=5)
 
+        # Basic morphology
         create_checkbox(
             morph_frame,
-            "Morphology",
+            "Basic Morphology",
             self.morphology_var,
             self._on_morphology_changed,
-        ).pack(anchor=tk.W, pady=2)
+        ).pack(anchor=tk.W, pady=1)
+
+        basic_morph_controls = ttk.Frame(morph_frame)
+        basic_morph_controls.pack(fill=tk.X, pady=1)
 
         morph_kernel_frame, _, _ = create_slider(
-            morph_frame,
+            basic_morph_controls,
             "Kernel Size",
             self.morph_kernel_var,
             1,
             10,
             self._on_morph_kernel_changed,
         )
-        morph_kernel_frame.pack(fill=tk.X, pady=2)
+        morph_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            basic_morph_controls,
+            "Opening",
+            self.morph_open_var,
+            self._on_morph_open_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        create_checkbox(
+            basic_morph_controls,
+            "Closing",
+            self.morph_close_var,
+            self._on_morph_close_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        # Advanced morphology
+        ttk.Separator(morph_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            morph_frame,
+            "Stroke Width Normalization",
+            self.stroke_width_normalization_var,
+            self._on_stroke_width_normalization_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        stroke_iterations_frame, _, _ = create_slider(
+            morph_frame,
+            "Stroke Iterations",
+            self.stroke_iterations_var,
+            1,
+            5,
+            self._on_stroke_iterations_changed,
+        )
+        stroke_iterations_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Top Hat",
+            self.tophat_var,
+            self._on_tophat_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        tophat_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Top Hat Kernel Size",
+            self.tophat_kernel_size_var,
+            1,
+            10,
+            self._on_tophat_kernel_size_changed,
+        )
+        tophat_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Black Hat",
+            self.blackhat_var,
+            self._on_blackhat_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        blackhat_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Black Hat Kernel Size",
+            self.blackhat_kernel_size_var,
+            1,
+            10,
+            self._on_blackhat_kernel_size_changed,
+        )
+        blackhat_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Gradient",
+            self.gradient_var,
+            self._on_gradient_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        gradient_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Gradient Kernel Size",
+            self.gradient_kernel_size_var,
+            1,
+            10,
+            self._on_gradient_kernel_size_changed,
+        )
+        gradient_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Morphological Gradient",
+            self.morphological_gradient_var,
+            self._on_morphological_gradient_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        morph_grad_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Morph Gradient Kernel",
+            self.morphological_gradient_kernel_var,
+            1,
+            10,
+            self._on_morphological_gradient_kernel_changed,
+        )
+        morph_grad_kernel_frame.pack(fill=tk.X, pady=1)
+
+        # Character operations
+        ttk.Separator(morph_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            morph_frame,
+            "Character Separation",
+            self.character_separation_var,
+            self._on_character_separation_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        char_sep_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Char Sep Kernel Size",
+            self.char_sep_kernel_size_var,
+            1,
+            5,
+            self._on_char_sep_kernel_size_changed,
+        )
+        char_sep_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Character Dilation",
+            self.character_dilation_var,
+            self._on_character_dilation_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        dilation_controls = ttk.Frame(morph_frame)
+        dilation_controls.pack(fill=tk.X, pady=1)
+
+        dilation_kernel_frame, _, _ = create_slider(
+            dilation_controls,
+            "Dilation Kernel Size",
+            self.dilation_kernel_size_var,
+            1,
+            5,
+            self._on_dilation_kernel_size_changed,
+        )
+        dilation_kernel_frame.pack(fill=tk.X, pady=1)
+
+        dilation_iterations_frame, _, _ = create_slider(
+            dilation_controls,
+            "Dilation Iterations",
+            self.dilation_iterations_var,
+            1,
+            5,
+            self._on_dilation_iterations_changed,
+        )
+        dilation_iterations_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Character Erosion",
+            self.character_erosion_var,
+            self._on_character_erosion_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        erosion_controls = ttk.Frame(morph_frame)
+        erosion_controls.pack(fill=tk.X, pady=1)
+
+        erosion_kernel_frame, _, _ = create_slider(
+            erosion_controls,
+            "Erosion Kernel Size",
+            self.erosion_kernel_size_var,
+            1,
+            5,
+            self._on_erosion_kernel_size_changed,
+        )
+        erosion_kernel_frame.pack(fill=tk.X, pady=1)
+
+        erosion_iterations_frame, _, _ = create_slider(
+            erosion_controls,
+            "Erosion Iterations",
+            self.erosion_iterations_var,
+            1,
+            5,
+            self._on_erosion_iterations_changed,
+        )
+        erosion_iterations_frame.pack(fill=tk.X, pady=1)
+
+        # Line removal
+        ttk.Separator(morph_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            morph_frame,
+            "Remove Vertical Lines",
+            self.vertical_line_removal_var,
+            self._on_vertical_line_removal_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        vertical_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Vertical Kernel Size",
+            self.vertical_kernel_size_var,
+            1,
+            15,
+            self._on_vertical_kernel_size_changed,
+        )
+        vertical_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Remove Horizontal Lines",
+            self.horizontal_line_removal_var,
+            self._on_horizontal_line_removal_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        horizontal_kernel_frame, _, _ = create_slider(
+            morph_frame,
+            "Horizontal Kernel Size",
+            self.horizontal_kernel_size_var,
+            1,
+            15,
+            self._on_horizontal_kernel_size_changed,
+        )
+        horizontal_kernel_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            morph_frame,
+            "Hough Lines Removal",
+            self.hough_lines_removal_var,
+            self._on_hough_lines_removal_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        # Noise removal
+        create_checkbox(
+            morph_frame,
+            "Remove Noise Dots",
+            self.noise_dots_removal_var,
+            self._on_noise_dots_removal_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        min_contour_frame, _, _ = create_slider(
+            morph_frame,
+            "Min Contour Area",
+            self.min_contour_area_var,
+            1,
+            100,
+            self._on_min_contour_area_changed,
+        )
+        min_contour_frame.pack(fill=tk.X, pady=1)
+
+    def _on_morph_open_changed(self) -> None:
+        """Handle morphology open change"""
+        self.app.processing_config.morph_open = self.morph_open_var.get()
+        self.app.update_image_display()
+
+    def _on_morph_close_changed(self) -> None:
+        """Handle morphology close change"""
+        self.app.processing_config.morph_close = self.morph_close_var.get()
+        self.app.update_image_display()
+
+    def _on_stroke_iterations_changed(self, value) -> None:
+        """Handle stroke iterations change"""
+        self.app.processing_config.stroke_iterations = int(float(value))
+        self.app.update_image_display()
+
+    def _on_tophat_kernel_size_changed(self, value) -> None:
+        """Handle tophat kernel size change"""
+        self.app.processing_config.tophat_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_blackhat_kernel_size_changed(self, value) -> None:
+        """Handle blackhat kernel size change"""
+        self.app.processing_config.blackhat_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_gradient_kernel_size_changed(self, value) -> None:
+        """Handle gradient kernel size change"""
+        self.app.processing_config.gradient_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_morphological_gradient_changed(self) -> None:
+        """Handle morphological gradient change"""
+        self.app.processing_config.morphological_gradient = self.morphological_gradient_var.get()
+        self.app.update_image_display()
+
+    def _on_morphological_gradient_kernel_changed(self, value) -> None:
+        """Handle morphological gradient kernel change"""
+        self.app.processing_config.morphological_gradient_kernel = int(float(value))
+        self.app.update_image_display()
+
+    def _on_char_sep_kernel_size_changed(self, value) -> None:
+        """Handle character separation kernel size change"""
+        self.app.processing_config.char_sep_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_dilation_kernel_size_changed(self, value) -> None:
+        """Handle dilation kernel size change"""
+        self.app.processing_config.dilation_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_dilation_iterations_changed(self, value) -> None:
+        """Handle dilation iterations change"""
+        self.app.processing_config.dilation_iterations = int(float(value))
+        self.app.update_image_display()
+
+    def _on_erosion_kernel_size_changed(self, value) -> None:
+        """Handle erosion kernel size change"""
+        self.app.processing_config.erosion_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_erosion_iterations_changed(self, value) -> None:
+        """Handle erosion iterations change"""
+        self.app.processing_config.erosion_iterations = int(float(value))
+        self.app.update_image_display()
 
     def _on_morphology_changed(self) -> None:
         """Handle morphology change"""
@@ -484,6 +1873,413 @@ class ProcessingPanel:
     def _on_morph_kernel_changed(self, value) -> None:
         """Handle morphology kernel change"""
         self.app.processing_config.morph_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _create_histogram_advanced_section(self) -> None:
+        """Create advanced histogram section"""
+        hist_frame = create_labeled_frame(self.scrollable_frame, "📊 Advanced Histogram")
+        hist_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        clahe_tile_frame, _, _ = create_slider(
+            hist_frame,
+            "CLAHE Tile Size",
+            self.clahe_tile_size_var,
+            4,
+            16,
+            self._on_clahe_tile_size_changed,
+        )
+        clahe_tile_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            hist_frame,
+            "Intensity Normalization",
+            self.intensity_normalization_var,
+            self._on_intensity_normalization_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            hist_frame,
+            "Contrast Stretching",
+            self.contrast_stretching_var,
+            self._on_contrast_stretching_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+    def _on_clahe_tile_size_changed(self, value) -> None:
+        """Handle CLAHE tile size change"""
+        self.app.processing_config.clahe_tile_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_intensity_normalization_changed(self) -> None:
+        """Handle intensity normalization change"""
+        self.app.processing_config.intensity_normalization = self.intensity_normalization_var.get()
+        self.app.update_image_display()
+
+    def _on_contrast_stretching_changed(self) -> None:
+        """Handle contrast stretching change"""
+        self.app.processing_config.contrast_stretching = self.contrast_stretching_var.get()
+        self.app.update_image_display()
+
+    def _create_line_removal_advanced_section(self) -> None:
+        """Create advanced line removal section"""
+        line_frame = create_labeled_frame(self.scrollable_frame, "📏 Advanced Line Removal")
+        line_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        vertical_kernel_frame, _, _ = create_slider(
+            line_frame,
+            "Vertical Kernel Size",
+            self.vertical_kernel_size_var,
+            1,
+            15,
+            self._on_vertical_kernel_size_changed,
+        )
+        vertical_kernel_frame.pack(fill=tk.X, pady=2)
+
+        horizontal_kernel_frame, _, _ = create_slider(
+            line_frame,
+            "Horizontal Kernel Size",
+            self.horizontal_kernel_size_var,
+            1,
+            15,
+            self._on_horizontal_kernel_size_changed,
+        )
+        horizontal_kernel_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            line_frame,
+            "Hough Lines Removal",
+            self.hough_lines_removal_var,
+            self._on_hough_lines_removal_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+    def _on_vertical_kernel_size_changed(self, value) -> None:
+        """Handle vertical kernel size change"""
+        self.app.processing_config.vertical_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_horizontal_kernel_size_changed(self, value) -> None:
+        """Handle horizontal kernel size change"""
+        self.app.processing_config.horizontal_kernel_size = int(float(value))
+        self.app.update_image_display()
+
+    def _on_hough_lines_removal_changed(self) -> None:
+        """Handle Hough lines removal change"""
+        self.app.processing_config.hough_lines_removal = self.hough_lines_removal_var.get()
+        self.app.update_image_display()
+
+    def _create_advanced_morphology_section(self) -> None:
+        """Create advanced morphology section"""
+        morph_adv_frame = create_labeled_frame(self.scrollable_frame, "🔄 Advanced Morphology")
+        morph_adv_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        create_checkbox(
+            morph_adv_frame,
+            "Stroke Width Normalization",
+            self.stroke_width_normalization_var,
+            self._on_stroke_width_normalization_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            morph_adv_frame,
+            "Tophat",
+            self.tophat_var,
+            self._on_tophat_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            morph_adv_frame,
+            "Blackhat",
+            self.blackhat_var,
+            self._on_blackhat_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            morph_adv_frame,
+            "Gradient",
+            self.gradient_var,
+            self._on_gradient_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+    def _on_stroke_width_normalization_changed(self) -> None:
+        """Handle stroke width normalization change"""
+        self.app.processing_config.stroke_width_normalization = self.stroke_width_normalization_var.get()
+        self.app.update_image_display()
+
+    def _on_tophat_changed(self) -> None:
+        """Handle tophat change"""
+        self.app.processing_config.tophat = self.tophat_var.get()
+        self.app.update_image_display()
+
+    def _on_blackhat_changed(self) -> None:
+        """Handle blackhat change"""
+        self.app.processing_config.blackhat = self.blackhat_var.get()
+        self.app.update_image_display()
+
+    def _on_gradient_changed(self) -> None:
+        """Handle gradient change"""
+        self.app.processing_config.gradient = self.gradient_var.get()
+        self.app.update_image_display()
+
+    def _create_character_operations_section(self) -> None:
+        """Create character operations section"""
+        char_frame = create_labeled_frame(self.scrollable_frame, "🔤 Character Operations")
+        char_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        create_checkbox(
+            char_frame,
+            "Character Dilation",
+            self.character_dilation_var,
+            self._on_character_dilation_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            char_frame,
+            "Character Erosion",
+            self.character_erosion_var,
+            self._on_character_erosion_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        min_contour_frame, _, _ = create_slider(
+            char_frame,
+            "Min Contour Area",
+            self.min_contour_area_var,
+            1,
+            100,
+            self._on_min_contour_area_changed,
+        )
+        min_contour_frame.pack(fill=tk.X, pady=2)
+
+    def _on_character_dilation_changed(self) -> None:
+        """Handle character dilation change"""
+        self.app.processing_config.character_dilation = self.character_dilation_var.get()
+        self.app.update_image_display()
+
+    def _on_character_erosion_changed(self) -> None:
+        """Handle character erosion change"""
+        self.app.processing_config.character_erosion = self.character_erosion_var.get()
+        self.app.update_image_display()
+
+    def _on_min_contour_area_changed(self, value) -> None:
+        """Handle min contour area change"""
+        self.app.processing_config.min_contour_area = int(float(value))
+        self.app.update_image_display()
+
+    def _create_contour_filtering_section(self) -> None:
+        """Create contour filtering section"""
+        contour_frame = create_labeled_frame(self.scrollable_frame, "🎯 Contour Filtering")
+        contour_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        create_checkbox(
+            contour_frame,
+            "Contour Filtering",
+            self.contour_filtering_var,
+            self._on_contour_filtering_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            contour_frame,
+            "Connected Components Filtering",
+            self.connected_components_filtering_var,
+            self._on_connected_components_filtering_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            contour_frame,
+            "Aspect Ratio Filtering",
+            self.aspect_ratio_filtering_var,
+            self._on_aspect_ratio_filtering_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+    def _on_contour_filtering_changed(self) -> None:
+        """Handle contour filtering change"""
+        self.app.processing_config.contour_filtering = self.contour_filtering_var.get()
+        self.app.update_image_display()
+
+    def _on_connected_components_filtering_changed(self) -> None:
+        """Handle connected components filtering change"""
+        self.app.processing_config.connected_components_filtering = self.connected_components_filtering_var.get()
+        self.app.update_image_display()
+
+    def _on_aspect_ratio_filtering_changed(self) -> None:
+        """Handle aspect ratio filtering change"""
+        self.app.processing_config.aspect_ratio_filtering = self.aspect_ratio_filtering_var.get()
+        self.app.update_image_display()
+
+    def _on_lbp_radius_changed(self, value) -> None:
+        """Handle LBP radius change"""
+        self.app.processing_config.lbp_radius = int(float(value))
+        self.app.update_image_display()
+
+    def _create_advanced_operations_section(self) -> None:
+        """Create consolidated advanced operations section"""
+        advanced_frame = create_labeled_frame(self.scrollable_frame, "🧬 Advanced Operations")
+        advanced_frame.pack(fill=tk.X, pady=5, padx=5)
+
+        # Background subtraction
+        create_checkbox(
+            advanced_frame,
+            "Background Subtraction",
+            self.background_subtraction_var,
+            self._on_background_subtraction_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        bg_threshold_frame, _, _ = create_slider(
+            advanced_frame,
+            "BG Threshold",
+            self.bg_threshold_var,
+            0,
+            100,
+            self._on_bg_threshold_changed,
+        )
+        bg_threshold_frame.pack(fill=tk.X, pady=1)
+
+        # Contour filtering
+        ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            advanced_frame,
+            "Contour Filtering",
+            self.contour_filtering_var,
+            self._on_contour_filtering_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        contour_controls = ttk.Frame(advanced_frame)
+        contour_controls.pack(fill=tk.X, pady=1)
+
+        contour_area_min_frame, _, _ = create_slider(
+            contour_controls,
+            "Min Contour Area",
+            self.contour_area_min_var,
+            10,
+            1000,
+            self._on_contour_area_min_changed,
+        )
+        contour_area_min_frame.pack(fill=tk.X, pady=1)
+
+        contour_area_max_frame, _, _ = create_slider(
+            contour_controls,
+            "Max Contour Area",
+            self.contour_area_max_var,
+            100,
+            50000,
+            self._on_contour_area_max_changed,
+        )
+        contour_area_max_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            advanced_frame,
+            "Connected Components Filtering",
+            self.connected_components_filtering_var,
+            self._on_connected_components_filtering_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        create_checkbox(
+            advanced_frame,
+            "Aspect Ratio Filtering",
+            self.aspect_ratio_filtering_var,
+            self._on_aspect_ratio_filtering_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        # Transform operations
+        ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        create_checkbox(
+            advanced_frame,
+            "Distance Transform",
+            self.distance_transform_var,
+            self._on_distance_transform_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        distance_type_frame, _, _ = create_slider(
+            advanced_frame,
+            "Distance Transform Type",
+            self.distance_transform_type_var,
+            1,
+            5,
+            self._on_distance_transform_type_changed,
+        )
+        distance_type_frame.pack(fill=tk.X, pady=1)
+
+        create_checkbox(
+            advanced_frame,
+            "Skeletonize",
+            self.skeletonize_var,
+            self._on_skeletonize_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        create_checkbox(
+            advanced_frame,
+            "Watershed Markers",
+            self.watershed_markers_var,
+            self._on_watershed_markers_changed,
+        ).pack(anchor=tk.W, pady=1)
+
+        # Pattern analysis
+        ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
+
+        self.local_binary_pattern_checkbox = create_checkbox(
+            advanced_frame,
+            "Local Binary Pattern",
+            self.local_binary_pattern_var,
+            self._on_local_binary_pattern_changed,
+        )
+        self.local_binary_pattern_checkbox.pack(anchor=tk.W, pady=1)
+
+        lbp_controls = ttk.Frame(advanced_frame)
+        lbp_controls.pack(fill=tk.X, pady=1)
+
+        lbp_radius_frame, _, _ = create_slider(
+            lbp_controls,
+            "LBP Radius",
+            self.lbp_radius_var,
+            1,
+            8,
+            self._on_lbp_radius_changed,
+        )
+        lbp_radius_frame.pack(fill=tk.X, pady=1)
+
+        lbp_n_points_frame, _, _ = create_slider(
+            lbp_controls,
+            "LBP N Points",
+            self.lbp_n_points_var,
+            8,
+            32,
+            self._on_lbp_n_points_changed,
+        )
+        lbp_n_points_frame.pack(fill=tk.X, pady=1)
+
+    def _on_contour_area_min_changed(self, value) -> None:
+        """Handle contour area min change"""
+        self.app.processing_config.contour_area_min = int(float(value))
+        self.app.update_image_display()
+
+    def _on_contour_area_max_changed(self, value) -> None:
+        """Handle contour area max change"""
+        self.app.processing_config.contour_area_max = int(float(value))
+        self.app.update_image_display()
+
+    def _on_distance_transform_type_changed(self, value) -> None:
+        """Handle distance transform type change"""
+        self.app.processing_config.distance_transform_type = int(float(value))
+        self.app.update_image_display()
+
+    def _on_lbp_n_points_changed(self, value) -> None:
+        """Handle LBP N points change"""
+        self.app.processing_config.lbp_n_points = int(float(value))
+        self.app.update_image_display()
+
+    def _on_distance_transform_changed(self) -> None:
+        """Handle distance transform change"""
+        self.app.processing_config.distance_transform = self.distance_transform_var.get()
+        self.app.update_image_display()
+
+    def _on_skeletonize_changed(self) -> None:
+        """Handle skeletonize change"""
+        self.app.processing_config.skeletonize = self.skeletonize_var.get()
+        self.app.update_image_display()
+
+    def _on_watershed_markers_changed(self) -> None:
+        """Handle watershed markers change"""
+        self.app.processing_config.watershed_markers = self.watershed_markers_var.get()
         self.app.update_image_display()
 
     def _create_misc_section(self) -> None:

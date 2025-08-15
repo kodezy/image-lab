@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import pyautogui
 from PIL import ImageGrab
 
 from src.config import CaptureConfig
@@ -33,14 +32,6 @@ def _capture_device(config: CaptureConfig) -> np.ndarray:
         if not cap.isOpened():
             raise RuntimeError(f"Failed to open capture device {config.device_id}")
 
-        screen_width, screen_height = _get_screen_resolution()
-
-        if screen_width > config.device_max_width or screen_height > config.device_max_height:
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.device_max_width)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.device_max_height)
-
-        cap.set(cv2.CAP_PROP_FPS, 30)
-
         ret, frame = cap.read()
 
         if not ret:
@@ -51,8 +42,3 @@ def _capture_device(config: CaptureConfig) -> np.ndarray:
     finally:
         if cap is not None:
             cap.release()
-
-
-def _get_screen_resolution() -> tuple[int, int]:
-    """Get screen resolution"""
-    return pyautogui.size()

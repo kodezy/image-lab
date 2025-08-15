@@ -38,6 +38,28 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
     return image_processed
 
 
+def _ensure_binary(image: np.ndarray) -> np.ndarray:
+    """Ensure image is binary (0 and 255 values only)"""
+    if len(image.shape) == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    if image.dtype != np.uint8:
+        image = image.astype(np.uint8)
+
+    if len(np.unique(image)) > 2:
+        raise ValueError("Image is not binary")
+
+    return image
+
+
+def _ensure_grayscale(image: np.ndarray) -> np.ndarray:
+    """Ensure image is grayscale"""
+    if len(image.shape) == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    return image
+
+
 @image_cache(max_size=128)
 def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     """Apply crop to image based on configuration"""
@@ -60,10 +82,10 @@ def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
 @image_cache(max_size=128)
 def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     """Apply resize to image based on configuration"""
-    if not config.resize_before_process:
+    if not config.resize_enabled:
         return image
 
-    if config.maintain_aspect_ratio:
+    if config.resize_maintain_aspect_ratio:
         h, w = image.shape[:2]
         aspect = w / h
 
@@ -77,9 +99,15 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     else:
         new_w, new_h = config.resize_width, config.resize_height
 
-    interpolation = cv2.INTER_AREA
+    image_width, image_height = image.shape[:2][::-1]
 
-    return cv2.resize(image, (new_w, new_h), interpolation=interpolation)
+    if (image_width, image_height) != (new_w, new_h):
+        is_upscaling = image_width > new_w or image_height > new_h
+        interpolation = cv2.INTER_LANCZOS4 if is_upscaling else cv2.INTER_AREA
+
+        image = cv2.resize(image, (new_w, new_h), interpolation=interpolation)
+
+    return image
 
 
 @image_cache(max_size=128)
@@ -248,7 +276,8 @@ def _apply_character_operations(image: np.ndarray, config: ProcessingConfig) -> 
             image = cv2.erode(image, ero_kernel, iterations=1)
 
     if config.noise_dots_removal:
-        contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        binary_image = _ensure_binary(image)
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         for contour in contours:
             if cv2.contourArea(contour) < config.min_contour_area:
@@ -268,15 +297,29 @@ def _apply_enhancement_operations(image: np.ndarray, config: ProcessingConfig) -
         image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
 
     if config.detail_enhancement:
-        image = cv2.detailEnhance(
-            cv2.cvtColor(image, cv2.COLOR_GRAY2BGR),
+        if len(image.shape) == 2:
+            color_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        else:
+            color_image = image.copy()
+
+        enhanced = cv2.detailEnhance(
+            color_image,
             sigma_s=config.detail_sigma_s,
             sigma_r=config.detail_sigma_r,
         )
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(enhanced, cv2.COLOR_BGR2GRAY)
+        else:
+            image = enhanced
 
     if config.edge_enhancement:
-        edges = cv2.Canny(image, 50, 150)
+        gray_image = _ensure_grayscale(image)
+        edges = cv2.Canny(gray_image, 50, 150)
+
+        if len(image.shape) == 3:
+            edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+
         image = cv2.addWeighted(image, 1.0, edges, config.edge_strength, 0)
 
     if config.unsharp_mask:
@@ -381,7 +424,8 @@ def _apply_advanced_morphology(image: np.ndarray, config: ProcessingConfig) -> n
 def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     """Apply contour filtering to image based on configuration"""
     if config.contour_filtering:
-        contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        binary_image = _ensure_binary(image)
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         mask = np.zeros_like(image)
 
         for contour in contours:
@@ -393,7 +437,8 @@ def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.
         image = cv2.bitwise_and(image, mask)
 
     if config.connected_components_filtering:
-        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(image, connectivity=8)
+        binary_image = _ensure_binary(image)
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(binary_image, connectivity=8)
         mask = np.zeros_like(image)
 
         for i in range(1, num_labels):
@@ -405,7 +450,8 @@ def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.
         image = mask
 
     if config.aspect_ratio_filtering:
-        contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        binary_image = _ensure_binary(image)
+        contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         mask = np.zeros_like(image)
 
         for contour in contours:
@@ -448,21 +494,29 @@ def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> n
         image = np.clip((image - p_min) * 255 / (p_max - p_min), 0, 255).astype(np.uint8)
 
     if config.distance_transform:
-        image = cv2.distanceTransform(image, config.distance_transform_type, 3)
+        binary_image = _ensure_binary(image)
+        image = cv2.distanceTransform(binary_image, config.distance_transform_type, 3)
         image = cv2.normalize(image, image, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
     if config.skeletonize:
-        image = _apply_skeletonization(image)
+        binary_image = _ensure_binary(image)
+        image = _apply_skeletonization(binary_image)
 
     if config.watershed_markers:
-        image = _apply_watershed_markers(image)
+        binary_image = _ensure_binary(image)
+        image = _apply_watershed_markers(binary_image)
 
     # Local Binary Pattern
     if config.local_binary_pattern:
         from skimage.feature import local_binary_pattern
 
-        lbp = local_binary_pattern(image, config.lbp_n_points, config.lbp_radius, method="uniform")
-        image = (lbp * (255.0 / lbp.max())).astype(np.uint8)
+        gray_image = _ensure_grayscale(image)
+        lbp = local_binary_pattern(gray_image, config.lbp_n_points, config.lbp_radius, method="uniform")
+
+        if lbp.max() > 0:
+            image = (lbp * (255.0 / lbp.max())).astype(np.uint8)
+        else:
+            image = lbp.astype(np.uint8)
 
     return image
 
@@ -471,15 +525,16 @@ def _apply_skeletonization(image: np.ndarray) -> np.ndarray:
     """Apply skeletonization to image"""
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
     skeleton = np.zeros_like(image)
+    working_image = image.copy()
 
     while True:
-        eroded = cv2.erode(image, kernel)
+        eroded = cv2.erode(working_image, kernel)
         temp = cv2.dilate(eroded, kernel)
-        temp = cv2.subtract(image, temp)
+        temp = cv2.subtract(working_image, temp)
         skeleton = cv2.bitwise_or(skeleton, temp)
-        _image = eroded.copy()
+        working_image = eroded.copy()
 
-        if cv2.countNonZero(_image) == 0:
+        if cv2.countNonZero(working_image) == 0:
             break
 
     return skeleton
@@ -488,9 +543,10 @@ def _apply_skeletonization(image: np.ndarray) -> np.ndarray:
 @image_cache(max_size=128)
 def _apply_watershed_markers(image: np.ndarray) -> np.ndarray:
     """Apply watershed markers to image"""
+    binary_image = _ensure_binary(image)
     kernel = np.ones((3, 3), np.uint8)
-    sure_bg = cv2.dilate(image, kernel, iterations=3)
-    dist_transform = cv2.distanceTransform(image, cv2.DIST_L2, 5)
+    sure_bg = cv2.dilate(binary_image, kernel, iterations=3)
+    dist_transform = cv2.distanceTransform(binary_image, cv2.DIST_L2, 5)
     _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
     sure_fg = sure_fg.astype(np.uint8)
 
