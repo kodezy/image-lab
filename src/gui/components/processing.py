@@ -162,7 +162,9 @@ class ProcessingPanel:
         self.lbp_radius_var.set(config.lbp_radius)
         self.lbp_n_points_var.set(config.lbp_n_points)
 
+        self._update_resize_dependent_controls()
         self._update_grayscale_dependent_controls()
+        self._update_binary_dependent_controls()
         self._update_crop_status()
 
     def _setup_variables(self) -> None:
@@ -312,7 +314,9 @@ class ProcessingPanel:
         self._create_advanced_operations_section()
 
         # Initialize control states
+        self._update_resize_dependent_controls()
         self._update_grayscale_dependent_controls()
+        self._update_binary_dependent_controls()
 
     def _create_format_section(self) -> None:
         """Create input and format section"""
@@ -333,6 +337,7 @@ class ProcessingPanel:
         """Handle color space change"""
         self.app.processing_config.color_space = value
         self._update_grayscale_dependent_controls()
+        self._update_binary_dependent_controls()
         self.app.update_image_display()
 
     def _create_preprocessing_section(self) -> None:
@@ -351,12 +356,13 @@ class ProcessingPanel:
         resize_controls = ttk.Frame(preprocess_frame)
         resize_controls.pack(fill=tk.X, pady=2)
 
-        create_checkbox(
+        self.resize_maintain_aspect_checkbox = create_checkbox(
             resize_controls,
             "Maintain Ratio",
             self.resize_maintain_aspect_var,
             self._on_resize_maintain_aspect_ratio_changed,
-        ).pack(anchor=tk.W, pady=2)
+        )
+        self.resize_maintain_aspect_checkbox.pack(anchor=tk.W, pady=2)
 
         width_frame, _, _ = create_slider(
             resize_controls,
@@ -433,8 +439,9 @@ class ProcessingPanel:
     def _on_resize_enabled_changed(self) -> None:
         """Handle resize enabled change"""
         self.app.processing_config.resize_enabled = self.resize_enabled_var.get()
-        self.app.update_image_display()
         self._update_crop_status()
+        self._update_resize_dependent_controls()
+        self.app.update_image_display()
 
     def _on_resize_width_changed(self, value) -> None:
         """Handle resize width change"""
@@ -698,6 +705,7 @@ class ProcessingPanel:
     def _on_threshold_enabled_changed(self) -> None:
         """Handle threshold enabled change"""
         self.app.processing_config.threshold_enabled = self.threshold_enabled_var.get()
+        self._update_binary_dependent_controls()
         self.app.update_image_display()
 
     def _on_threshold_type_changed(self) -> None:
@@ -1763,12 +1771,13 @@ class ProcessingPanel:
         ).pack(anchor=tk.W, pady=1)
 
         # Noise removal
-        create_checkbox(
+        self.noise_dots_removal_checkbox = create_checkbox(
             morph_frame,
             "Remove Noise Dots",
             self.noise_dots_removal_var,
             self._on_noise_dots_removal_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.noise_dots_removal_checkbox.pack(anchor=tk.W, pady=1)
 
         min_contour_frame, _, _ = create_slider(
             morph_frame,
@@ -2115,12 +2124,13 @@ class ProcessingPanel:
         # Contour filtering
         ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
-        create_checkbox(
+        self.contour_filtering_checkbox = create_checkbox(
             advanced_frame,
             "Contour Filtering",
             self.contour_filtering_var,
             self._on_contour_filtering_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.contour_filtering_checkbox.pack(anchor=tk.W, pady=1)
 
         contour_controls = ttk.Frame(advanced_frame)
         contour_controls.pack(fill=tk.X, pady=1)
@@ -2145,29 +2155,32 @@ class ProcessingPanel:
         )
         contour_area_max_frame.pack(fill=tk.X, pady=1)
 
-        create_checkbox(
+        self.connected_components_filtering_checkbox = create_checkbox(
             advanced_frame,
             "Connected Components Filtering",
             self.connected_components_filtering_var,
             self._on_connected_components_filtering_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.connected_components_filtering_checkbox.pack(anchor=tk.W, pady=1)
 
-        create_checkbox(
+        self.aspect_ratio_filtering_checkbox = create_checkbox(
             advanced_frame,
             "Aspect Ratio Filtering",
             self.aspect_ratio_filtering_var,
             self._on_aspect_ratio_filtering_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.aspect_ratio_filtering_checkbox.pack(anchor=tk.W, pady=1)
 
         # Transform operations
         ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
-        create_checkbox(
+        self.distance_transform_checkbox = create_checkbox(
             advanced_frame,
             "Distance Transform",
             self.distance_transform_var,
             self._on_distance_transform_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.distance_transform_checkbox.pack(anchor=tk.W, pady=1)
 
         distance_type_frame, _, _ = create_slider(
             advanced_frame,
@@ -2179,19 +2192,21 @@ class ProcessingPanel:
         )
         distance_type_frame.pack(fill=tk.X, pady=1)
 
-        create_checkbox(
+        self.skeletonize_checkbox = create_checkbox(
             advanced_frame,
             "Skeletonize",
             self.skeletonize_var,
             self._on_skeletonize_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.skeletonize_checkbox.pack(anchor=tk.W, pady=1)
 
-        create_checkbox(
+        self.watershed_markers_checkbox = create_checkbox(
             advanced_frame,
             "Watershed Markers",
             self.watershed_markers_var,
             self._on_watershed_markers_changed,
-        ).pack(anchor=tk.W, pady=1)
+        )
+        self.watershed_markers_checkbox.pack(anchor=tk.W, pady=1)
 
         # Pattern analysis
         ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
@@ -2262,79 +2277,6 @@ class ProcessingPanel:
         self.app.processing_config.watershed_markers = self.watershed_markers_var.get()
         self.app.update_image_display()
 
-    def _create_misc_section(self) -> None:
-        """Create misc operations section"""
-        misc_frame = create_labeled_frame(self.scrollable_frame, "⚙️ Misc")
-        misc_frame.pack(fill=tk.X, pady=5, padx=5)
-
-        self.edge_enhancement_checkbox = create_checkbox(
-            misc_frame,
-            "Edge Enhancement",
-            self.edge_enhancement_var,
-            self._on_edge_enhancement_changed,
-        )
-        self.edge_enhancement_checkbox.pack(anchor=tk.W, pady=2)
-
-        self.histogram_equalization_checkbox = create_checkbox(
-            misc_frame,
-            "Histogram Equalization",
-            self.histogram_equalization_var,
-            self._on_histogram_eq_changed,
-        )
-        self.histogram_equalization_checkbox.pack(anchor=tk.W, pady=2)
-
-        self.adaptive_hist_eq_checkbox = create_checkbox(
-            misc_frame,
-            "Adaptive Histogram Equalization",
-            self.adaptive_hist_eq_var,
-            self._on_adaptive_hist_eq_changed,
-        )
-        self.adaptive_hist_eq_checkbox.pack(anchor=tk.W, pady=2)
-
-        create_checkbox(
-            misc_frame,
-            "Character Separation",
-            self.character_separation_var,
-            self._on_character_separation_changed,
-        ).pack(anchor=tk.W, pady=2)
-
-        create_checkbox(
-            misc_frame,
-            "Remove Vertical Lines",
-            self.vertical_line_removal_var,
-            self._on_vertical_line_removal_changed,
-        ).pack(anchor=tk.W, pady=2)
-
-        create_checkbox(
-            misc_frame,
-            "Remove Horizontal Lines",
-            self.horizontal_line_removal_var,
-            self._on_horizontal_line_removal_changed,
-        ).pack(anchor=tk.W, pady=2)
-
-        create_checkbox(
-            misc_frame,
-            "Remove Noise Dots",
-            self.noise_dots_removal_var,
-            self._on_noise_dots_removal_changed,
-        ).pack(anchor=tk.W, pady=2)
-
-        self.multi_otsu_checkbox = create_checkbox(
-            misc_frame,
-            "Multi-OTSU Thresholding",
-            self.multi_otsu_var,
-            self._on_multi_otsu_changed,
-        )
-        self.multi_otsu_checkbox.pack(anchor=tk.W, pady=2)
-
-        self.local_binary_pattern_checkbox = create_checkbox(
-            misc_frame,
-            "Local Binary Pattern",
-            self.local_binary_pattern_var,
-            self._on_local_binary_pattern_changed,
-        )
-        self.local_binary_pattern_checkbox.pack(anchor=tk.W, pady=2)
-
     def _on_edge_enhancement_changed(self) -> None:
         """Handle edge enhancement change"""
         self.app.processing_config.edge_enhancement = self.edge_enhancement_var.get()
@@ -2380,11 +2322,21 @@ class ProcessingPanel:
         self.app.processing_config.local_binary_pattern = self.local_binary_pattern_var.get()
         self.app.update_image_display()
 
+    def _update_resize_dependent_controls(self) -> None:
+        """Update state of controls that depend on resize"""
+        is_resize = self.resize_enabled_var.get()
+        state = tk.NORMAL if is_resize else tk.DISABLED
+
+        self.resize_maintain_aspect_checkbox.config(state=state)
+
+        if state == tk.DISABLED:
+            self.app.processing_config.resize_maintain_aspect_ratio = False
+        else:
+            self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_var.get()
+
     def _update_grayscale_dependent_controls(self) -> None:
         """Update state of controls that depend on grayscale"""
         is_grayscale = self.color_space_var.get() == "Grayscale"
-
-        # Enable/disable grayscale-dependent controls
         state = tk.NORMAL if is_grayscale else tk.DISABLED
 
         self.threshold_enabled_checkbox.config(state=state)
@@ -2394,3 +2346,51 @@ class ProcessingPanel:
         self.adaptive_hist_eq_checkbox.config(state=state)
         self.multi_otsu_checkbox.config(state=state)
         self.local_binary_pattern_checkbox.config(state=state)
+
+        if state == tk.DISABLED:
+            self.app.processing_config.threshold_enabled = False
+            self.app.processing_config.edge_enhancement = False
+            self.app.processing_config.histogram_equalization = False
+            self.app.processing_config.adaptive_hist_eq = False
+            self.app.processing_config.multi_otsu = False
+            self.app.processing_config.local_binary_pattern = False
+        else:
+            self.app.processing_config.threshold_enabled = self.threshold_enabled_var.get()
+            self.app.processing_config.edge_enhancement = self.edge_enhancement_var.get()
+            self.app.processing_config.histogram_equalization = self.histogram_equalization_var.get()
+            self.app.processing_config.adaptive_hist_eq = self.adaptive_hist_eq_var.get()
+            self.app.processing_config.multi_otsu = self.multi_otsu_var.get()
+            self.app.processing_config.local_binary_pattern = self.local_binary_pattern_var.get()
+
+    def _update_binary_dependent_controls(self) -> None:
+        """Update state of controls that depend on binary"""
+        is_binary = self.threshold_enabled_var.get()
+        state = tk.NORMAL if is_binary else tk.DISABLED
+
+        self.noise_dots_removal_checkbox.config(state=state)
+        self.contour_filtering_checkbox.config(state=state)
+        self.connected_components_filtering_checkbox.config(state=state)
+        self.aspect_ratio_filtering_checkbox.config(state=state)
+        self.distance_transform_checkbox.config(state=state)
+        self.skeletonize_checkbox.config(state=state)
+        self.watershed_markers_checkbox.config(state=state)
+        self.local_binary_pattern_checkbox.config(state=state)
+
+        if state == tk.DISABLED:
+            self.app.processing_config.noise_dots_removal = False
+            self.app.processing_config.contour_filtering = False
+            self.app.processing_config.connected_components_filtering = False
+            self.app.processing_config.aspect_ratio_filtering = False
+            self.app.processing_config.distance_transform = False
+            self.app.processing_config.skeletonize = False
+            self.app.processing_config.watershed_markers = False
+            self.app.processing_config.local_binary_pattern = False
+        else:
+            self.app.processing_config.noise_dots_removal = self.noise_dots_removal_var.get()
+            self.app.processing_config.contour_filtering = self.contour_filtering_var.get()
+            self.app.processing_config.connected_components_filtering = self.connected_components_filtering_var.get()
+            self.app.processing_config.aspect_ratio_filtering = self.aspect_ratio_filtering_var.get()
+            self.app.processing_config.distance_transform = self.distance_transform_var.get()
+            self.app.processing_config.skeletonize = self.skeletonize_var.get()
+            self.app.processing_config.watershed_markers = self.watershed_markers_var.get()
+            self.app.processing_config.local_binary_pattern = self.local_binary_pattern_var.get()
