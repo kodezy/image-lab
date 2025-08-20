@@ -17,6 +17,7 @@ Ctrl+N - New Capture
 Ctrl+O - Load Image
 Ctrl+S - Save Image
 Ctrl+L - Load Config
+Ctrl+Shift+R - Reset Configs
 Ctrl+Shift+S - Save Config
 
 View Operations:
@@ -79,6 +80,7 @@ class MenuBar:
         self.parent.bind("<Control-o>", lambda e: self.app.load_image_file())
         self.parent.bind("<Control-s>", lambda e: self.app.save_image_file())
         self.parent.bind("<Control-l>", lambda e: self.app.load_config_file())
+        self.parent.bind("<Control-Shift-R>", lambda e: self.app.reset_configs())
         self.parent.bind("<Control-Shift-S>", lambda e: self.app.save_config_file())
         self.parent.bind("<F5>", lambda e: self.app.update_image_display())
 
@@ -92,13 +94,8 @@ class MenuBar:
         edit_menu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Edit", menu=edit_menu)
 
-        edit_menu.add_command(label="Reset All Configs", command=self._reset_configs)
+        edit_menu.add_command(label="Reset All Configs", command=self.app.reset_configs, accelerator="Ctrl+Shift+R")
         edit_menu.add_command(label="Refresh Image", command=self.app.update_image_display, accelerator="F5")
-
-    def _reset_configs(self) -> None:
-        """Reset configurations with confirmation"""
-        if messagebox.askyesno("Reset Configurations", "Reset all configurations to defaults?"):
-            self.app.reset_configs()
 
     def _create_view_menu(self) -> None:
         """Create View menu"""

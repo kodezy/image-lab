@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, messagebox, ttk
 
 import cv2
 import numpy as np
@@ -179,12 +179,13 @@ class ImageLabGUI:
 
     def reset_configs(self) -> None:
         """Reset all configurations to defaults"""
-        self.capture_config = CaptureConfig()
-        self.ocr_config = OCRConfig()
-        self.processing_config = ProcessingConfig()
+        if messagebox.askyesno("Reset Configurations", "Reset all configurations to defaults?"):
+            self.capture_config = CaptureConfig()
+            self.ocr_config = OCRConfig()
+            self.processing_config = ProcessingConfig()
 
-        self._refresh_panels()
-        show_success("Configurations reset to defaults")
+            self._refresh_panels()
+            show_success("Configurations reset to defaults")
 
     def update_image_display(self) -> None:
         """Update image display with current processing"""
