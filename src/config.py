@@ -30,6 +30,18 @@ class OCRConfig(Config):
     lang: str = "en"  # ch, en, etc.
     device: str = "cpu"  # cpu, gpu:0, npu:0, xpu:0, mlu:0, dcu:0
 
+    # Model customization
+    doc_orientation_classify_model_name: str | None = None
+    doc_orientation_classify_model_dir: str | None = None
+    doc_unwarping_model_name: str | None = None
+    doc_unwarping_model_dir: str | None = None
+    text_detection_model_name: str | None = None
+    text_detection_model_dir: str | None = None
+    textline_orientation_model_name: str | None = None
+    textline_orientation_model_dir: str | None = None
+    text_recognition_model_name: str | None = None
+    text_recognition_model_dir: str | None = None
+
     # Module control
     use_doc_orientation_classify: bool = False
     use_doc_unwarping: bool = False
@@ -41,13 +53,18 @@ class OCRConfig(Config):
     text_det_thresh: float = 0.3
     text_det_box_thresh: float = 0.6
     text_det_unclip_ratio: float = 1.5
+    text_det_input_shape: tuple[int, int] | None = None
 
     # Text recognition
     text_rec_score_thresh: float = 0.5
     text_recognition_batch_size: int = 6
+    text_rec_input_shape: tuple[int, int] | None = None
+    textline_orientation_batch_size: int = 1
 
     # Performance
+    enable_hpi: bool = False
     enable_mkldnn: bool = True
+    mkldnn_cache_capacity: int = 10
     cpu_threads: int = 8
     use_tensorrt: bool = False
     precision: str = "fp32"  # fp32, fp16

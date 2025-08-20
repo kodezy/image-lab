@@ -53,6 +53,16 @@ class OCRPanel:
         self.batch_size_var.set(config.text_recognition_batch_size)
         self.cpu_threads_var.set(config.cpu_threads)
 
+        # New parameters
+        self.enable_hpi_var.set(config.enable_hpi)
+        self.mkldnn_cache_var.set(config.mkldnn_cache_capacity)
+        self.precision_var.set(config.precision)
+        self.det_limit_side_len_var.set(config.text_det_limit_side_len)
+        self.det_limit_type_var.set(config.text_det_limit_type)
+        self.use_tensorrt_var.set(config.use_tensorrt)
+        self.enable_mkldnn_var.set(config.enable_mkldnn)
+        self.textline_orientation_batch_var.set(config.textline_orientation_batch_size)
+
     def _setup_variables(self) -> None:
         """Setup tkinter variables"""
         config = self.app.ocr_config
@@ -68,6 +78,16 @@ class OCRPanel:
 
         self.batch_size_var = tk.IntVar(value=config.text_recognition_batch_size)
         self.cpu_threads_var = tk.IntVar(value=config.cpu_threads)
+
+        # New parameters
+        self.enable_hpi_var = tk.BooleanVar(value=config.enable_hpi)
+        self.mkldnn_cache_var = tk.IntVar(value=config.mkldnn_cache_capacity)
+        self.precision_var = tk.StringVar(value=config.precision)
+        self.det_limit_side_len_var = tk.IntVar(value=config.text_det_limit_side_len)
+        self.det_limit_type_var = tk.StringVar(value=config.text_det_limit_type)
+        self.use_tensorrt_var = tk.BooleanVar(value=config.use_tensorrt)
+        self.enable_mkldnn_var = tk.BooleanVar(value=config.enable_mkldnn)
+        self.textline_orientation_batch_var = tk.IntVar(value=config.textline_orientation_batch_size)
 
     def _create_frame(self) -> None:
         """Create OCR frame"""
@@ -106,7 +126,7 @@ class OCRPanel:
             settings_frame,
             "Device",
             self.device_var,
-            ["cpu", "gpu:0"],
+            ["cpu", "gpu:0", "npu:0", "xpu:0", "mlu:0", "dcu:0"],
             self._on_device_changed,
         )
         device_frame.pack(fill=tk.X, pady=2)
@@ -162,6 +182,25 @@ class OCRPanel:
         )
         unclip_frame.pack(fill=tk.X, pady=2)
 
+        det_limit_frame, self.det_limit_spinbox = create_spinbox(
+            settings_frame,
+            "Detection Limit Side Length",
+            self.det_limit_side_len_var,
+            64,
+            4096,
+            self._on_det_limit_side_len_changed,
+        )
+        det_limit_frame.pack(fill=tk.X, pady=2)
+
+        det_limit_type_frame, self.det_limit_type_combobox = create_combobox(
+            settings_frame,
+            "Detection Limit Type",
+            self.det_limit_type_var,
+            ["min", "max"],
+            self._on_det_limit_type_changed,
+        )
+        det_limit_type_frame.pack(fill=tk.X, pady=2)
+
         batch_size_frame, self.batch_spinbox = create_spinbox(
             settings_frame,
             "Batch Size",
@@ -182,17 +221,80 @@ class OCRPanel:
         )
         cpu_threads_frame.pack(fill=tk.X, pady=2)
 
-    def _on_lang_changed(self) -> None:
+        ttk.Separator(settings_frame, orient="horizontal").pack(fill=tk.X, pady=10)
+
+        # Performance settings
+        enable_hpi_frame = ttk.Frame(settings_frame)
+        enable_hpi_frame.pack(fill=tk.X, pady=2)
+        self.enable_hpi_checkbox = ttk.Checkbutton(
+            enable_hpi_frame,
+            text="Enable High Performance Inference",
+            variable=self.enable_hpi_var,
+            command=self._on_enable_hpi_changed,
+        )
+        self.enable_hpi_checkbox.pack(anchor=tk.W)
+
+        mkldnn_cache_frame, self.mkldnn_cache_spinbox = create_spinbox(
+            settings_frame,
+            "MKL-DNN Cache Capacity",
+            self.mkldnn_cache_var,
+            1,
+            100,
+            self._on_mkldnn_cache_changed,
+        )
+        mkldnn_cache_frame.pack(fill=tk.X, pady=2)
+
+        precision_frame, self.precision_combobox = create_combobox(
+            settings_frame,
+            "Precision",
+            self.precision_var,
+            ["fp32", "fp16"],
+            self._on_precision_changed,
+        )
+        precision_frame.pack(fill=tk.X, pady=2)
+
+        # Additional performance settings
+        use_tensorrt_frame = ttk.Frame(settings_frame)
+        use_tensorrt_frame.pack(fill=tk.X, pady=2)
+        self.use_tensorrt_checkbox = ttk.Checkbutton(
+            use_tensorrt_frame,
+            text="Enable TensorRT Acceleration",
+            variable=self.use_tensorrt_var,
+            command=self._on_use_tensorrt_changed,
+        )
+        self.use_tensorrt_checkbox.pack(anchor=tk.W)
+
+        enable_mkldnn_frame = ttk.Frame(settings_frame)
+        enable_mkldnn_frame.pack(fill=tk.X, pady=2)
+        self.enable_mkldnn_checkbox = ttk.Checkbutton(
+            enable_mkldnn_frame,
+            text="Enable MKL-DNN Acceleration",
+            variable=self.enable_mkldnn_var,
+            command=self._on_enable_mkldnn_changed,
+        )
+        self.enable_mkldnn_checkbox.pack(anchor=tk.W)
+
+        textline_orientation_batch_frame, self.textline_orientation_batch_spinbox = create_spinbox(
+            settings_frame,
+            "Textline Orientation Batch Size",
+            self.textline_orientation_batch_var,
+            1,
+            32,
+            self._on_textline_orientation_batch_changed,
+        )
+        textline_orientation_batch_frame.pack(fill=tk.X, pady=2)
+
+    def _on_lang_changed(self, value) -> None:
         """Handle language change"""
         self.app.ocr_config.lang = self.lang_var.get()
         self._invalidate_ocr_instance()
 
-    def _on_device_changed(self) -> None:
+    def _on_device_changed(self, value) -> None:
         """Handle device change"""
         self.app.ocr_config.device = self.device_var.get()
         self._invalidate_ocr_instance()
 
-    def _on_version_changed(self) -> None:
+    def _on_version_changed(self, value) -> None:
         """Handle version change"""
         self.app.ocr_config.ocr_version = self.version_var.get()
         self._invalidate_ocr_instance()
@@ -225,6 +327,46 @@ class OCRPanel:
     def _on_cpu_threads_changed(self) -> None:
         """Handle CPU threads change"""
         self.app.ocr_config.cpu_threads = self.cpu_threads_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_enable_hpi_changed(self) -> None:
+        """Handle High Performance Inference checkbox change"""
+        self.app.ocr_config.enable_hpi = self.enable_hpi_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_mkldnn_cache_changed(self) -> None:
+        """Handle MKL-DNN Cache Capacity spinbox change"""
+        self.app.ocr_config.mkldnn_cache_capacity = self.mkldnn_cache_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_precision_changed(self, value) -> None:
+        """Handle Precision combobox change"""
+        self.app.ocr_config.precision = self.precision_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_use_tensorrt_changed(self) -> None:
+        """Handle TensorRT checkbox change"""
+        self.app.ocr_config.use_tensorrt = self.use_tensorrt_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_enable_mkldnn_changed(self) -> None:
+        """Handle MKL-DNN checkbox change"""
+        self.app.ocr_config.enable_mkldnn = self.enable_mkldnn_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_textline_orientation_batch_changed(self) -> None:
+        """Handle Textline Orientation Batch Size spinbox change"""
+        self.app.ocr_config.textline_orientation_batch_size = self.textline_orientation_batch_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_det_limit_side_len_changed(self) -> None:
+        """Handle Detection Limit Side Length spinbox change"""
+        self.app.ocr_config.text_det_limit_side_len = self.det_limit_side_len_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_det_limit_type_changed(self, value) -> None:
+        """Handle Detection Limit Type combobox change"""
+        self.app.ocr_config.text_det_limit_type = self.det_limit_type_var.get()
         self._invalidate_ocr_instance()
 
     def _invalidate_ocr_instance(self) -> None:
