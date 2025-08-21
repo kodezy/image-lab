@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Any
 
-from src.gui.utils import create_button, create_combobox, create_labeled_frame, create_slider, create_spinbox
+from src.gui.utils import create_button, create_combobox, create_labeled_frame, create_slider, create_spinbox, create_scrollable_frame
 
 
 class OCRPanel:
@@ -111,10 +111,13 @@ class OCRPanel:
     def _create_settings_section(self) -> None:
         """Create OCR settings section"""
         settings_frame = create_labeled_frame(self.frame, "⚙️ Settings")
-        settings_frame.pack(fill=tk.X, pady=5, padx=5)
+        settings_frame.pack(fill=tk.BOTH, expand=True, pady=5, padx=5)
+
+        canvas, scrollable_frame, _ = create_scrollable_frame(settings_frame)
+        canvas.pack(fill=tk.BOTH, expand=True)
 
         lang_frame, self.lang_combobox = create_combobox(
-            settings_frame,
+            scrollable_frame,
             "Language",
             self.lang_var,
             ["ch", "en", "pt"],
@@ -123,7 +126,7 @@ class OCRPanel:
         lang_frame.pack(fill=tk.X, pady=2)
 
         device_frame, self.device_combobox = create_combobox(
-            settings_frame,
+            scrollable_frame,
             "Device",
             self.device_var,
             ["cpu", "gpu:0", "npu:0", "xpu:0", "mlu:0", "dcu:0"],
@@ -132,7 +135,7 @@ class OCRPanel:
         device_frame.pack(fill=tk.X, pady=2)
 
         version_frame, self.version_combobox = create_combobox(
-            settings_frame,
+            scrollable_frame,
             "OCR Version",
             self.version_var,
             ["PP-OCRv5", "PP-OCRv4", "PP-OCRv3"],
@@ -140,10 +143,10 @@ class OCRPanel:
         )
         version_frame.pack(fill=tk.X, pady=2)
 
-        ttk.Separator(settings_frame, orient="horizontal").pack(fill=tk.X, pady=10)
+        ttk.Separator(scrollable_frame, orient="horizontal").pack(fill=tk.X, pady=10)
 
         det_thresh_frame, _, _ = create_slider(
-            settings_frame,
+            scrollable_frame,
             "Detection Threshold",
             self.det_thresh_var,
             0.1,
@@ -153,7 +156,7 @@ class OCRPanel:
         det_thresh_frame.pack(fill=tk.X, pady=2)
 
         box_thresh_frame, _, _ = create_slider(
-            settings_frame,
+            scrollable_frame,
             "Box Threshold",
             self.box_thresh_var,
             0.1,
@@ -163,7 +166,7 @@ class OCRPanel:
         box_thresh_frame.pack(fill=tk.X, pady=2)
 
         score_thresh_frame, _, _ = create_slider(
-            settings_frame,
+            scrollable_frame,
             "Score Threshold",
             self.score_thresh_var,
             0.0,
@@ -173,7 +176,7 @@ class OCRPanel:
         score_thresh_frame.pack(fill=tk.X, pady=2)
 
         unclip_frame, _, _ = create_slider(
-            settings_frame,
+            scrollable_frame,
             "Unclip Ratio",
             self.unclip_ratio_var,
             1.0,
@@ -183,7 +186,7 @@ class OCRPanel:
         unclip_frame.pack(fill=tk.X, pady=2)
 
         det_limit_frame, self.det_limit_spinbox = create_spinbox(
-            settings_frame,
+            scrollable_frame,
             "Detection Limit Side Length",
             self.det_limit_side_len_var,
             64,
@@ -193,7 +196,7 @@ class OCRPanel:
         det_limit_frame.pack(fill=tk.X, pady=2)
 
         det_limit_type_frame, self.det_limit_type_combobox = create_combobox(
-            settings_frame,
+            scrollable_frame,
             "Detection Limit Type",
             self.det_limit_type_var,
             ["min", "max"],
@@ -202,7 +205,7 @@ class OCRPanel:
         det_limit_type_frame.pack(fill=tk.X, pady=2)
 
         batch_size_frame, self.batch_spinbox = create_spinbox(
-            settings_frame,
+            scrollable_frame,
             "Batch Size",
             self.batch_size_var,
             1,
@@ -212,7 +215,7 @@ class OCRPanel:
         batch_size_frame.pack(fill=tk.X, pady=2)
 
         cpu_threads_frame, self.cpu_threads_spinbox = create_spinbox(
-            settings_frame,
+            scrollable_frame,
             "CPU Threads",
             self.cpu_threads_var,
             1,
@@ -221,10 +224,10 @@ class OCRPanel:
         )
         cpu_threads_frame.pack(fill=tk.X, pady=2)
 
-        ttk.Separator(settings_frame, orient="horizontal").pack(fill=tk.X, pady=10)
+        ttk.Separator(scrollable_frame, orient="horizontal").pack(fill=tk.X, pady=10)
 
         # Performance settings
-        enable_hpi_frame = ttk.Frame(settings_frame)
+        enable_hpi_frame = ttk.Frame(scrollable_frame)
         enable_hpi_frame.pack(fill=tk.X, pady=2)
         self.enable_hpi_checkbox = ttk.Checkbutton(
             enable_hpi_frame,
@@ -235,7 +238,7 @@ class OCRPanel:
         self.enable_hpi_checkbox.pack(anchor=tk.W)
 
         mkldnn_cache_frame, self.mkldnn_cache_spinbox = create_spinbox(
-            settings_frame,
+            scrollable_frame,
             "MKL-DNN Cache Capacity",
             self.mkldnn_cache_var,
             1,
@@ -245,7 +248,7 @@ class OCRPanel:
         mkldnn_cache_frame.pack(fill=tk.X, pady=2)
 
         precision_frame, self.precision_combobox = create_combobox(
-            settings_frame,
+            scrollable_frame,
             "Precision",
             self.precision_var,
             ["fp32", "fp16"],
@@ -254,7 +257,7 @@ class OCRPanel:
         precision_frame.pack(fill=tk.X, pady=2)
 
         # Additional performance settings
-        use_tensorrt_frame = ttk.Frame(settings_frame)
+        use_tensorrt_frame = ttk.Frame(scrollable_frame)
         use_tensorrt_frame.pack(fill=tk.X, pady=2)
         self.use_tensorrt_checkbox = ttk.Checkbutton(
             use_tensorrt_frame,
@@ -264,7 +267,7 @@ class OCRPanel:
         )
         self.use_tensorrt_checkbox.pack(anchor=tk.W)
 
-        enable_mkldnn_frame = ttk.Frame(settings_frame)
+        enable_mkldnn_frame = ttk.Frame(scrollable_frame)
         enable_mkldnn_frame.pack(fill=tk.X, pady=2)
         self.enable_mkldnn_checkbox = ttk.Checkbutton(
             enable_mkldnn_frame,
@@ -275,7 +278,7 @@ class OCRPanel:
         self.enable_mkldnn_checkbox.pack(anchor=tk.W)
 
         textline_orientation_batch_frame, self.textline_orientation_batch_spinbox = create_spinbox(
-            settings_frame,
+            scrollable_frame,
             "Textline Orientation Batch Size",
             self.textline_orientation_batch_var,
             1,

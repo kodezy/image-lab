@@ -149,7 +149,9 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
     canvas.configure(yscrollcommand=scrollbar.set)
 
     scrollable_frame.bind("<Configure>", configure_scroll_region)
+    
     canvas.bind("<MouseWheel>", on_mousewheel)
+    parent.bind("<MouseWheel>", on_mousewheel)
 
     canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
