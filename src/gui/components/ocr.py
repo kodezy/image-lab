@@ -2,7 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Any
 
-from src.gui.utils import create_button, create_combobox, create_labeled_frame, create_slider, create_spinbox, create_scrollable_frame
+from src.gui.utils import (
+    create_button,
+    create_combobox,
+    create_labeled_frame,
+    create_scrollable_frame,
+    create_slider,
+    create_spinbox,
+)
 
 
 class OCRPanel:

@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
@@ -6,14 +7,14 @@ import numpy as np
 
 from src.config import CaptureConfig, OCRConfig, ProcessingConfig
 from src.core.capture import capture_image
-from src.core.ocr import create_ocr
+from src.core.ocr import PaddleOCR, create_ocr
 from src.core.processing import process_image
 from src.gui.components.capture import CapturePanel
 from src.gui.components.image import ImagePanel
 from src.gui.components.menu import MenuBar
 from src.gui.components.ocr import OCRPanel
 from src.gui.components.processing import ProcessingPanel
-from src.gui.utils import show_error, show_success
+from src.gui.utils import get_padding, show_error, show_success
 from src.infra.io import load_image, load_json, save_image, save_json
 
 APP_ICON_PATH = "assets/app.ico"
@@ -25,6 +26,10 @@ class ImageLabGUI:
     def __init__(self, window_width: int = 1000, window_height: int = 600) -> None:
         self._window_width = window_width
         self._window_height = window_height
+
+        self.current_image: np.ndarray | None = None
+        self.processed_image: np.ndarray | None = None
+        self.ocr_instance: PaddleOCR | None = None
 
         self._initialize_window()
         self._initialize_configs()
@@ -223,35 +228,45 @@ class ImageLabGUI:
         self.root = tk.Tk()
         self.root.title("Image Lab")
         self.root.minsize(800, 600)
-        
+
         self.root.geometry(f"{self._window_width}x{self._window_height}")
         self._center_window()
-        
+
         self.root.configure(bg="#f8f9fa")
+        self._configure_macos_support()
         self._set_window_icon()
+
+    def _configure_macos_support(self) -> None:
+        """Configure macOS-specific settings"""
+        if sys.platform == "darwin":
+            style = ttk.Style()
+            style.theme_use("aqua")
+
+            bg_color = style.lookup("TFrame", "background")
+            if bg_color:
+                self.root.configure(bg=bg_color)
 
     def _center_window(self) -> None:
         """Center window on screen"""
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        
+
         x = (screen_width - self._window_width) // 2
         y = ((screen_height - self._window_height) // 2) - 50
-        
+
         self.root.geometry(f"{self._window_width}x{self._window_height}+{x}+{y}")
 
     def _set_window_icon(self) -> None:
+        """Set window icon"""
         try:
             if APP_ICON_PATH.lower().endswith(".ico"):
                 self.root.iconbitmap(APP_ICON_PATH)
-                return
-
-            icon = tk.PhotoImage(file=APP_ICON_PATH)
-            self.root.iconphoto(True, icon)
-            self._app_icon_image = icon
-
+            else:
+                icon = tk.PhotoImage(file=APP_ICON_PATH)
+                self.root.iconphoto(True, icon)
+                self._app_icon_image = icon
         except Exception:
-            print("Failed to set window icon")
+            pass
 
     def _initialize_configs(self) -> None:
         """Initialize configuration objects"""
@@ -278,8 +293,10 @@ class ImageLabGUI:
 
     def _create_main_layout(self) -> None:
         """Create main application layout"""
+        padding = get_padding()
+
         self.main_frame = ttk.Frame(self.root)
-        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=padding, pady=padding)
 
         self.main_frame.grid_columnconfigure(1, weight=1)
         self.main_frame.grid_rowconfigure(0, weight=1)
@@ -291,8 +308,10 @@ class ImageLabGUI:
 
     def _create_control_panel(self) -> None:
         """Create left control panel with tabs"""
+        padding = get_padding()
+
         self.control_notebook = ttk.Notebook(self.main_frame, width=400)
-        self.control_notebook.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+        self.control_notebook.grid(row=0, column=0, sticky="nsew", padx=(0, padding))
 
         self.capture_panel = CapturePanel(self.control_notebook, self)
         self.processing_panel = ProcessingPanel(self.control_notebook, self)

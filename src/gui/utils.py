@@ -1,6 +1,12 @@
+import sys
 import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any, Callable
+
+
+def get_padding() -> int:
+    """Get platform-appropriate padding value"""
+    return 8 if sys.platform == "darwin" else 10
 
 
 def show_error(message: str, title: str = "Error") -> None:
@@ -18,8 +24,10 @@ def show_warning(message: str, title: str = "Warning") -> None:
     messagebox.showwarning(title, message)
 
 
-def create_labeled_frame(parent: tk.Widget, text: str, padding: int = 10) -> ttk.LabelFrame:
+def create_labeled_frame(parent: tk.Widget, text: str, padding: int | None = None) -> ttk.LabelFrame:
     """Create labeled frame with consistent styling"""
+    if padding is None:
+        padding = get_padding()
     frame = ttk.LabelFrame(parent, text=text, padding=padding)
     return frame
 
@@ -135,21 +143,27 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
         canvas.configure(scrollregion=canvas.bbox("all"))
 
     def on_mousewheel(event: tk.Event) -> None:
-        canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        if sys.platform == "darwin":
+            delta = -event.delta
+        else:
+            delta = int(-1 * (event.delta / 120))
+
+        canvas.yview_scroll(delta, "units")
 
     def configure_canvas_window(event: tk.Event | None = None) -> None:
         canvas_width = canvas.winfo_width()
         if canvas_width > 1:
             canvas.itemconfig(canvas_window, width=canvas_width)
 
-    canvas = tk.Canvas(parent, highlightthickness=0, bg="white")
+    bg_color = _get_canvas_bg_color()
+    canvas = tk.Canvas(parent, highlightthickness=0, bg=bg_color)
     scrollbar = ttk.Scrollbar(parent, orient="vertical", command=canvas.yview)
     scrollable_frame = ttk.Frame(canvas)
 
     canvas.configure(yscrollcommand=scrollbar.set)
 
     scrollable_frame.bind("<Configure>", configure_scroll_region)
-    
+
     canvas.bind("<MouseWheel>", on_mousewheel)
     parent.bind("<MouseWheel>", on_mousewheel)
 
@@ -161,3 +175,19 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
     canvas.pack(side="left", fill="both", expand=True)
 
     return canvas, scrollable_frame, scrollbar
+
+
+def _get_canvas_bg_color() -> str:
+    """Get appropriate canvas background color based on system theme"""
+    if sys.platform == "darwin":
+        try:
+            style = ttk.Style()
+            bg_color = style.lookup("TFrame", "background")
+
+            if bg_color:
+                return bg_color
+
+        except Exception:
+            pass
+
+    return "white"

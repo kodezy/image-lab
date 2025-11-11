@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk
 from typing import Any
@@ -15,6 +16,15 @@ class ImagePanel:
     def __init__(self, parent: tk.Widget, app: Any) -> None:
         self.parent = parent
         self.app = app
+
+        self.zoom_factor: float = 1.0
+        self.pan_x: int = 0
+        self.pan_y: int = 0
+        self.photo_ref: ImageTk.PhotoImage | None = None
+        self.drag_start_x: int = 0
+        self.drag_start_y: int = 0
+        self.image_center_x: int = 0
+        self.image_center_y: int = 0
 
         self._initialize_state()
         self._create_frame()
@@ -93,6 +103,18 @@ class ImagePanel:
         self.image_center_x = 0
         self.image_center_y = 0
 
+    def _get_canvas_bg_color(self) -> str:
+        """Get appropriate canvas background color based on system theme"""
+        if sys.platform == "darwin":
+            try:
+                style = ttk.Style()
+                bg_color = style.lookup("TFrame", "background")
+                if bg_color:
+                    return bg_color
+            except Exception:
+                pass
+        return "white"
+
     def _create_frame(self) -> None:
         """Create image frame"""
         self.frame = create_labeled_frame(self.parent, "🖼️ Image Display")
@@ -116,7 +138,8 @@ class ImagePanel:
         canvas_frame.grid_rowconfigure(0, weight=1)
         canvas_frame.grid_columnconfigure(0, weight=1)
 
-        self.canvas = tk.Canvas(canvas_frame, bg="white", highlightthickness=1, highlightbackground="#ddd")
+        bg_color = self._get_canvas_bg_color()
+        self.canvas = tk.Canvas(canvas_frame, bg=bg_color, highlightthickness=0, borderwidth=0)
 
         h_scrollbar = ttk.Scrollbar(canvas_frame, orient="horizontal", command=self.canvas.xview)
         v_scrollbar = ttk.Scrollbar(canvas_frame, orient="vertical", command=self.canvas.yview)
@@ -153,7 +176,12 @@ class ImagePanel:
 
         old_zoom = self.zoom_factor
 
-        if event.delta > 0 or event.num == 4:
+        if sys.platform == "darwin":
+            delta = event.delta
+        else:
+            delta = event.delta if event.delta else (4 if event.num == 4 else 5)
+
+        if delta > 0 or (not sys.platform == "darwin" and event.num == 4):
             self.zoom_factor = min(self.zoom_factor * 1.1, 5.0)
         else:
             self.zoom_factor = max(self.zoom_factor / 1.1, 0.3)
