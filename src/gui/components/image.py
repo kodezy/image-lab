@@ -26,6 +26,10 @@ class ImagePanel:
         self.image_center_x: int = 0
         self.image_center_y: int = 0
 
+        self._last_canvas_width: int = 0
+        self._last_canvas_height: int = 0
+        self._cursor_text_id: int | None = None
+
         self._initialize_state()
         self._create_frame()
 
@@ -100,8 +104,13 @@ class ImagePanel:
         self.photo_ref = None
         self.drag_start_x = 0
         self.drag_start_y = 0
+        self.drag_initial_pan_x = 0
+        self.drag_initial_pan_y = 0
         self.image_center_x = 0
         self.image_center_y = 0
+        self._last_canvas_width = 0
+        self._last_canvas_height = 0
+        self._cursor_text_id = None
 
     def _get_canvas_bg_color(self) -> str:
         """Get appropriate canvas background color based on system theme"""
@@ -126,9 +135,17 @@ class ImagePanel:
         """Create image toolbar with controls"""
         toolbar_frame = ttk.Frame(self.frame)
         toolbar_frame.pack(fill=tk.X, pady=(0, 10))
+        toolbar_frame.grid_columnconfigure(0, weight=1)
+        toolbar_frame.grid_columnconfigure(1, weight=0, minsize=250)
 
-        self._create_status_section(toolbar_frame)
-        self._create_zoom_controls(toolbar_frame)
+        status_container = ttk.Frame(toolbar_frame)
+        status_container.grid(row=0, column=0, sticky="ew")
+
+        zoom_container = ttk.Frame(toolbar_frame)
+        zoom_container.grid(row=0, column=1, sticky="e")
+
+        self._create_status_section(status_container)
+        self._create_zoom_controls(zoom_container)
 
     def _create_canvas(self) -> None:
         """Create image canvas with scrollbars"""
@@ -169,6 +186,8 @@ class ImagePanel:
         self.canvas.bind("<Enter>", self._on_canvas_enter)
         self.canvas.bind("<Leave>", self._on_canvas_leave)
 
+        self.canvas.bind("<Configure>", self._on_canvas_resize)
+
     def _on_mouse_wheel(self, event) -> None:
         """Handle mouse wheel for zooming"""
         if self.app.processed_image is None:
@@ -192,7 +211,7 @@ class ImagePanel:
     def _on_mouse_move(self, event) -> None:
         """Handle mouse movement to show cursor position"""
         if self.app.processed_image is None:
-            self.cursor_position_label.config(text="", foreground="gray")
+            self._update_cursor_text("")
             return
 
         # Get canvas coordinates
@@ -207,9 +226,9 @@ class ImagePanel:
 
         # Show coordinates only when within image bounds
         if image_x >= 0 and image_y >= 0 and image_x < img_width and image_y < img_height:
-            self.cursor_position_label.config(text=f"Cursor: ({image_x}, {image_y})", foreground="purple")
+            self._update_cursor_text(f"({image_x}, {image_y})")
         else:
-            self.cursor_position_label.config(text="", foreground="purple")
+            self._update_cursor_text("")
 
     def _canvas_to_image_coordinates(self, canvas_x: int, canvas_y: int) -> tuple[int, int]:
         """Convert canvas coordinates to image coordinates"""
@@ -251,26 +270,49 @@ class ImagePanel:
     def _on_canvas_leave(self, event) -> None:
         """Handle mouse leaving canvas"""
         self.canvas.configure(cursor="")
-        self.cursor_position_label.config(text="", foreground="purple")
+        self._update_cursor_text("")
+
+    def _on_canvas_resize(self, event) -> None:
+        """Handle canvas resize - auto-fit if not zoomed in"""
+        if self.app.processed_image is None:
+            return
+
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+
+        if canvas_width <= 1 or canvas_height <= 1:
+            return
+
+        if self._last_canvas_width == canvas_width and self._last_canvas_height == canvas_height:
+            return
+
+        self._last_canvas_width = canvas_width
+        self._last_canvas_height = canvas_height
+
+        if self.zoom_factor <= 1.1:
+            self.fit_to_window()
+        elif self.app.processed_image is not None:
+            self._display_image(self.app.processed_image)
 
     def _start_drag(self, event) -> None:
         """Start dragging operation"""
         self.canvas.focus_set()
         self.drag_start_x = event.x
         self.drag_start_y = event.y
+        self.drag_initial_pan_x = self.pan_x
+        self.drag_initial_pan_y = self.pan_y
         self.canvas.configure(cursor="fleur")
 
     def _do_drag(self, event) -> None:
         """Perform drag operation"""
-        if hasattr(self, "drag_start_x"):
-            dx = event.x - self.drag_start_x
-            dy = event.y - self.drag_start_y
+        if not hasattr(self, "drag_start_x"):
+            return
 
-            self.pan_x += dx
-            self.pan_y += dy
+        dx = event.x - self.drag_start_x
+        dy = event.y - self.drag_start_y
 
-        self.drag_start_x = event.x
-        self.drag_start_y = event.y
+        self.pan_x = self.drag_initial_pan_x + dx
+        self.pan_y = self.drag_initial_pan_y + dy
 
         if self.app.processed_image is not None:
             self._display_image(self.app.processed_image)
@@ -294,9 +336,6 @@ class ImagePanel:
         self.image_info_label = ttk.Label(status_frame, text="", foreground="blue")
         self.image_info_label.pack(side=tk.LEFT, padx=(20, 0))
 
-        self.cursor_position_label = ttk.Label(status_frame, text="", foreground="purple")
-        self.cursor_position_label.pack(side=tk.LEFT, padx=(20, 0))
-
     def _create_zoom_controls(self, parent: ttk.Frame) -> None:
         """Create zoom control buttons"""
         zoom_frame = ttk.Frame(parent)
@@ -314,9 +353,9 @@ class ImagePanel:
         """Clear image display"""
         self.canvas.delete("all")
         self.photo_ref = None
+        self._cursor_text_id = None
         self.status_label.config(text="No image loaded", foreground="gray")
         self.image_info_label.config(text="")
-        self.cursor_position_label.config(text="", foreground="gray")
 
     def _update_image_info(self, image: np.ndarray) -> None:
         """Update image information display"""
@@ -340,7 +379,6 @@ class ImagePanel:
 
         self.image_info_label.config(text=info_text, foreground="blue")
         self.status_label.config(text="Image loaded", foreground="green")
-        self.cursor_position_label.config(text="", foreground="purple")
 
     def _display_image(self, image: np.ndarray) -> None:
         """Display image on canvas with clean positioning"""
@@ -352,8 +390,17 @@ class ImagePanel:
         pil_image = Image.fromarray(display_image)
         self.photo_ref = ImageTk.PhotoImage(pil_image)
 
+        # Save cursor text before clearing
+        saved_cursor_text = ""
+        if self._cursor_text_id is not None:
+            try:
+                saved_cursor_text = self.canvas.itemcget(self._cursor_text_id, "text")
+            except tk.TclError:
+                pass
+
         # Clear canvas
         self.canvas.delete("all")
+        self._cursor_text_id = None
 
         # Get dimensions
         canvas_width = self.canvas.winfo_width() or 600
@@ -364,9 +411,16 @@ class ImagePanel:
         self.image_center_x = canvas_width // 2
         self.image_center_y = canvas_height // 2
 
-        # Calculate pan limits
-        max_pan_x = max(0, (img_w - canvas_width) // 2)
-        max_pan_y = max(0, (img_h - canvas_height) // 2)
+        # Calculate pan limits based on image size vs canvas size
+        if img_w > canvas_width:
+            max_pan_x = (img_w - canvas_width) // 2
+        else:
+            max_pan_x = 0
+
+        if img_h > canvas_height:
+            max_pan_y = (img_h - canvas_height) // 2
+        else:
+            max_pan_y = 0
 
         # Apply pan limits
         self.pan_x = max(-max_pan_x, min(max_pan_x, self.pan_x))
@@ -381,6 +435,10 @@ class ImagePanel:
         # Update scroll region and zoom display
         self._update_scroll_region(display_image, image_x, image_y)
         self._update_zoom_display()
+
+        # Restore cursor text if it existed
+        if saved_cursor_text:
+            self._update_cursor_text(saved_cursor_text)
 
     def _prepare_display_image(self, image: np.ndarray) -> np.ndarray | None:
         """Prepare image for display with zoom"""
@@ -429,3 +487,15 @@ class ImagePanel:
         """Update zoom percentage display"""
         zoom_percent = int(self.zoom_factor * 100)
         self.zoom_label.config(text=f"{zoom_percent}%")
+
+    def _update_cursor_text(self, text: str) -> None:
+        """Update cursor position text on canvas"""
+        if self._cursor_text_id is not None:
+            self.canvas.delete(self._cursor_text_id)
+            self._cursor_text_id = None
+
+        if text:
+            text_id = self.canvas.create_text(
+                10, 10, anchor=tk.NW, text=text, fill="#00ff41", font=("Courier", 10, "bold")
+            )
+            self._cursor_text_id = text_id

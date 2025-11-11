@@ -36,8 +36,8 @@ def get_shortcuts_text() -> str:
     {mod}+Shift+S - Save Config
 
     View Operations:
-    {mod}++ - Zoom In
-    {mod}+- - Zoom Out
+    {mod}++ Zoom In
+    {mod}+- Zoom Out
     {mod}+0 - Reset Zoom
     {mod}+F - Fit to Window
 
@@ -103,6 +103,7 @@ class MenuBar:
         self.parent.bind("<F5>", lambda e: self.app.update_image_display())
 
         self.parent.bind(f"<{mod}-plus>", lambda e: self._zoom_in())
+        self.parent.bind(f"<{mod}-equal>", lambda e: self._zoom_in())
         self.parent.bind(f"<{mod}-minus>", lambda e: self._zoom_out())
         self.parent.bind(f"<{mod}-0>", lambda e: self._reset_zoom())
         self.parent.bind(f"<{mod}-f>", lambda e: self._fit_to_window())

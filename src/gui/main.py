@@ -227,7 +227,7 @@ class ImageLabGUI:
         """Initialize main window"""
         self.root = tk.Tk()
         self.root.title("Image Lab")
-        self.root.minsize(800, 600)
+        self.root.minsize(1000, 600)
 
         self.root.geometry(f"{self._window_width}x{self._window_height}")
         self._center_window()
