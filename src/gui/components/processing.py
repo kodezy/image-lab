@@ -645,7 +645,7 @@ class ProcessingPanel:
             threshold_frame,
             "Threshold Type",
             self.threshold_type_var,
-            ["BINARY", "OTSU_BINARY", "ADAPTIVE_MEAN", "ADAPTIVE_GAUSSIAN"],
+            ["BINARY", "BINARY_INV", "OTSU_BINARY", "ADAPTIVE_MEAN", "ADAPTIVE_GAUSSIAN"],
             self._on_threshold_type_changed,
         )
         threshold_type_frame.pack(fill=tk.X, pady=1)

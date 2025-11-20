@@ -179,7 +179,7 @@ class ProcessingConfig(Config):
 
     # Thresholding
     threshold_enabled: bool = False
-    threshold_type: Literal["BINARY", "OTSU_BINARY", "ADAPTIVE_MEAN", "ADAPTIVE_GAUSSIAN"] = "BINARY"
+    threshold_type: Literal["BINARY", "BINARY_INV", "OTSU_BINARY", "ADAPTIVE_MEAN", "ADAPTIVE_GAUSSIAN"] = "BINARY"
     threshold_value: int = 127
     adaptive_block_size: int = 11
     adaptive_c: int = 2

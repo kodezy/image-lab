@@ -376,6 +376,9 @@ def _apply_threshold(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
         case "BINARY":
             _, image = cv2.threshold(image, config.threshold_value, 255, cv2.THRESH_BINARY)
 
+        case "BINARY_INV":
+            _, image = cv2.threshold(image, config.threshold_value, 255, cv2.THRESH_BINARY_INV)
+
         case "OTSU_BINARY":
             if image.size > 0 and len(np.unique(image)) > 1:
                 _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
