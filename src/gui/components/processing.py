@@ -708,7 +708,7 @@ class ProcessingPanel:
         self._update_binary_dependent_controls()
         self.app.update_image_display()
 
-    def _on_threshold_type_changed(self) -> None:
+    def _on_threshold_type_changed(self, value: str | None = None) -> None:
         """Handle threshold type change"""
         self.app.processing_config.threshold_type = self.threshold_type_var.get()
         self.app.update_image_display()
