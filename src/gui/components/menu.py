@@ -30,6 +30,7 @@ def get_shortcuts_text() -> str:
     File Operations:
     {mod}+N - New Capture
     {mod}+O - Load Image
+    {mod}+V - Load from Clipboard
     {mod}+S - Save Image
     {mod}+L - Load Config
     {mod}+Shift+R - Reset Configs
@@ -74,6 +75,9 @@ class MenuBar:
         file_menu.add_separator()
 
         file_menu.add_command(label="Load Image...", command=self.app.load_image_file, accelerator=f"{mod}+O")
+        file_menu.add_command(
+            label="Load from Clipboard", command=self.app.load_image_from_clipboard, accelerator=f"{mod}+V"
+        )
         file_menu.add_command(label="Save Image...", command=self.app.save_image_file, accelerator=f"{mod}+S")
         file_menu.add_separator()
 
@@ -96,6 +100,7 @@ class MenuBar:
 
         self.parent.bind(f"<{mod}-n>", lambda e: self.app.capture_new_image())
         self.parent.bind(f"<{mod}-o>", lambda e: self.app.load_image_file())
+        self.parent.bind(f"<{mod}-v>", lambda e: self.app.load_image_from_clipboard())
         self.parent.bind(f"<{mod}-s>", lambda e: self.app.save_image_file())
         self.parent.bind(f"<{mod}-l>", lambda e: self.app.load_config_file())
         self.parent.bind(f"<{mod}-Shift-R>", lambda e: self.app.reset_configs())

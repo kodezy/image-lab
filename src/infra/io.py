@@ -5,6 +5,7 @@ from typing import Any
 
 import cv2
 import numpy as np
+from PIL import Image, ImageGrab
 
 
 def save_image(image: np.ndarray, filename: str) -> bool:
@@ -41,6 +42,24 @@ def load_image(filename: str) -> np.ndarray | None:
             file_bytes = np.frombuffer(file.read(), dtype=np.uint8)
             image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
             return image
+
+    except Exception:
+        return None
+
+
+def load_image_from_clipboard() -> np.ndarray | None:
+    """Load image from clipboard"""
+    try:
+        clipboard_image = ImageGrab.grabclipboard()
+
+        if clipboard_image is None:
+            return None
+
+        if not isinstance(clipboard_image, Image.Image):
+            return None
+
+        image_array = np.array(clipboard_image)
+        return cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
 
     except Exception:
         return None

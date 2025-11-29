@@ -15,7 +15,7 @@ from src.gui.components.menu import MenuBar
 from src.gui.components.ocr import OCRPanel
 from src.gui.components.processing import ProcessingPanel
 from src.gui.utils import get_padding, show_error, show_success
-from src.infra.io import load_image, load_json, save_image, save_json
+from src.infra.io import load_image, load_image_from_clipboard, load_json, save_image, save_json
 
 APP_ICON_PATH = "assets/app.ico"
 
@@ -98,6 +98,21 @@ class ImageLabGUI:
 
         except Exception as exception:
             show_error(f"Load failed: {exception}")
+
+    def load_image_from_clipboard(self) -> None:
+        """Load image from clipboard"""
+        try:
+            image = load_image_from_clipboard()
+
+            if image is not None:
+                self.current_image = image
+                self.update_image_display()
+                self.image_panel.reset_zoom()
+            else:
+                show_error("No image found in clipboard")
+
+        except Exception as exception:
+            show_error(f"Clipboard load failed: {exception}")
 
     def save_image_file(self, filename: str | None = None) -> None:
         """Save processed image to file"""
