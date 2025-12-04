@@ -5,3 +5,4 @@ pyautogui
 paddleocr
 paddlepaddle
 pytesseract
+easyocr

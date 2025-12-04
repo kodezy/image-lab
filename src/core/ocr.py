@@ -1,11 +1,12 @@
 from typing import Any, Protocol
 
 import cv2
+import easyocr
 import numpy as np
 import pytesseract
 from paddleocr import PaddleOCR
 
-from src.config import OCRConfig, PaddleOCRConfig, TesseractConfig
+from src.config import EasyOCRConfig, OCRConfig, PaddleOCRConfig, TesseractConfig
 from src.infra.cache import ocr_cache
 
 
@@ -124,6 +125,72 @@ class TesseractOCRWrapper:
         ]
 
 
+class EasyOCRWrapper:
+    def __init__(self, config: EasyOCRConfig) -> None:
+        self._config = config
+        self._reader = easyocr.Reader(
+            lang_list=config.lang_list,
+            gpu=config.gpu,
+            model_storage_directory=config.model_storage_directory,
+            download_enabled=config.download_enabled,
+            user_network_directory=config.user_network_directory,
+            recog_network=config.recog_network,
+            detector=config.detector,
+            recognizer=config.recognizer,
+        )
+
+    def predict(self, image: np.ndarray) -> Any:
+        results = self._reader.readtext(
+            image,
+            decoder=self._config.decoder,
+            beamWidth=self._config.beam_width,
+            batch_size=self._config.batch_size,
+            workers=self._config.workers,
+            allowlist=self._config.allowlist,
+            blocklist=self._config.blocklist,
+            detail=self._config.detail,
+            paragraph=self._config.paragraph,
+            min_size=self._config.min_size,
+            rotation_info=self._config.rotation_info,
+            contrast_ths=self._config.contrast_ths,
+            adjust_contrast=self._config.adjust_contrast,
+            text_threshold=self._config.text_threshold,
+            low_text=self._config.low_text,
+            link_threshold=self._config.link_threshold,
+            canvas_size=self._config.canvas_size,
+            mag_ratio=self._config.mag_ratio,
+            slope_ths=self._config.slope_ths,
+            ycenter_ths=self._config.ycenter_ths,
+            height_ths=self._config.height_ths,
+            width_ths=self._config.width_ths,
+            add_margin=self._config.add_margin,
+            x_ths=self._config.x_ths,
+            y_ths=self._config.y_ths,
+        )
+
+        texts = []
+        scores = []
+        boxes = []
+
+        for result in results:
+            if len(result) >= 3:
+                box_coords = result[0]
+                text = result[1]
+                confidence = result[2]
+
+                texts.append(text)
+                scores.append(float(confidence))
+                boxes.append(box_coords)
+
+        return [
+            {
+                "rec_texts": texts,
+                "rec_scores": scores,
+                "det_boxes": boxes,
+            },
+        ]
+
+
 @ocr_cache(max_size=16)
 def create_ocr(config: OCRConfig | None = None) -> OCRProtocol:
     if config is None:
@@ -131,5 +198,8 @@ def create_ocr(config: OCRConfig | None = None) -> OCRProtocol:
 
     if config.ocr_type == "tesseract":
         return TesseractOCRWrapper(config.tesseract_config)
+
+    if config.ocr_type == "easyocr":
+        return EasyOCRWrapper(config.easyocr_config)
 
     return PaddleOCRWrapper(config.paddleocr_config)

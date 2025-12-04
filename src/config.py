@@ -75,12 +75,55 @@ class TesseractConfig(Config):
 
 
 @dataclass
-class OCRConfig(Config):
-    """OCR configuration supporting PaddleOCR and Tesseract"""
+class EasyOCRConfig(Config):
+    """EasyOCR configuration"""
 
-    ocr_type: Literal["paddleocr", "tesseract"] = "paddleocr"
+    lang_list: list[str] = field(default_factory=lambda: ["en"])
+    gpu: bool | str = True
+    model_storage_directory: str | None = None
+    download_enabled: bool = True
+    user_network_directory: str | None = None
+    recog_network: str = "standard"
+    detector: bool = True
+    recognizer: bool = True
+
+    decoder: str = "greedy"
+    beam_width: int = 5
+    batch_size: int = 1
+    workers: int = 0
+    allowlist: str | None = None
+    blocklist: str | None = None
+    detail: int = 1
+    paragraph: bool = False
+    min_size: int = 10
+    rotation_info: list[int] | None = None
+
+    contrast_ths: float = 0.1
+    adjust_contrast: float = 0.5
+
+    text_threshold: float = 0.7
+    low_text: float = 0.4
+    link_threshold: float = 0.4
+    canvas_size: int = 2560
+    mag_ratio: float = 1.0
+
+    slope_ths: float = 0.1
+    ycenter_ths: float = 0.5
+    height_ths: float = 0.5
+    width_ths: float = 0.5
+    add_margin: float = 0.1
+    x_ths: float = 1.0
+    y_ths: float = 0.5
+
+
+@dataclass
+class OCRConfig(Config):
+    """OCR configuration supporting PaddleOCR, Tesseract and EasyOCR"""
+
+    ocr_type: Literal["paddleocr", "tesseract", "easyocr"] = "paddleocr"
     paddleocr_config: PaddleOCRConfig = field(default_factory=PaddleOCRConfig)
     tesseract_config: TesseractConfig = field(default_factory=TesseractConfig)
+    easyocr_config: EasyOCRConfig = field(default_factory=EasyOCRConfig)
 
     def update_from_dict(self, data: dict[str, Any]) -> None:
         """Update config from dictionary"""
@@ -89,6 +132,8 @@ class OCRConfig(Config):
                 self.paddleocr_config.update_from_dict(value)
             elif key == "tesseract_config" and isinstance(value, dict):
                 self.tesseract_config.update_from_dict(value)
+            elif key == "easyocr_config" and isinstance(value, dict):
+                self.easyocr_config.update_from_dict(value)
             elif hasattr(self, key):
                 setattr(self, key, value)
 

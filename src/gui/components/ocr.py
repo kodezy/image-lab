@@ -74,13 +74,33 @@ class OCRPanel:
             self.enable_mkldnn_var.set(paddle_config.enable_mkldnn)
             self.textline_orientation_batch_var.set(paddle_config.textline_orientation_batch_size)
 
-        else:
+        elif ocr_config.ocr_type == "tesseract":
             tesseract_config = ocr_config.tesseract_config
 
             self.tesseract_lang_var.set(tesseract_config.lang)
             self.psm_var.set(tesseract_config.psm)
             self.oem_var.set(tesseract_config.oem)
             self.tesseract_config_var.set(tesseract_config.config)
+
+        else:
+            easyocr_config = ocr_config.easyocr_config
+
+            self.easyocr_lang_var.set(",".join(easyocr_config.lang_list))
+            self.easyocr_gpu_var.set(bool(easyocr_config.gpu) if isinstance(easyocr_config.gpu, bool) else True)
+            self.easyocr_gpu_str_var.set(str(easyocr_config.gpu) if isinstance(easyocr_config.gpu, str) else "")
+            self.easyocr_decoder_var.set(easyocr_config.decoder)
+            self.easyocr_beam_width_var.set(easyocr_config.beam_width)
+            self.easyocr_batch_size_var.set(easyocr_config.batch_size)
+            self.easyocr_workers_var.set(easyocr_config.workers)
+            self.easyocr_paragraph_var.set(easyocr_config.paragraph)
+            self.easyocr_min_size_var.set(easyocr_config.min_size)
+            self.easyocr_text_threshold_var.set(easyocr_config.text_threshold)
+            self.easyocr_low_text_var.set(easyocr_config.low_text)
+            self.easyocr_link_threshold_var.set(easyocr_config.link_threshold)
+            self.easyocr_canvas_size_var.set(easyocr_config.canvas_size)
+            self.easyocr_mag_ratio_var.set(easyocr_config.mag_ratio)
+            self.easyocr_contrast_ths_var.set(easyocr_config.contrast_ths)
+            self.easyocr_adjust_contrast_var.set(easyocr_config.adjust_contrast)
 
         self._update_visible_settings()
 
@@ -118,6 +138,28 @@ class OCRPanel:
         self.oem_var = tk.IntVar(value=tesseract_config.oem)
         self.tesseract_config_var = tk.StringVar(value=tesseract_config.config)
 
+        easyocr_config = ocr_config.easyocr_config
+        self.easyocr_lang_var = tk.StringVar(value=",".join(easyocr_config.lang_list))
+        self.easyocr_gpu_var = tk.BooleanVar(
+            value=bool(easyocr_config.gpu) if isinstance(easyocr_config.gpu, bool) else True,
+        )
+        self.easyocr_gpu_str_var = tk.StringVar(
+            value=str(easyocr_config.gpu) if isinstance(easyocr_config.gpu, str) else "",
+        )
+        self.easyocr_decoder_var = tk.StringVar(value=easyocr_config.decoder)
+        self.easyocr_beam_width_var = tk.IntVar(value=easyocr_config.beam_width)
+        self.easyocr_batch_size_var = tk.IntVar(value=easyocr_config.batch_size)
+        self.easyocr_workers_var = tk.IntVar(value=easyocr_config.workers)
+        self.easyocr_paragraph_var = tk.BooleanVar(value=easyocr_config.paragraph)
+        self.easyocr_min_size_var = tk.IntVar(value=easyocr_config.min_size)
+        self.easyocr_text_threshold_var = tk.DoubleVar(value=easyocr_config.text_threshold)
+        self.easyocr_low_text_var = tk.DoubleVar(value=easyocr_config.low_text)
+        self.easyocr_link_threshold_var = tk.DoubleVar(value=easyocr_config.link_threshold)
+        self.easyocr_canvas_size_var = tk.IntVar(value=easyocr_config.canvas_size)
+        self.easyocr_mag_ratio_var = tk.DoubleVar(value=easyocr_config.mag_ratio)
+        self.easyocr_contrast_ths_var = tk.DoubleVar(value=easyocr_config.contrast_ths)
+        self.easyocr_adjust_contrast_var = tk.DoubleVar(value=easyocr_config.adjust_contrast)
+
     def _create_frame(self) -> None:
         """Create OCR frame"""
         self.frame = ttk.Frame(self.parent)
@@ -153,7 +195,7 @@ class OCRPanel:
             scrollable_frame,
             "OCR Engine",
             self.ocr_type_var,
-            ["paddleocr", "tesseract"],
+            ["paddleocr", "tesseract", "easyocr"],
             self._on_ocr_type_changed,
         )
         ocr_type_frame.pack(fill=tk.X, pady=(0, 5))
@@ -163,6 +205,9 @@ class OCRPanel:
 
         self.tesseract_frame = ttk.Frame(scrollable_frame)
         self._create_tesseract_settings(self.tesseract_frame)
+
+        self.easyocr_frame = ttk.Frame(scrollable_frame)
+        self._create_easyocr_settings(self.easyocr_frame)
 
         self._update_visible_settings()
 
@@ -377,16 +422,173 @@ class OCRPanel:
         self.tesseract_config_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(10, 0))
         self.tesseract_config_entry.bind("<KeyRelease>", self._on_tesseract_config_changed)
 
+    def _create_easyocr_settings(self, parent: ttk.Frame) -> None:
+        """Create EasyOCR specific settings"""
+        lang_frame = ttk.Frame(parent)
+        lang_frame.pack(fill=tk.X, pady=(0, 5))
+        lang_label = ttk.Label(lang_frame, text="Languages (comma-separated):")
+        lang_label.pack(side=tk.LEFT)
+        self.easyocr_lang_entry = ttk.Entry(lang_frame, textvariable=self.easyocr_lang_var, width=20)
+        self.easyocr_lang_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(10, 0))
+        self.easyocr_lang_entry.bind("<KeyRelease>", self._on_easyocr_lang_changed)
+
+        gpu_frame = ttk.Frame(parent)
+        gpu_frame.pack(fill=tk.X, pady=(0, 5))
+        self.easyocr_gpu_checkbox = ttk.Checkbutton(
+            gpu_frame,
+            text="Enable GPU",
+            variable=self.easyocr_gpu_var,
+            command=self._on_easyocr_gpu_changed,
+        )
+        self.easyocr_gpu_checkbox.pack(anchor=tk.W)
+
+        decoder_frame, self.easyocr_decoder_combobox = create_combobox(
+            parent,
+            "Decoder",
+            self.easyocr_decoder_var,
+            ["greedy", "beamsearch", "wordbeamsearch"],
+            self._on_easyocr_decoder_changed,
+        )
+        decoder_frame.pack(fill=tk.X, pady=(0, 5))
+
+        beam_width_frame, self.easyocr_beam_width_spinbox = create_spinbox(
+            parent,
+            "Beam Width",
+            self.easyocr_beam_width_var,
+            1,
+            20,
+            self._on_easyocr_beam_width_changed,
+        )
+        beam_width_frame.pack(fill=tk.X, pady=(0, 5))
+
+        batch_size_frame, self.easyocr_batch_size_spinbox = create_spinbox(
+            parent,
+            "Batch Size",
+            self.easyocr_batch_size_var,
+            1,
+            32,
+            self._on_easyocr_batch_size_changed,
+        )
+        batch_size_frame.pack(fill=tk.X, pady=(0, 5))
+
+        workers_frame, self.easyocr_workers_spinbox = create_spinbox(
+            parent,
+            "Workers",
+            self.easyocr_workers_var,
+            0,
+            16,
+            self._on_easyocr_workers_changed,
+        )
+        workers_frame.pack(fill=tk.X, pady=(0, 5))
+
+        paragraph_frame = ttk.Frame(parent)
+        paragraph_frame.pack(fill=tk.X, pady=(0, 5))
+        self.easyocr_paragraph_checkbox = ttk.Checkbutton(
+            paragraph_frame,
+            text="Paragraph Mode",
+            variable=self.easyocr_paragraph_var,
+            command=self._on_easyocr_paragraph_changed,
+        )
+        self.easyocr_paragraph_checkbox.pack(anchor=tk.W)
+
+        min_size_frame, self.easyocr_min_size_spinbox = create_spinbox(
+            parent,
+            "Min Size",
+            self.easyocr_min_size_var,
+            1,
+            100,
+            self._on_easyocr_min_size_changed,
+        )
+        min_size_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
+
+        text_threshold_frame, _, _ = create_slider(
+            parent,
+            "Text Threshold",
+            self.easyocr_text_threshold_var,
+            0.1,
+            0.9,
+            self._on_easyocr_text_threshold_changed,
+        )
+        text_threshold_frame.pack(fill=tk.X, pady=(0, 5))
+
+        low_text_frame, _, _ = create_slider(
+            parent,
+            "Low Text",
+            self.easyocr_low_text_var,
+            0.1,
+            0.9,
+            self._on_easyocr_low_text_changed,
+        )
+        low_text_frame.pack(fill=tk.X, pady=(0, 5))
+
+        link_threshold_frame, _, _ = create_slider(
+            parent,
+            "Link Threshold",
+            self.easyocr_link_threshold_var,
+            0.1,
+            0.9,
+            self._on_easyocr_link_threshold_changed,
+        )
+        link_threshold_frame.pack(fill=tk.X, pady=(0, 5))
+
+        canvas_size_frame, self.easyocr_canvas_size_spinbox = create_spinbox(
+            parent,
+            "Canvas Size",
+            self.easyocr_canvas_size_var,
+            512,
+            4096,
+            self._on_easyocr_canvas_size_changed,
+        )
+        canvas_size_frame.pack(fill=tk.X, pady=(0, 5))
+
+        mag_ratio_frame, _, _ = create_slider(
+            parent,
+            "Magnification Ratio",
+            self.easyocr_mag_ratio_var,
+            0.5,
+            2.0,
+            self._on_easyocr_mag_ratio_changed,
+        )
+        mag_ratio_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
+
+        contrast_ths_frame, _, _ = create_slider(
+            parent,
+            "Contrast Threshold",
+            self.easyocr_contrast_ths_var,
+            0.0,
+            1.0,
+            self._on_easyocr_contrast_ths_changed,
+        )
+        contrast_ths_frame.pack(fill=tk.X, pady=(0, 5))
+
+        adjust_contrast_frame, _, _ = create_slider(
+            parent,
+            "Adjust Contrast",
+            self.easyocr_adjust_contrast_var,
+            0.0,
+            1.0,
+            self._on_easyocr_adjust_contrast_changed,
+        )
+        adjust_contrast_frame.pack(fill=tk.X, pady=(0, 5))
+
     def _update_visible_settings(self) -> None:
         """Update visible settings based on OCR type"""
         ocr_type = self.ocr_type_var.get()
 
+        self.paddleocr_frame.pack_forget()
+        self.tesseract_frame.pack_forget()
+        self.easyocr_frame.pack_forget()
+
         if ocr_type == "paddleocr":
-            self.tesseract_frame.pack_forget()
             self.paddleocr_frame.pack(fill=tk.X, anchor=tk.NW)
-        else:
-            self.paddleocr_frame.pack_forget()
+        elif ocr_type == "tesseract":
             self.tesseract_frame.pack(fill=tk.X, anchor=tk.NW)
+        else:
+            self.easyocr_frame.pack(fill=tk.X, anchor=tk.NW)
 
         def update_layout():
             self.scrollable_frame.update_idletasks()
@@ -515,6 +717,87 @@ class OCRPanel:
     def _on_tesseract_config_changed(self, event) -> None:
         """Handle Tesseract config string change"""
         self.app.ocr_config.tesseract_config.config = self.tesseract_config_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_lang_changed(self, event) -> None:
+        """Handle EasyOCR language change"""
+        lang_str = self.easyocr_lang_var.get()
+        lang_list = [lang.strip() for lang in lang_str.split(",") if lang.strip()]
+        self.app.ocr_config.easyocr_config.lang_list = lang_list if lang_list else ["en"]
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_gpu_changed(self) -> None:
+        """Handle EasyOCR GPU change"""
+        if self.easyocr_gpu_var.get():
+            gpu_str = self.easyocr_gpu_str_var.get()
+            self.app.ocr_config.easyocr_config.gpu = gpu_str if gpu_str else True
+        else:
+            self.app.ocr_config.easyocr_config.gpu = False
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_decoder_changed(self, value) -> None:
+        """Handle EasyOCR decoder change"""
+        self.app.ocr_config.easyocr_config.decoder = self.easyocr_decoder_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_beam_width_changed(self) -> None:
+        """Handle EasyOCR beam width change"""
+        self.app.ocr_config.easyocr_config.beam_width = self.easyocr_beam_width_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_batch_size_changed(self) -> None:
+        """Handle EasyOCR batch size change"""
+        self.app.ocr_config.easyocr_config.batch_size = self.easyocr_batch_size_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_workers_changed(self) -> None:
+        """Handle EasyOCR workers change"""
+        self.app.ocr_config.easyocr_config.workers = self.easyocr_workers_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_paragraph_changed(self) -> None:
+        """Handle EasyOCR paragraph change"""
+        self.app.ocr_config.easyocr_config.paragraph = self.easyocr_paragraph_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_min_size_changed(self) -> None:
+        """Handle EasyOCR min size change"""
+        self.app.ocr_config.easyocr_config.min_size = self.easyocr_min_size_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_text_threshold_changed(self, value) -> None:
+        """Handle EasyOCR text threshold change"""
+        self.app.ocr_config.easyocr_config.text_threshold = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_low_text_changed(self, value) -> None:
+        """Handle EasyOCR low text change"""
+        self.app.ocr_config.easyocr_config.low_text = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_link_threshold_changed(self, value) -> None:
+        """Handle EasyOCR link threshold change"""
+        self.app.ocr_config.easyocr_config.link_threshold = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_canvas_size_changed(self) -> None:
+        """Handle EasyOCR canvas size change"""
+        self.app.ocr_config.easyocr_config.canvas_size = self.easyocr_canvas_size_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_mag_ratio_changed(self, value) -> None:
+        """Handle EasyOCR magnification ratio change"""
+        self.app.ocr_config.easyocr_config.mag_ratio = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_contrast_ths_changed(self, value) -> None:
+        """Handle EasyOCR contrast threshold change"""
+        self.app.ocr_config.easyocr_config.contrast_ths = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_easyocr_adjust_contrast_changed(self, value) -> None:
+        """Handle EasyOCR adjust contrast change"""
+        self.app.ocr_config.easyocr_config.adjust_contrast = round(float(value), 3)
         self._invalidate_ocr_instance()
 
     def _invalidate_ocr_instance(self) -> None:
