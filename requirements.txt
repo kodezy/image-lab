@@ -4,3 +4,4 @@ pillow
 pyautogui
 paddleocr
 paddlepaddle
+pytesseract

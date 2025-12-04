@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 
@@ -22,15 +22,13 @@ class CaptureConfig(Config):
 
 
 @dataclass
-class OCRConfig(Config):
+class PaddleOCRConfig(Config):
     """PaddleOCR configuration based on official documentation"""
 
-    # Model and version
     ocr_version: Literal["PP-OCRv5", "PP-OCRv4", "PP-OCRv3"] = "PP-OCRv5"
-    lang: str = "en"  # ch, en, etc.
-    device: str = "cpu"  # cpu, gpu:0, npu:0, xpu:0, mlu:0, dcu:0
+    lang: str = "en"
+    device: str = "cpu"
 
-    # Model customization
     doc_orientation_classify_model_name: str | None = None
     doc_orientation_classify_model_dir: str | None = None
     doc_unwarping_model_name: str | None = None
@@ -42,12 +40,10 @@ class OCRConfig(Config):
     text_recognition_model_name: str | None = None
     text_recognition_model_dir: str | None = None
 
-    # Module control
     use_doc_orientation_classify: bool = False
     use_doc_unwarping: bool = False
     use_textline_orientation: bool = False
 
-    # Text detection
     text_det_limit_side_len: int = 960
     text_det_limit_type: Literal["min", "max"] = "max"
     text_det_thresh: float = 0.3
@@ -55,19 +51,46 @@ class OCRConfig(Config):
     text_det_unclip_ratio: float = 1.5
     text_det_input_shape: tuple[int, int] | None = None
 
-    # Text recognition
     text_rec_score_thresh: float = 0.5
     text_recognition_batch_size: int = 6
     text_rec_input_shape: tuple[int, int] | None = None
     textline_orientation_batch_size: int = 1
 
-    # Performance
     enable_hpi: bool = False
     enable_mkldnn: bool = True
     mkldnn_cache_capacity: int = 10
     cpu_threads: int = 8
     use_tensorrt: bool = False
-    precision: str = "fp32"  # fp32, fp16
+    precision: str = "fp32"
+
+
+@dataclass
+class TesseractConfig(Config):
+    """Tesseract OCR configuration"""
+
+    lang: str = "eng"
+    psm: int = 3
+    oem: Literal[0, 1, 2, 3] = 1
+    config: str = ""
+
+
+@dataclass
+class OCRConfig(Config):
+    """OCR configuration supporting PaddleOCR and Tesseract"""
+
+    ocr_type: Literal["paddleocr", "tesseract"] = "paddleocr"
+    paddleocr_config: PaddleOCRConfig = field(default_factory=PaddleOCRConfig)
+    tesseract_config: TesseractConfig = field(default_factory=TesseractConfig)
+
+    def update_from_dict(self, data: dict[str, Any]) -> None:
+        """Update config from dictionary"""
+        for key, value in data.items():
+            if key == "paddleocr_config" and isinstance(value, dict):
+                self.paddleocr_config.update_from_dict(value)
+            elif key == "tesseract_config" and isinstance(value, dict):
+                self.tesseract_config.update_from_dict(value)
+            elif hasattr(self, key):
+                setattr(self, key, value)
 
 
 @dataclass

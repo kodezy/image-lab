@@ -1,13 +1,15 @@
 import sys
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 import cv2
 import numpy as np
+from PIL import Image, ImageTk
 
 from src.config import CaptureConfig, OCRConfig, ProcessingConfig
 from src.core.capture import capture_image
-from src.core.ocr import PaddleOCR, create_ocr
+from src.core.ocr import OCRProtocol, create_ocr
 from src.core.processing import process_image
 from src.gui.components.capture import CapturePanel
 from src.gui.components.image import ImagePanel
@@ -17,7 +19,10 @@ from src.gui.components.processing import ProcessingPanel
 from src.gui.utils import get_padding, show_error, show_success
 from src.infra.io import load_image, load_image_from_clipboard, load_json, save_image, save_json
 
-APP_ICON_PATH = "assets/app.ico"
+def get_icon_path() -> Path | None:
+    project_root = Path(__file__).parent.parent.parent
+    icon_path = project_root / "assets" / "app.ico"
+    return icon_path if icon_path.exists() else None
 
 
 class ImageLabGUI:
@@ -29,7 +34,7 @@ class ImageLabGUI:
 
         self.current_image: np.ndarray | None = None
         self.processed_image: np.ndarray | None = None
-        self.ocr_instance: PaddleOCR | None = None
+        self.ocr_instance: OCRProtocol | None = None
 
         self._initialize_window()
         self._initialize_configs()
@@ -273,13 +278,24 @@ class ImageLabGUI:
 
     def _set_window_icon(self) -> None:
         """Set window icon"""
+        icon_path = get_icon_path()
+        if not icon_path:
+            return
+
         try:
-            if APP_ICON_PATH.lower().endswith(".ico"):
-                self.root.iconbitmap(APP_ICON_PATH)
-            else:
-                icon = tk.PhotoImage(file=APP_ICON_PATH)
-                self.root.iconphoto(True, icon)
+            if sys.platform == "darwin":
+                pil_image = Image.open(str(icon_path))
+                icon = ImageTk.PhotoImage(pil_image)
+                self.root.iconphoto(True, icon)  # type: ignore
                 self._app_icon_image = icon
+            else:
+                if str(icon_path).lower().endswith(".ico"):
+                    self.root.iconbitmap(str(icon_path))
+                else:
+                    pil_image = Image.open(str(icon_path))
+                    icon = ImageTk.PhotoImage(pil_image)
+                    self.root.iconphoto(True, icon)
+                    self._app_icon_image = icon
         except Exception:
             pass
 
