@@ -1,7 +1,8 @@
 import sys
 import tkinter as tk
+from collections.abc import Callable
 from tkinter import messagebox, ttk
-from typing import Any, Callable
+from typing import Any
 
 
 def get_padding() -> int:

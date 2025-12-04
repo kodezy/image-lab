@@ -72,7 +72,12 @@ class CapturePanel:
         device_frame.pack(fill=tk.X, pady=5, padx=5)
 
         device_id_frame, self.device_spinbox = create_spinbox(
-            device_frame, "Device ID", self.device_id_var, 0, 10, command=self._on_device_id_changed
+            device_frame,
+            "Device ID",
+            self.device_id_var,
+            0,
+            10,
+            command=self._on_device_id_changed,
         )
         device_id_frame.pack(fill=tk.X, pady=2)
 

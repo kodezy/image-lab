@@ -259,9 +259,8 @@ class ImagePanel:
             image_y = int(relative_y / self.zoom_factor)
 
             return image_x, image_y
-        else:
-            # Cursor outside image
-            return -1, -1
+        # Cursor outside image
+        return -1, -1
 
     def _on_canvas_enter(self, event) -> None:
         """Handle mouse entering canvas"""
@@ -371,11 +370,10 @@ class ImagePanel:
                 info_text = f"{w}×{h}px (Binary)"
             else:
                 info_text = f"{w}×{h}px (Grayscale)"
+        elif is_binary:
+            info_text = f"{w}×{h}px (Binary, {channels} channels)"
         else:
-            if is_binary:
-                info_text = f"{w}×{h}px (Binary, {channels} channels)"
-            else:
-                info_text = f"{w}×{h}px ({channels} channels)"
+            info_text = f"{w}×{h}px ({channels} channels)"
 
         self.image_info_label.config(text=info_text, foreground="blue")
         self.status_label.config(text="Image loaded", foreground="green")
@@ -480,7 +478,7 @@ class ImagePanel:
                 image_y - img_h // 2 - margin,
                 image_x + img_w // 2 + margin,
                 image_y + img_h // 2 + margin,
-            )
+            ),
         )
 
     def _update_zoom_display(self) -> None:
@@ -496,6 +494,11 @@ class ImagePanel:
 
         if text:
             text_id = self.canvas.create_text(
-                10, 10, anchor=tk.NW, text=text, fill="#00ff41", font=("Courier", 10, "bold")
+                10,
+                10,
+                anchor=tk.NW,
+                text=text,
+                fill="#00ff41",
+                font=("Courier", 10, "bold"),
             )
             self._cursor_text_id = text_id

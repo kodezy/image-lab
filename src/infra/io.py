@@ -82,7 +82,7 @@ def save_json(configs: dict[str, Any], filename: str) -> bool:
 def load_json(filename: str) -> dict[str, Any] | None:
     """Load JSON file"""
     try:
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, encoding="utf-8") as f:
             return json.load(f)
 
     except Exception:

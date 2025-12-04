@@ -581,7 +581,7 @@ class ProcessingPanel:
 
             if len(coords) == 4:
                 return (coords[0], coords[1], coords[2], coords[3])
-            elif len(coords) > 4:
+            if len(coords) > 4:
                 # Take first 4 coordinates if more are provided
                 return (coords[0], coords[1], coords[2], coords[3])
         except (ValueError, AttributeError):

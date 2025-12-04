@@ -298,7 +298,8 @@ def _apply_character_operations(image: np.ndarray, config: ProcessingConfig) -> 
 
     if config.character_erosion:
         ero_kernel = cv2.getStructuringElement(
-            cv2.MORPH_ELLIPSE, (config.erosion_kernel_size, config.erosion_kernel_size)
+            cv2.MORPH_ELLIPSE,
+            (config.erosion_kernel_size, config.erosion_kernel_size),
         )
 
         for _ in range(config.erosion_iterations):

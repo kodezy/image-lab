@@ -19,6 +19,7 @@ from src.gui.components.processing import ProcessingPanel
 from src.gui.utils import get_padding, show_error, show_success
 from src.infra.io import load_image, load_image_from_clipboard, load_json, save_image, save_json
 
+
 def get_icon_path() -> Path | None:
     project_root = Path(__file__).parent.parent.parent
     icon_path = project_root / "assets" / "app.ico"
@@ -288,14 +289,13 @@ class ImageLabGUI:
                 icon = ImageTk.PhotoImage(pil_image)
                 self.root.iconphoto(True, icon)  # type: ignore
                 self._app_icon_image = icon
+            elif str(icon_path).lower().endswith(".ico"):
+                self.root.iconbitmap(str(icon_path))
             else:
-                if str(icon_path).lower().endswith(".ico"):
-                    self.root.iconbitmap(str(icon_path))
-                else:
-                    pil_image = Image.open(str(icon_path))
-                    icon = ImageTk.PhotoImage(pil_image)
-                    self.root.iconphoto(True, icon)
-                    self._app_icon_image = icon
+                pil_image = Image.open(str(icon_path))
+                icon = ImageTk.PhotoImage(pil_image)
+                self.root.iconphoto(True, icon)
+                self._app_icon_image = icon
         except Exception:
             pass
 

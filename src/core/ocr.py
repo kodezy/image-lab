@@ -2,16 +2,15 @@ from typing import Any, Protocol
 
 import cv2
 import numpy as np
-from paddleocr import PaddleOCR
 import pytesseract
+from paddleocr import PaddleOCR
 
 from src.config import OCRConfig, PaddleOCRConfig, TesseractConfig
 from src.infra.cache import ocr_cache
 
 
 class OCRProtocol(Protocol):
-    def predict(self, image: np.ndarray) -> Any:
-        ...
+    def predict(self, image: np.ndarray) -> Any: ...
 
 
 class PaddleOCRWrapper:
@@ -65,7 +64,7 @@ class TesseractOCRWrapper:
         except Exception:
             raise RuntimeError(
                 "Tesseract não está instalado ou não está no PATH.\n"
-                "Instale o Tesseract e certifique-se de que está no PATH do sistema."
+                "Instale o Tesseract e certifique-se de que está no PATH do sistema.",
             )
 
         if len(image.shape) == 3:
@@ -121,7 +120,7 @@ class TesseractOCRWrapper:
                 "rec_texts": texts,
                 "rec_scores": scores,
                 "det_boxes": boxes,
-            }
+            },
         ]
 
 

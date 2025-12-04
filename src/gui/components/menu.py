@@ -76,7 +76,9 @@ class MenuBar:
 
         file_menu.add_command(label="Load Image...", command=self.app.load_image_file, accelerator=f"{mod}+O")
         file_menu.add_command(
-            label="Load from Clipboard", command=self.app.load_image_from_clipboard, accelerator=f"{mod}+V"
+            label="Load from Clipboard",
+            command=self.app.load_image_from_clipboard,
+            accelerator=f"{mod}+V",
         )
         file_menu.add_command(label="Save Image...", command=self.app.save_image_file, accelerator=f"{mod}+S")
         file_menu.add_separator()
