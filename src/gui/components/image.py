@@ -71,7 +71,6 @@ class ImagePanel:
         if self.app.processed_image is None:
             return
 
-        # Auto-fit to window on reset
         self.fit_to_window()
 
     def fit_to_window(self) -> None:
@@ -79,13 +78,11 @@ class ImagePanel:
         if self.app.processed_image is None:
             return
 
-        # Get canvas dimensions
         canvas_width = self.canvas.winfo_width() or 600
         canvas_height = self.canvas.winfo_height() or 400
 
         img_h, img_w = self.app.processed_image.shape[:2]
 
-        # Calculate zoom to fit image in canvas
         margin = 50
         zoom_w = (canvas_width - margin) / img_w
         zoom_h = (canvas_height - margin) / img_h
@@ -214,17 +211,13 @@ class ImagePanel:
             self._update_cursor_text("")
             return
 
-        # Get canvas coordinates
         canvas_x = event.x
         canvas_y = event.y
 
-        # Convert to image coordinates
         image_x, image_y = self._canvas_to_image_coordinates(canvas_x, canvas_y)
 
-        # Get image dimensions
         img_height, img_width = self.app.processed_image.shape[:2]
 
-        # Show coordinates only when within image bounds
         if image_x >= 0 and image_y >= 0 and image_x < img_width and image_y < img_height:
             self._update_cursor_text(f"({image_x}, {image_y})")
         else:
@@ -235,31 +228,26 @@ class ImagePanel:
         if self.app.processed_image is None:
             return 0, 0
 
-        # Get displayed image dimensions
         display_image = self._prepare_display_image(self.app.processed_image)
         if display_image is None:
             return 0, 0
 
         img_h, img_w = display_image.shape[:2]
 
-        # Calculate image boundaries on canvas
         image_left = self.image_center_x + self.pan_x - img_w // 2
         image_right = image_left + img_w
         image_top = self.image_center_y + self.pan_y - img_h // 2
         image_bottom = image_top + img_h
 
-        # Check if cursor is over the image
         if image_left <= canvas_x <= image_right and image_top <= canvas_y <= image_bottom:
-            # Calculate relative position within displayed image
             relative_x = canvas_x - image_left
             relative_y = canvas_y - image_top
 
-            # Convert to original image coordinates
             image_x = int(relative_x / self.zoom_factor)
             image_y = int(relative_y / self.zoom_factor)
 
             return image_x, image_y
-        # Cursor outside image
+
         return -1, -1
 
     def _on_canvas_enter(self, event) -> None:
@@ -361,9 +349,8 @@ class ImagePanel:
         h, w = image.shape[:2]
         channels = image.shape[2] if len(image.shape) == 3 else 1
 
-        # Detect image type
         unique_values = np.unique(image)
-        is_binary = len(unique_values) == 2 and (unique_values == [0, 255]).all()
+        is_binary = len(unique_values) == 2 and set(unique_values) == {0, 255}
 
         if channels == 1:
             if is_binary:
@@ -384,11 +371,9 @@ class ImagePanel:
         if display_image is None:
             return
 
-        # Convert to PIL and create PhotoImage
         pil_image = Image.fromarray(display_image)
         self.photo_ref = ImageTk.PhotoImage(pil_image)
 
-        # Save cursor text before clearing
         saved_cursor_text = ""
         if self._cursor_text_id is not None:
             try:
@@ -396,20 +381,16 @@ class ImagePanel:
             except tk.TclError:
                 pass
 
-        # Clear canvas
         self.canvas.delete("all")
         self._cursor_text_id = None
 
-        # Get dimensions
         canvas_width = self.canvas.winfo_width() or 600
         canvas_height = self.canvas.winfo_height() or 400
         img_h, img_w = display_image.shape[:2]
 
-        # Calculate image center on canvas
         self.image_center_x = canvas_width // 2
         self.image_center_y = canvas_height // 2
 
-        # Calculate pan limits based on image size vs canvas size
         if img_w > canvas_width:
             max_pan_x = (img_w - canvas_width) // 2
         else:
@@ -420,21 +401,17 @@ class ImagePanel:
         else:
             max_pan_y = 0
 
-        # Apply pan limits
         self.pan_x = max(-max_pan_x, min(max_pan_x, self.pan_x))
         self.pan_y = max(-max_pan_y, min(max_pan_y, self.pan_y))
 
-        # Position image
         image_x = self.image_center_x + self.pan_x
         image_y = self.image_center_y + self.pan_y
 
         self.canvas.create_image(image_x, image_y, image=self.photo_ref, anchor=tk.CENTER)
 
-        # Update scroll region and zoom display
         self._update_scroll_region(display_image, image_x, image_y)
         self._update_zoom_display()
 
-        # Restore cursor text if it existed
         if saved_cursor_text:
             self._update_cursor_text(saved_cursor_text)
 
@@ -471,7 +448,6 @@ class ImagePanel:
         img_h, img_w = image.shape[:2]
         margin = 50
 
-        # Scroll region covers the image area with margin
         self.canvas.configure(
             scrollregion=(
                 image_x - img_w // 2 - margin,

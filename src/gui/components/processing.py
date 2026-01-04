@@ -24,7 +24,6 @@ class ProcessingPanel:
 
         # Update crop variables
         self.bbox_var.set(self._format_bbox(config.bbox))
-
         self.threshold_enabled_var.set(config.threshold_enabled)
         self.threshold_type_var.set(config.threshold_type)
         self.threshold_value_var.set(config.threshold_value)
@@ -67,7 +66,6 @@ class ProcessingPanel:
         self.gamma_correction_var.set(config.gamma_correction)
         self.gamma_value_var.set(config.gamma_value)
 
-        # Advanced noise reduction
         self.denoise_nl_means_var.set(config.denoise_nl_means)
         self.denoise_h_var.set(config.denoise_h)
         self.denoise_template_window_var.set(config.denoise_template_window)
@@ -79,14 +77,12 @@ class ProcessingPanel:
         self.noise_reduction_bilateral_var.set(config.noise_reduction_bilateral)
         self.bilateral_iterations_var.set(config.bilateral_iterations)
 
-        # Advanced filters
         self.bilateral_sigma_color_var.set(config.bilateral_sigma_color)
         self.bilateral_sigma_space_var.set(config.bilateral_sigma_space)
         self.gaussian_sigma_var.set(config.gaussian_sigma)
         self.background_subtraction_var.set(config.background_subtraction)
         self.bg_threshold_var.set(config.bg_threshold)
 
-        # Advanced histogram and contrast
         self.clahe_tile_size_var.set(config.clahe_tile_size)
         self.adaptive_hist_kernel_var.set(config.adaptive_hist_kernel)
         self.multi_otsu_classes_var.set(config.multi_otsu_classes)
@@ -97,7 +93,6 @@ class ProcessingPanel:
         self.stretch_min_percentile_var.set(config.stretch_min_percentile)
         self.stretch_max_percentile_var.set(config.stretch_max_percentile)
 
-        # Advanced line removal
         self.vertical_kernel_size_var.set(config.vertical_kernel_size)
         self.horizontal_kernel_size_var.set(config.horizontal_kernel_size)
         self.hough_lines_removal_var.set(config.hough_lines_removal)
@@ -105,7 +100,6 @@ class ProcessingPanel:
         self.hough_min_line_length_var.set(config.hough_min_line_length)
         self.hough_max_line_gap_var.set(config.hough_max_line_gap)
 
-        # Advanced morphology
         self.stroke_width_normalization_var.set(config.stroke_width_normalization)
         self.stroke_iterations_var.set(config.stroke_iterations)
         self.morph_open_var.set(config.morph_open)
@@ -129,7 +123,6 @@ class ProcessingPanel:
         self.erosion_iterations_var.set(config.erosion_iterations)
         self.min_contour_area_var.set(config.min_contour_area)
 
-        # Advanced enhancement
         self.text_enhancement_var.set(config.text_enhancement)
         self.text_kernel_size_var.set(config.text_kernel_size)
         self.detail_enhancement_var.set(config.detail_enhancement)
@@ -143,7 +136,6 @@ class ProcessingPanel:
         self.adaptive_block_size_var.set(config.adaptive_block_size)
         self.adaptive_c_var.set(config.adaptive_c)
 
-        # Contour filtering
         self.contour_filtering_var.set(config.contour_filtering)
         self.contour_area_min_var.set(config.contour_area_min)
         self.contour_area_max_var.set(config.contour_area_max)
@@ -154,7 +146,6 @@ class ProcessingPanel:
         self.min_aspect_ratio_var.set(config.min_aspect_ratio)
         self.max_aspect_ratio_var.set(config.max_aspect_ratio)
 
-        # Advanced operations
         self.distance_transform_var.set(config.distance_transform)
         self.distance_transform_type_var.set(config.distance_transform_type)
         self.skeletonize_var.set(config.skeletonize)
@@ -181,7 +172,6 @@ class ProcessingPanel:
         self.gamma_correction_var = tk.BooleanVar(value=config.gamma_correction)
         self.gamma_value_var = tk.DoubleVar(value=config.gamma_value)
 
-        # Noise reduction variables
         self.denoise_nl_means_var = tk.BooleanVar(value=config.denoise_nl_means)
         self.denoise_h_var = tk.DoubleVar(value=config.denoise_h)
         self.denoise_template_window_var = tk.IntVar(value=config.denoise_template_window)
@@ -193,7 +183,6 @@ class ProcessingPanel:
         self.noise_reduction_bilateral_var = tk.BooleanVar(value=config.noise_reduction_bilateral)
         self.bilateral_iterations_var = tk.IntVar(value=config.bilateral_iterations)
 
-        # Filter variables
         self.bilateral_filter_var = tk.BooleanVar(value=config.bilateral_filter)
         self.bilateral_d_var = tk.IntVar(value=config.bilateral_d)
         self.bilateral_sigma_color_var = tk.IntVar(value=config.bilateral_sigma_color)
@@ -206,7 +195,6 @@ class ProcessingPanel:
         self.background_subtraction_var = tk.BooleanVar(value=config.background_subtraction)
         self.bg_threshold_var = tk.IntVar(value=config.bg_threshold)
 
-        # Histogram and contrast variables
         self.histogram_equalization_var = tk.BooleanVar(value=config.histogram_equalization)
         self.clahe_var = tk.BooleanVar(value=config.clahe)
         self.clahe_clip_limit_var = tk.DoubleVar(value=config.clahe_clip_limit)
@@ -222,7 +210,6 @@ class ProcessingPanel:
         self.stretch_min_percentile_var = tk.DoubleVar(value=config.stretch_min_percentile)
         self.stretch_max_percentile_var = tk.DoubleVar(value=config.stretch_max_percentile)
 
-        # Line removal variables
         self.vertical_line_removal_var = tk.BooleanVar(value=config.vertical_line_removal)
         self.vertical_kernel_size_var = tk.IntVar(value=config.vertical_kernel_size)
         self.horizontal_line_removal_var = tk.BooleanVar(value=config.horizontal_line_removal)
@@ -232,7 +219,6 @@ class ProcessingPanel:
         self.hough_min_line_length_var = tk.IntVar(value=config.hough_min_line_length)
         self.hough_max_line_gap_var = tk.IntVar(value=config.hough_max_line_gap)
 
-        # Morphological operations variables
         self.stroke_width_normalization_var = tk.BooleanVar(value=config.stroke_width_normalization)
         self.stroke_iterations_var = tk.IntVar(value=config.stroke_iterations)
         self.morphology_var = tk.BooleanVar(value=config.morphology)
@@ -260,7 +246,6 @@ class ProcessingPanel:
         self.noise_dots_removal_var = tk.BooleanVar(value=config.noise_dots_removal)
         self.min_contour_area_var = tk.IntVar(value=config.min_contour_area)
 
-        # Enhancement variables
         self.text_enhancement_var = tk.BooleanVar(value=config.text_enhancement)
         self.text_kernel_size_var = tk.IntVar(value=config.text_kernel_size)
         self.detail_enhancement_var = tk.BooleanVar(value=config.detail_enhancement)
@@ -280,7 +265,6 @@ class ProcessingPanel:
         self.adaptive_block_size_var = tk.IntVar(value=config.adaptive_block_size)
         self.adaptive_c_var = tk.IntVar(value=config.adaptive_c)
 
-        # Contour filtering variables
         self.contour_filtering_var = tk.BooleanVar(value=config.contour_filtering)
         self.contour_area_min_var = tk.IntVar(value=config.contour_area_min)
         self.contour_area_max_var = tk.IntVar(value=config.contour_area_max)
@@ -291,7 +275,6 @@ class ProcessingPanel:
         self.min_aspect_ratio_var = tk.DoubleVar(value=config.min_aspect_ratio)
         self.max_aspect_ratio_var = tk.DoubleVar(value=config.max_aspect_ratio)
 
-        # Advanced operations variables
         self.distance_transform_var = tk.BooleanVar(value=config.distance_transform)
         self.distance_transform_type_var = tk.IntVar(value=config.distance_transform_type)
         self.skeletonize_var = tk.BooleanVar(value=config.skeletonize)
@@ -313,7 +296,6 @@ class ProcessingPanel:
         self._create_threshold_section()
         self._create_advanced_operations_section()
 
-        # Initialize control states
         self._update_resize_dependent_controls()
         self._update_grayscale_dependent_controls()
         self._update_binary_dependent_controls()
@@ -323,7 +305,6 @@ class ProcessingPanel:
         input_frame = create_labeled_frame(self.scrollable_frame, "📥 Format")
         input_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Color space conversion
         color_frame, self.color_space_combobox = create_combobox(
             input_frame,
             "Color Space",
@@ -345,7 +326,6 @@ class ProcessingPanel:
         preprocess_frame = create_labeled_frame(self.scrollable_frame, "🔧 Preprocessing")
         preprocess_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Resize controls
         create_checkbox(
             preprocess_frame,
             "Resize",
@@ -384,7 +364,6 @@ class ProcessingPanel:
         )
         height_frame.pack(fill=tk.X, pady=1)
 
-        # Crop controls
         ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
 
         create_checkbox(
@@ -394,7 +373,6 @@ class ProcessingPanel:
             self._on_crop_enabled_changed,
         ).pack(anchor=tk.W, pady=2)
 
-        # Bbox input
         bbox_frame = ttk.Frame(preprocess_frame)
         bbox_frame.pack(fill=tk.X, pady=2)
 
@@ -410,13 +388,11 @@ class ProcessingPanel:
         bbox_entry.bind("<Return>", self._on_bbox_enter)
         bbox_entry.bind("<Key>", self._on_bbox_key)
 
-        # Add variable trace for more reliable updates
         self.bbox_var.trace_add("write", self._on_bbox_variable_changed)
 
         self.crop_status_label = ttk.Label(preprocess_frame, text="Crop: Disabled", foreground="gray")
         self.crop_status_label.pack(anchor=tk.W, pady=2)
 
-        # Gamma correction
         ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
 
         create_checkbox(
@@ -470,41 +446,6 @@ class ProcessingPanel:
         self.app.processing_config.gamma_value = float(value)
         self.app.update_image_display()
 
-    def _create_crop_section(self) -> None:
-        """Create crop section"""
-        crop_frame = create_labeled_frame(self.scrollable_frame, "✂️ Crop")
-        crop_frame.pack(fill=tk.X, pady=5, padx=5)
-
-        create_checkbox(
-            crop_frame,
-            "Crop",
-            self.crop_enabled_var,
-            self._on_crop_enabled_changed,
-        ).pack(anchor=tk.W, pady=2)
-
-        # Bbox input
-        bbox_frame = ttk.Frame(crop_frame)
-        bbox_frame.pack(fill=tk.X, pady=5)
-
-        ttk.Label(bbox_frame, text="(x1,y1,x2,y2):").pack(side=tk.LEFT, padx=(0, 5))
-        bbox_entry = ttk.Entry(
-            bbox_frame,
-            textvariable=self.bbox_var,
-            width=20,
-        )
-        bbox_entry.pack(side=tk.LEFT, padx=(0, 5))
-        bbox_entry.bind("<KeyRelease>", self._on_bbox_key_release)
-        bbox_entry.bind("<FocusOut>", self._on_bbox_focus_out)
-        bbox_entry.bind("<Return>", self._on_bbox_enter)
-        bbox_entry.bind("<Key>", self._on_bbox_key)
-
-        # Add variable trace for more reliable updates
-        self.bbox_var.trace_add("write", self._on_bbox_variable_changed)
-
-        # Status label
-        self.crop_status_label = ttk.Label(crop_frame, text="Crop: Disabled", foreground="gray")
-        self.crop_status_label.pack(anchor=tk.W, pady=2)
-
     def _on_crop_enabled_changed(self) -> None:
         """Handle crop enabled change"""
         self.app.processing_config.crop_enabled = self.crop_enabled_var.get()
@@ -533,10 +474,8 @@ class ProcessingPanel:
 
         x1, y1, x2, y2 = bbox
 
-        # Get current image dimensions for validation
         img_height, img_width = self.app.processed_image.shape[:2]
 
-        # Check if coordinates are within image bounds
         if x1 < 0 or y1 < 0 or x2 > img_width or y2 > img_height:
             self.crop_status_label.config(
                 text=f"Crop: Out of bounds - Image: {img_width}×{img_height}",
@@ -544,7 +483,6 @@ class ProcessingPanel:
             )
             return
 
-        # Check if coordinates are valid (x2 > x1 and y2 > y1)
         if x2 <= x1 or y2 <= y1:
             self.crop_status_label.config(
                 text=f"Crop: Invalid coordinates ({x1},{y1}) to ({x2},{y2})",
@@ -552,11 +490,9 @@ class ProcessingPanel:
             )
             return
 
-        # Calculate dimensions
         width = x2 - x1
         height = y2 - y1
 
-        # Show crop dimensions and image dimensions
         self.crop_status_label.config(
             text=f"Crop: {width}×{height} | Image: {img_width}×{img_height}",
             foreground="green",
@@ -575,14 +511,12 @@ class ProcessingPanel:
             return None
 
         try:
-            # Remove extra spaces and split by comma
             cleaned_str = bbox_str.replace(" ", "").replace("(", "").replace(")", "")
             coords = [int(x.strip()) for x in cleaned_str.split(",") if x.strip()]
 
             if len(coords) == 4:
                 return (coords[0], coords[1], coords[2], coords[3])
             if len(coords) > 4:
-                # Take first 4 coordinates if more are provided
                 return (coords[0], coords[1], coords[2], coords[3])
         except (ValueError, AttributeError):
             pass
@@ -616,15 +550,12 @@ class ProcessingPanel:
         if bbox is not None:
             x1, y1, x2, y2 = bbox
 
-            # Update config with user input (don't force correction)
             self.app.processing_config.bbox = bbox
             self._update_crop_status()
 
-            # Only update image display if we have valid coordinates
             if x2 > x1 and y2 > y1:
                 self.app.update_image_display()
         else:
-            # Update status even with invalid input for real-time feedback
             self._update_crop_status()
 
     def _create_threshold_section(self) -> None:
@@ -632,7 +563,6 @@ class ProcessingPanel:
         threshold_frame = create_labeled_frame(self.scrollable_frame, "🎯 Threshold")
         threshold_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Basic threshold
         self.threshold_enabled_checkbox = create_checkbox(
             threshold_frame,
             "Threshold",
@@ -660,7 +590,6 @@ class ProcessingPanel:
         )
         threshold_value_frame.pack(fill=tk.X, pady=1)
 
-        # Adaptive parameters
         adaptive_block_frame, _, _ = create_slider(
             threshold_frame,
             "Adaptive Block Size",
@@ -681,7 +610,6 @@ class ProcessingPanel:
         )
         adaptive_c_frame.pack(fill=tk.X, pady=1)
 
-        # Multi-OTSU
         ttk.Separator(threshold_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         self.multi_otsu_checkbox = create_checkbox(
@@ -1032,7 +960,6 @@ class ProcessingPanel:
         noise_frame = create_labeled_frame(self.scrollable_frame, "🔇 Noise Reduction")
         noise_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Basic filters
         create_checkbox(
             noise_frame,
             "Bilateral Filter",
@@ -1073,7 +1000,6 @@ class ProcessingPanel:
         )
         bilateral_sigma_space_frame.pack(fill=tk.X, pady=1)
 
-        # Gaussian blur
         create_checkbox(
             noise_frame,
             "Gaussian Blur",
@@ -1104,7 +1030,6 @@ class ProcessingPanel:
         )
         gaussian_sigma_frame.pack(fill=tk.X, pady=1)
 
-        # Median filter
         create_checkbox(
             noise_frame,
             "Median Filter",
@@ -1122,7 +1047,6 @@ class ProcessingPanel:
         )
         median_kernel_frame.pack(fill=tk.X, pady=1)
 
-        # Advanced denoising
         ttk.Separator(noise_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         create_checkbox(
@@ -1165,7 +1089,6 @@ class ProcessingPanel:
         )
         denoise_search_frame.pack(fill=tk.X, pady=1)
 
-        # Edge preserving filter
         create_checkbox(
             noise_frame,
             "Edge Preserving Filter",
@@ -1196,7 +1119,6 @@ class ProcessingPanel:
         )
         edge_sigma_r_frame.pack(fill=tk.X, pady=1)
 
-        # Additional bilateral iterations
         create_checkbox(
             noise_frame,
             "Additional Bilateral Iterations",
@@ -1219,7 +1141,6 @@ class ProcessingPanel:
         enhance_frame = create_labeled_frame(self.scrollable_frame, "✨ Enhancement")
         enhance_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Histogram equalization
         self.histogram_equalization_checkbox = create_checkbox(
             enhance_frame,
             "Histogram Equalization",
@@ -1228,7 +1149,6 @@ class ProcessingPanel:
         )
         self.histogram_equalization_checkbox.pack(anchor=tk.W, pady=1)
 
-        # CLAHE
         self.clahe_checkbox = create_checkbox(enhance_frame, "CLAHE", self.clahe_var, self._on_clahe_changed)
         self.clahe_checkbox.pack(anchor=tk.W, pady=1)
 
@@ -1255,7 +1175,6 @@ class ProcessingPanel:
         )
         clahe_tile_frame.pack(fill=tk.X, pady=1)
 
-        # Adaptive histogram equalization
         self.adaptive_hist_eq_checkbox = create_checkbox(
             enhance_frame,
             "Adaptive Histogram Equalization",
@@ -1264,7 +1183,6 @@ class ProcessingPanel:
         )
         self.adaptive_hist_eq_checkbox.pack(anchor=tk.W, pady=1)
 
-        # Contrast and intensity
         ttk.Separator(enhance_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         create_checkbox(
@@ -1281,7 +1199,6 @@ class ProcessingPanel:
             self._on_contrast_stretching_changed,
         ).pack(anchor=tk.W, pady=1)
 
-        # Sharpening
         ttk.Separator(enhance_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         create_checkbox(enhance_frame, "Sharpen", self.sharpen_var, self._on_sharpen_changed).pack(anchor=tk.W, pady=1)
@@ -1313,7 +1230,6 @@ class ProcessingPanel:
         )
         unsharp_strength_frame.pack(fill=tk.X, pady=1)
 
-        # Edge enhancement
         self.edge_enhancement_checkbox = create_checkbox(
             enhance_frame,
             "Edge Enhancement",
@@ -1332,7 +1248,6 @@ class ProcessingPanel:
         )
         edge_strength_frame.pack(fill=tk.X, pady=1)
 
-        # Advanced enhancement
         ttk.Separator(enhance_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         create_checkbox(
@@ -1523,7 +1438,6 @@ class ProcessingPanel:
         morph_frame = create_labeled_frame(self.scrollable_frame, "🔄 Morphology")
         morph_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Basic morphology
         create_checkbox(
             morph_frame,
             "Basic Morphology",
@@ -1558,7 +1472,6 @@ class ProcessingPanel:
             self._on_morph_close_changed,
         ).pack(anchor=tk.W, pady=1)
 
-        # Advanced morphology
         ttk.Separator(morph_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         create_checkbox(
@@ -1726,7 +1639,6 @@ class ProcessingPanel:
         )
         erosion_iterations_frame.pack(fill=tk.X, pady=1)
 
-        # Line removal
         ttk.Separator(morph_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         create_checkbox(
@@ -1770,7 +1682,6 @@ class ProcessingPanel:
             self._on_hough_lines_removal_changed,
         ).pack(anchor=tk.W, pady=1)
 
-        # Noise removal
         self.noise_dots_removal_checkbox = create_checkbox(
             morph_frame,
             "Remove Noise Dots",
@@ -2103,7 +2014,6 @@ class ProcessingPanel:
         advanced_frame = create_labeled_frame(self.scrollable_frame, "🧬 Advanced Operations")
         advanced_frame.pack(fill=tk.X, pady=5, padx=5)
 
-        # Background subtraction
         create_checkbox(
             advanced_frame,
             "Background Subtraction",
@@ -2121,7 +2031,6 @@ class ProcessingPanel:
         )
         bg_threshold_frame.pack(fill=tk.X, pady=1)
 
-        # Contour filtering
         ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         self.contour_filtering_checkbox = create_checkbox(
@@ -2171,7 +2080,6 @@ class ProcessingPanel:
         )
         self.aspect_ratio_filtering_checkbox.pack(anchor=tk.W, pady=1)
 
-        # Transform operations
         ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         self.distance_transform_checkbox = create_checkbox(
@@ -2208,7 +2116,6 @@ class ProcessingPanel:
         )
         self.watershed_markers_checkbox.pack(anchor=tk.W, pady=1)
 
-        # Pattern analysis
         ttk.Separator(advanced_frame, orient="horizontal").pack(fill=tk.X, pady=3)
 
         self.local_binary_pattern_checkbox = create_checkbox(

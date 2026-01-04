@@ -75,11 +75,8 @@ class TesseractOCRWrapper:
 
         config_parts = []
 
-        if self._config.psm is not None:
-            config_parts.append(f"--psm {self._config.psm}")
-
-        if self._config.oem is not None:
-            config_parts.append(f"--oem {self._config.oem}")
+        config_parts.append(f"--psm {self._config.psm}")
+        config_parts.append(f"--oem {self._config.oem}")
 
         if self._config.config:
             config_parts.append(self._config.config)

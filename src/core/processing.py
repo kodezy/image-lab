@@ -86,8 +86,9 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     if not config.resize_enabled:
         return image
 
+    h, w = image.shape[:2]
+
     if config.resize_maintain_aspect_ratio:
-        h, w = image.shape[:2]
         aspect = w / h
 
         if aspect > 1:
@@ -96,14 +97,11 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
         else:
             new_h = config.resize_height
             new_w = int(config.resize_height * aspect)
-
     else:
         new_w, new_h = config.resize_width, config.resize_height
 
-    image_width, image_height = image.shape[:2][::-1]
-
-    if (image_width, image_height) != (new_w, new_h):
-        is_upscaling = image_width > new_w or image_height > new_h
+    if (w, h) != (new_w, new_h):
+        is_upscaling = w > new_w or h > new_h
         interpolation = cv2.INTER_LANCZOS4 if is_upscaling else cv2.INTER_AREA
 
         image = cv2.resize(image, (new_w, new_h), interpolation=interpolation)
@@ -114,9 +112,6 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
 @image_cache(max_size=128)
 def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     """Apply color space conversion to image based on configuration"""
-    if config.color_space == "Original":
-        return image
-
     match config.color_space:
         case "Grayscale":
             if len(image.shape) == 3:
@@ -231,7 +226,6 @@ def _apply_histogram_operations(image: np.ndarray, config: ProcessingConfig) -> 
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(config.adaptive_hist_kernel, config.adaptive_hist_kernel))
         image = clahe.apply(image)
 
-    # Multi-OTSU thresholding
     if config.multi_otsu and len(image.shape) == 2:
         thresholds = threshold_multiotsu(image, classes=config.multi_otsu_classes)
         regions = np.digitize(image, bins=thresholds)
@@ -522,8 +516,8 @@ def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> n
         image = cv2.normalize(image, image, config.norm_min, config.norm_max, cv2.NORM_MINMAX)
 
     if config.contrast_stretching:
-        p_min = float(np.percentile(image.astype(np.float64), config.stretch_min_percentile, method="linear", out=None))
-        p_max = float(np.percentile(image.astype(np.float64), config.stretch_max_percentile, method="linear", out=None))
+        p_min = float(np.percentile(image.astype(np.float64), config.stretch_min_percentile))
+        p_max = float(np.percentile(image.astype(np.float64), config.stretch_max_percentile))
         image = np.clip((image - p_min) * 255 / (p_max - p_min), 0, 255).astype(np.uint8)
 
     if config.distance_transform:
@@ -539,7 +533,6 @@ def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> n
         binary_image = _ensure_binary(image)
         image = _apply_watershed_markers(binary_image)
 
-    # Local Binary Pattern
     if config.local_binary_pattern:
         from skimage.feature import local_binary_pattern
 

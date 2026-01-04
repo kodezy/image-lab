@@ -39,7 +39,6 @@ class ImageLabGUI:
 
         self._initialize_window()
         self._initialize_configs()
-        self._initialize_state()
         self._setup_ui()
 
     def run(self) -> None:
@@ -304,12 +303,6 @@ class ImageLabGUI:
         self.capture_config = CaptureConfig()
         self.ocr_config = OCRConfig()
         self.processing_config = ProcessingConfig()
-
-    def _initialize_state(self) -> None:
-        """Initialize application state"""
-        self.current_image = None
-        self.processed_image = None
-        self.ocr_instance = None
 
     def _setup_ui(self) -> None:
         """Setup user interface components"""

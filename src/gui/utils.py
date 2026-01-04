@@ -188,7 +188,7 @@ def _get_canvas_bg_color() -> str:
             if bg_color:
                 return bg_color
 
-        except Exception as exception:
+        except Exception:
             pass
 
     return "white"

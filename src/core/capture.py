@@ -26,6 +26,7 @@ def _capture_pil() -> np.ndarray:
 
 def _capture_device(config: CaptureConfig) -> np.ndarray:
     """Capture image from device"""
+    cap = None
     try:
         cap = cv2.VideoCapture(config.device_id, cv2.CAP_DSHOW)
 
