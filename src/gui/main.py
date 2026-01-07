@@ -223,6 +223,8 @@ class ImageLabGUI:
         try:
             self.processed_image = process_image(self.current_image, self.processing_config)
             self.image_panel.update_image(self.processed_image)
+            self.processing_panel._update_grayscale_dependent_controls()
+            self.processing_panel._update_binary_dependent_controls()
 
         except Exception as exception:
             show_error(f"Processing failed: {exception}")

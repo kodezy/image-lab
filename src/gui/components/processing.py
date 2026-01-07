@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Any
 
+import numpy as np
+
 from src.gui.utils import create_checkbox, create_combobox, create_labeled_frame, create_scrollable_frame, create_slider
 
 
@@ -2241,9 +2243,26 @@ class ProcessingPanel:
         else:
             self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_var.get()
 
+    def _is_image_grayscale(self) -> bool:
+        """Check if processed image is grayscale"""
+        if self.app.processed_image is None:
+            return False
+
+        return len(self.app.processed_image.shape) == 2
+
+    def _is_image_binary(self) -> bool:
+        """Check if processed image is binary (only 0 and 255 values)"""
+        if self.app.processed_image is None:
+            return False
+
+        unique_values = np.unique(self.app.processed_image)
+        return len(unique_values) == 2 and set(unique_values) == {0, 255}
+
     def _update_grayscale_dependent_controls(self) -> None:
         """Update state of controls that depend on grayscale"""
-        is_grayscale = self.color_space_var.get() == "Grayscale"
+        is_grayscale_config = self.color_space_var.get() == "Grayscale"
+        is_grayscale_image = self._is_image_grayscale()
+        is_grayscale = is_grayscale_config or is_grayscale_image
         state = tk.NORMAL if is_grayscale else tk.DISABLED
 
         self.threshold_enabled_checkbox.config(state=state)
@@ -2271,7 +2290,9 @@ class ProcessingPanel:
 
     def _update_binary_dependent_controls(self) -> None:
         """Update state of controls that depend on binary"""
-        is_binary = self.threshold_enabled_var.get()
+        is_binary_config = self.threshold_enabled_var.get()
+        is_binary_image = self._is_image_binary()
+        is_binary = is_binary_config or is_binary_image
         state = tk.NORMAL if is_binary else tk.DISABLED
 
         self.noise_dots_removal_checkbox.config(state=state)
