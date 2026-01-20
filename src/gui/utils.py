@@ -143,18 +143,61 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
     def configure_scroll_region(event: tk.Event | None = None) -> None:
         canvas.configure(scrollregion=canvas.bbox("all"))
 
-    def on_mousewheel(event: tk.Event) -> None:
-        if sys.platform == "darwin":
-            delta = -event.delta
-        else:
-            delta = int(-1 * (event.delta / 120))
+    def is_widget_in_scrollable_frame(widget: tk.Widget) -> bool:
+        """Check if widget is inside scrollable_frame"""
+        try:
+            current = widget
+            while current:
+                if current == scrollable_frame:
+                    return True
+                try:
+                    current = current.master
+                except (AttributeError, tk.TclError):
+                    break
+            return False
+        except Exception:
+            return False
 
-        canvas.yview_scroll(delta, "units")
+    def on_mousewheel(event: tk.Event) -> None:
+        try:
+            widget = event.widget
+
+            if widget != canvas and widget != parent and not is_widget_in_scrollable_frame(widget):
+                return
+
+            if hasattr(event, "num") and event.num in (4, 5):
+                if event.num == 4:
+                    delta = -1
+                else:
+                    delta = 1
+            elif sys.platform == "darwin":
+                delta = -event.delta
+            else:
+                delta = int(-1 * (event.delta / 120))
+
+            canvas.yview_scroll(delta, "units")
+        except Exception:
+            pass
 
     def configure_canvas_window(event: tk.Event | None = None) -> None:
         canvas_width = canvas.winfo_width()
         if canvas_width > 1:
             canvas.itemconfig(canvas_window, width=canvas_width)
+
+    def bind_to_all_children(widget: tk.Widget) -> None:
+        """Recursively bind mouse wheel to widget and all children"""
+        try:
+            widget.bind("<MouseWheel>", on_mousewheel, add=True)
+            widget.bind("<Button-4>", on_mousewheel, add=True)
+            widget.bind("<Button-5>", on_mousewheel, add=True)
+        except Exception:
+            pass
+
+        try:
+            for child in widget.winfo_children():
+                bind_to_all_children(child)
+        except Exception:
+            pass
 
     bg_color = _get_canvas_bg_color()
     canvas = tk.Canvas(parent, highlightthickness=0, bg=bg_color)
@@ -163,10 +206,23 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
 
     canvas.configure(yscrollcommand=scrollbar.set)
 
-    scrollable_frame.bind("<Configure>", configure_scroll_region)
+    def on_configure(event: tk.Event) -> None:
+        configure_scroll_region(event)
+
+    def rebind_after_configure() -> None:
+        """Rebind after a short delay to ensure all widgets are created"""
+        bind_to_all_children(scrollable_frame)
+
+    scrollable_frame.bind("<Configure>", lambda e: (on_configure(e), canvas.after(10, rebind_after_configure)))
 
     canvas.bind("<MouseWheel>", on_mousewheel)
-    parent.bind("<MouseWheel>", on_mousewheel)
+    canvas.bind("<Button-4>", on_mousewheel)
+    canvas.bind("<Button-5>", on_mousewheel)
+
+    root = canvas.winfo_toplevel()
+    root.bind_all("<MouseWheel>", on_mousewheel, add=True)
+    root.bind_all("<Button-4>", on_mousewheel, add=True)
+    root.bind_all("<Button-5>", on_mousewheel, add=True)
 
     canvas_window = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
@@ -174,6 +230,8 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
 
     scrollbar.pack(side="right", fill="y")
     canvas.pack(side="left", fill="both", expand=True)
+
+    canvas.after_idle(lambda: bind_to_all_children(scrollable_frame))
 
     return canvas, scrollable_frame, scrollbar
 

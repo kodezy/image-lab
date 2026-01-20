@@ -64,8 +64,7 @@ class TesseractOCRWrapper:
             pytesseract.get_tesseract_version()
         except Exception:
             raise RuntimeError(
-                "Tesseract não está instalado ou não está no PATH.\n"
-                "Instale o Tesseract e certifique-se de que está no PATH do sistema.",
+                "Tesseract is not installed or not in PATH.\nInstall Tesseract and ensure it is in the system PATH.",
             )
 
         if len(image.shape) == 3:
@@ -73,15 +72,12 @@ class TesseractOCRWrapper:
         else:
             gray = image
 
-        config_parts = []
-
-        config_parts.append(f"--psm {self._config.psm}")
-        config_parts.append(f"--oem {self._config.oem}")
+        config_parts = [f"--psm {self._config.psm}", f"--oem {self._config.oem}"]
 
         if self._config.config:
             config_parts.append(self._config.config)
 
-        config_str = " ".join(config_parts) if config_parts else None
+        config_str = " ".join(config_parts)
 
         try:
             data = pytesseract.image_to_data(
@@ -91,7 +87,7 @@ class TesseractOCRWrapper:
                 output_type=pytesseract.Output.DICT,
             )
         except Exception as exception:
-            raise RuntimeError(f"Erro ao executar Tesseract: {exception}") from exception
+            raise RuntimeError(f"Error executing Tesseract: {exception}") from exception
 
         texts = []
         scores = []

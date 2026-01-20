@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Any
 
-from src.gui.utils import create_button, create_labeled_frame, create_spinbox
+from src.gui.utils import create_button, create_labeled_frame, create_scrollable_frame, create_spinbox
 
 
 class CapturePanel:
@@ -30,6 +30,7 @@ class CapturePanel:
     def _create_frame(self) -> None:
         """Create capture frame"""
         self.frame = ttk.Frame(self.parent)
+        _, self.scrollable_frame, _ = create_scrollable_frame(self.frame)
 
         self._create_source_section()
         self._create_device_section()
@@ -42,7 +43,7 @@ class CapturePanel:
 
     def _create_source_section(self) -> None:
         """Create capture source selection"""
-        source_frame = create_labeled_frame(self.frame, "📷 Capture Source")
+        source_frame = create_labeled_frame(self.scrollable_frame, "📷 Capture Source")
         source_frame.pack(fill=tk.X, pady=5, padx=5)
 
         ttk.Radiobutton(
@@ -68,7 +69,7 @@ class CapturePanel:
 
     def _create_device_section(self) -> None:
         """Create device configuration section"""
-        device_frame = create_labeled_frame(self.frame, "⚙️ Device Settings")
+        device_frame = create_labeled_frame(self.scrollable_frame, "⚙️ Device Settings")
         device_frame.pack(fill=tk.X, pady=5, padx=5)
 
         device_id_frame, self.device_spinbox = create_spinbox(
@@ -87,7 +88,7 @@ class CapturePanel:
 
     def _create_actions_section(self) -> None:
         """Create action buttons section"""
-        actions_frame = create_labeled_frame(self.frame, "🎯 Actions")
+        actions_frame = create_labeled_frame(self.scrollable_frame, "🎯 Actions")
         actions_frame.pack(fill=tk.X, pady=5, padx=5)
 
         button_frame = ttk.Frame(actions_frame)

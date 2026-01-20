@@ -8,7 +8,6 @@ from src.infra.cache import image_cache
 
 @image_cache(max_size=128)
 def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> np.ndarray:
-    """Process image based on configuration"""
     if config is None:
         config = ProcessingConfig()
 
@@ -39,7 +38,6 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
 
 
 def _ensure_binary(image: np.ndarray) -> np.ndarray:
-    """Ensure image is binary (0 and 255 values only)"""
     if len(image.shape) == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -53,16 +51,13 @@ def _ensure_binary(image: np.ndarray) -> np.ndarray:
 
 
 def _ensure_grayscale(image: np.ndarray) -> np.ndarray:
-    """Ensure image is grayscale"""
     if len(image.shape) == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     return image
 
 
-@image_cache(max_size=128)
 def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply crop to image based on configuration"""
     if not config.crop_enabled or config.bbox is None:
         return image
 
@@ -80,9 +75,7 @@ def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     return image
 
 
-@image_cache(max_size=128)
 def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply resize to image based on configuration"""
     if not config.resize_enabled:
         return image
 
@@ -101,7 +94,7 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
         new_w, new_h = config.resize_width, config.resize_height
 
     if (w, h) != (new_w, new_h):
-        is_upscaling = w > new_w or h > new_h
+        is_upscaling = w < new_w or h < new_h
         interpolation = cv2.INTER_LANCZOS4 if is_upscaling else cv2.INTER_AREA
 
         image = cv2.resize(image, (new_w, new_h), interpolation=interpolation)
@@ -109,9 +102,7 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     return image
 
 
-@image_cache(max_size=128)
 def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply color space conversion to image based on configuration"""
     match config.color_space:
         case "Grayscale":
             if len(image.shape) == 3:
@@ -143,9 +134,7 @@ def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarra
             return image
 
 
-@image_cache(max_size=128)
 def _apply_gamma_correction(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply gamma correction to image based on configuration"""
     if not config.gamma_correction or config.gamma_value == 1.0:
         return image
 
@@ -155,9 +144,7 @@ def _apply_gamma_correction(image: np.ndarray, config: ProcessingConfig) -> np.n
     return cv2.LUT(image, table)
 
 
-@image_cache(max_size=128)
 def _apply_denoising(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply denoising to image based on configuration"""
     if config.denoise_nl_means:
         image = cv2.fastNlMeansDenoising(
             image,
@@ -182,9 +169,7 @@ def _apply_denoising(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     return image
 
 
-@image_cache(max_size=128)
 def _apply_filters(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply filters to image based on configuration"""
     if config.bilateral_filter:
         image = cv2.bilateralFilter(
             image,
@@ -209,9 +194,7 @@ def _apply_filters(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     return image
 
 
-@image_cache(max_size=128)
 def _apply_histogram_operations(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply histogram operations to image based on configuration"""
     if config.histogram_equalization and len(image.shape) == 2:
         image = cv2.equalizeHist(image)
 
@@ -221,8 +204,7 @@ def _apply_histogram_operations(image: np.ndarray, config: ProcessingConfig) -> 
             tileGridSize=(config.clahe_tile_size, config.clahe_tile_size),
         )
         image = clahe.apply(image)
-
-    if config.adaptive_hist_eq:
+    elif config.adaptive_hist_eq and len(image.shape) == 2:
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(config.adaptive_hist_kernel, config.adaptive_hist_kernel))
         image = clahe.apply(image)
 
@@ -234,9 +216,7 @@ def _apply_histogram_operations(image: np.ndarray, config: ProcessingConfig) -> 
     return image
 
 
-@image_cache(max_size=128)
 def _apply_line_removal(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply line removal to image based on configuration"""
     if config.vertical_line_removal:
         vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, config.vertical_kernel_size))
         vertical_lines = cv2.morphologyEx(image, cv2.MORPH_OPEN, vertical_kernel)
@@ -250,9 +230,7 @@ def _apply_line_removal(image: np.ndarray, config: ProcessingConfig) -> np.ndarr
     return image
 
 
-@image_cache(max_size=128)
 def _apply_morphological_operations(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply morphological operations to image based on configuration"""
     if config.stroke_width_normalization:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
 
@@ -270,9 +248,7 @@ def _apply_morphological_operations(image: np.ndarray, config: ProcessingConfig)
     return image
 
 
-@image_cache(max_size=128)
 def _apply_character_operations(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply character operations to image based on configuration"""
     if config.character_separation:
         kernel = cv2.getStructuringElement(
             cv2.MORPH_ELLIPSE,
@@ -310,9 +286,7 @@ def _apply_character_operations(image: np.ndarray, config: ProcessingConfig) -> 
     return image
 
 
-@image_cache(max_size=128)
 def _apply_enhancement_operations(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply enhancement operations to image based on configuration"""
     if config.text_enhancement:
         kernel_size = config.text_kernel_size * 2 + 1
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, 1))
@@ -358,9 +332,7 @@ def _apply_enhancement_operations(image: np.ndarray, config: ProcessingConfig) -
     return image
 
 
-@image_cache(max_size=128)
 def _apply_threshold(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply threshold to image based on configuration"""
     if not config.threshold_enabled:
         return image
 
@@ -413,9 +385,7 @@ def _apply_threshold(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     return image
 
 
-@image_cache(max_size=128)
 def _apply_advanced_morphology(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply advanced morphology to image based on configuration"""
     if config.tophat:
         tophat_kernel = cv2.getStructuringElement(
             cv2.MORPH_ELLIPSE,
@@ -436,8 +406,7 @@ def _apply_advanced_morphology(image: np.ndarray, config: ProcessingConfig) -> n
             (config.gradient_kernel_size, config.gradient_kernel_size),
         )
         image = cv2.morphologyEx(image, cv2.MORPH_GRADIENT, gradient_kernel)
-
-    if config.morphological_gradient:
+    elif config.morphological_gradient:
         morph_kernel = cv2.getStructuringElement(
             cv2.MORPH_ELLIPSE,
             (config.morphological_gradient_kernel, config.morphological_gradient_kernel),
@@ -447,9 +416,7 @@ def _apply_advanced_morphology(image: np.ndarray, config: ProcessingConfig) -> n
     return image
 
 
-@image_cache(max_size=128)
 def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply contour filtering to image based on configuration"""
     if config.contour_filtering:
         binary_image = _ensure_binary(image)
         contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -493,9 +460,7 @@ def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.
     return image
 
 
-@image_cache(max_size=128)
 def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    """Apply advanced operations to image based on configuration"""
     if config.hough_lines_removal:
         lines = cv2.HoughLinesP(
             image,
@@ -548,7 +513,6 @@ def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> n
 
 
 def _apply_skeletonization(image: np.ndarray) -> np.ndarray:
-    """Apply skeletonization to image"""
     kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
     skeleton = np.zeros_like(image)
     working_image = image.copy()
@@ -566,9 +530,7 @@ def _apply_skeletonization(image: np.ndarray) -> np.ndarray:
     return skeleton
 
 
-@image_cache(max_size=128)
 def _apply_watershed_markers(image: np.ndarray) -> np.ndarray:
-    """Apply watershed markers to image"""
     binary_image = _ensure_binary(image)
     kernel = np.ones((3, 3), np.uint8)
     sure_bg = cv2.dilate(binary_image, kernel, iterations=3)
