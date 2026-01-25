@@ -44,9 +44,6 @@ def _ensure_binary(image: np.ndarray) -> np.ndarray:
     if image.dtype != np.uint8:
         image = image.astype(np.uint8)
 
-    if len(np.unique(image)) > 2:
-        raise ValueError("Image is not binary")
-
     return image
 
 
@@ -103,33 +100,22 @@ def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
 
 
 def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
+    if len(image.shape) != 3:
+        return image
+
     match config.color_space:
         case "Grayscale":
-            if len(image.shape) == 3:
-                return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            return image
+            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         case "RGB":
-            if len(image.shape) == 3:
-                return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            return image
-        case "BGR":
-            return image  # Already in BGR format
+            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         case "HSV":
-            if len(image.shape) == 3:
-                return cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-            return image
+            return cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         case "LAB":
-            if len(image.shape) == 3:
-                return cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-            return image
+            return cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
         case "YUV":
-            if len(image.shape) == 3:
-                return cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
-            return image
+            return cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
         case "YCrCb":
-            if len(image.shape) == 3:
-                return cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
-            return image
+            return cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
         case _:
             return image
 
@@ -297,19 +283,10 @@ def _apply_enhancement_operations(image: np.ndarray, config: ProcessingConfig) -
     if config.detail_enhancement:
         if len(image.shape) == 2:
             color_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-        else:
-            color_image = image.copy()
-
-        enhanced = cv2.detailEnhance(
-            color_image,
-            sigma_s=config.detail_sigma_s,
-            sigma_r=config.detail_sigma_r,
-        )
-
-        if len(image.shape) == 2:
+            enhanced = cv2.detailEnhance(color_image, sigma_s=config.detail_sigma_s, sigma_r=config.detail_sigma_r)
             image = cv2.cvtColor(enhanced, cv2.COLOR_BGR2GRAY)
         else:
-            image = enhanced
+            image = cv2.detailEnhance(image, sigma_s=config.detail_sigma_s, sigma_r=config.detail_sigma_r)
 
     if config.edge_enhancement:
         gray_image = _ensure_grayscale(image)
@@ -336,8 +313,7 @@ def _apply_threshold(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     if not config.threshold_enabled:
         return image
 
-    if len(image.shape) == 3:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = _ensure_grayscale(image)
 
     match config.threshold_type:
         case "BINARY":

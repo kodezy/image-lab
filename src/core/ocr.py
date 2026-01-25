@@ -67,10 +67,7 @@ class TesseractOCRWrapper:
                 "Tesseract is not installed or not in PATH.\nInstall Tesseract and ensure it is in the system PATH.",
             )
 
-        if len(image.shape) == 3:
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = image
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
 
         config_parts = [f"--psm {self._config.psm}", f"--oem {self._config.oem}"]
 
