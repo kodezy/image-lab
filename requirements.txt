@@ -6,3 +6,5 @@ paddleocr
 paddlepaddle
 pytesseract
 easyocr
+rapidocr
+onnxruntime

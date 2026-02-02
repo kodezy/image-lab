@@ -75,6 +75,36 @@ class TesseractConfig(Config):
 
 
 @dataclass
+class RapidOCRConfig(Config):
+    lang_type: Literal["ch", "en", "multi"] = "en"
+    ocr_version: Literal["PP-OCRv4", "PP-OCRv5"] = "PP-OCRv4"
+    model_type: Literal["mobile", "server"] = "mobile"
+
+    use_det: bool = True
+    use_cls: bool = True
+    use_rec: bool = True
+    text_score: float = 0.5
+    min_height: int = 30
+    width_height_ratio: float = 8.0
+    max_side_len: int = 2000
+    min_side_len: int = 30
+
+    limit_side_len: int = 736
+    limit_type: Literal["min", "max"] = "min"
+    thresh: float = 0.3
+    box_thresh: float = 0.5
+    max_candidates: int = 1000
+    unclip_ratio: float = 1.6
+    use_dilation: bool = True
+    score_mode: Literal["fast", "slow"] = "fast"
+
+    cls_batch_num: int = 6
+    cls_thresh: float = 0.9
+
+    rec_batch_num: int = 6
+
+
+@dataclass
 class EasyOCRConfig(Config):
     """EasyOCR configuration"""
 
@@ -118,15 +148,13 @@ class EasyOCRConfig(Config):
 
 @dataclass
 class OCRConfig(Config):
-    """OCR configuration supporting PaddleOCR, Tesseract and EasyOCR"""
-
-    ocr_type: Literal["paddleocr", "tesseract", "easyocr"] = "paddleocr"
+    ocr_type: Literal["paddleocr", "tesseract", "easyocr", "rapidocr"] = "paddleocr"
     paddleocr_config: PaddleOCRConfig = field(default_factory=PaddleOCRConfig)
     tesseract_config: TesseractConfig = field(default_factory=TesseractConfig)
     easyocr_config: EasyOCRConfig = field(default_factory=EasyOCRConfig)
+    rapidocr_config: RapidOCRConfig = field(default_factory=RapidOCRConfig)
 
     def update_from_dict(self, data: dict[str, Any]) -> None:
-        """Update config from dictionary"""
         for key, value in data.items():
             if key == "paddleocr_config" and isinstance(value, dict):
                 self.paddleocr_config.update_from_dict(value)
@@ -134,6 +162,8 @@ class OCRConfig(Config):
                 self.tesseract_config.update_from_dict(value)
             elif key == "easyocr_config" and isinstance(value, dict):
                 self.easyocr_config.update_from_dict(value)
+            elif key == "rapidocr_config" and isinstance(value, dict):
+                self.rapidocr_config.update_from_dict(value)
             elif hasattr(self, key):
                 setattr(self, key, value)
 

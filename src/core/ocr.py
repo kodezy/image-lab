@@ -5,8 +5,9 @@ import easyocr
 import numpy as np
 import pytesseract
 from paddleocr import PaddleOCR
+from rapidocr import LangDet, LangRec, ModelType, OCRVersion, RapidOCR
 
-from src.config import EasyOCRConfig, OCRConfig, PaddleOCRConfig, TesseractConfig
+from src.config import EasyOCRConfig, OCRConfig, PaddleOCRConfig, RapidOCRConfig, TesseractConfig
 from src.infra.cache import ocr_cache
 
 
@@ -181,6 +182,75 @@ class EasyOCRWrapper:
         ]
 
 
+def _to_lang_det(value: str) -> LangDet:
+    return {"ch": LangDet.CH, "en": LangDet.EN, "multi": LangDet.MULTI}[value]
+
+
+def _to_lang_rec(value: str) -> LangRec:
+    return {"ch": LangRec.CH, "en": LangRec.EN}[value]
+
+
+def _to_ocr_version(value: str) -> OCRVersion:
+    return {"PP-OCRv4": OCRVersion.PPOCRV4, "PP-OCRv5": OCRVersion.PPOCRV5}[value]
+
+
+def _to_model_type(value: str) -> ModelType:
+    return {"mobile": ModelType.MOBILE, "server": ModelType.SERVER}[value]
+
+
+class RapidOCRWrapper:
+    def __init__(self, config: RapidOCRConfig) -> None:
+        self._config = config
+        rec_lang = LangRec.CH if config.lang_type == "multi" else _to_lang_rec(config.lang_type)
+        self._engine = RapidOCR(
+            params={
+                "Det.lang_type": _to_lang_det(config.lang_type),
+                "Rec.lang_type": rec_lang,
+                "Det.ocr_version": _to_ocr_version(config.ocr_version),
+                "Rec.ocr_version": _to_ocr_version(config.ocr_version),
+                "Det.model_type": _to_model_type(config.model_type),
+                "Rec.model_type": _to_model_type(config.model_type),
+                "Global.use_det": config.use_det,
+                "Global.use_cls": config.use_cls,
+                "Global.use_rec": config.use_rec,
+                "Global.text_score": config.text_score,
+                "Global.min_height": config.min_height,
+                "Global.width_height_ratio": config.width_height_ratio,
+                "Global.max_side_len": config.max_side_len,
+                "Global.min_side_len": config.min_side_len,
+                "Det.limit_side_len": config.limit_side_len,
+                "Det.limit_type": config.limit_type,
+                "Det.thresh": config.thresh,
+                "Det.box_thresh": config.box_thresh,
+                "Det.max_candidates": config.max_candidates,
+                "Det.unclip_ratio": config.unclip_ratio,
+                "Det.use_dilation": config.use_dilation,
+                "Det.score_mode": config.score_mode,
+                "Cls.cls_batch_num": config.cls_batch_num,
+                "Cls.cls_thresh": config.cls_thresh,
+                "Rec.rec_batch_num": config.rec_batch_num,
+            },
+        )
+
+    def predict(self, image: np.ndarray) -> Any:
+        result = self._engine(image)
+
+        if result is None or not hasattr(result, "txts"):
+            return [{"rec_texts": [], "rec_scores": [], "det_boxes": []}]
+
+        texts = list(result.txts) if result.txts else []
+        scores = list(result.scores) if result.scores else []
+        boxes = [box.tolist() for box in result.boxes] if hasattr(result, "boxes") and result.boxes is not None else []
+
+        return [
+            {
+                "rec_texts": texts,
+                "rec_scores": scores,
+                "det_boxes": boxes,
+            },
+        ]
+
+
 @ocr_cache(max_size=16)
 def create_ocr(config: OCRConfig | None = None) -> OCRProtocol:
     if config is None:
@@ -191,5 +261,8 @@ def create_ocr(config: OCRConfig | None = None) -> OCRProtocol:
 
     if config.ocr_type == "easyocr":
         return EasyOCRWrapper(config.easyocr_config)
+
+    if config.ocr_type == "rapidocr":
+        return RapidOCRWrapper(config.rapidocr_config)
 
     return PaddleOCRWrapper(config.paddleocr_config)

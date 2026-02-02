@@ -82,6 +82,32 @@ class OCRPanel:
             self.oem_var.set(tesseract_config.oem)
             self.tesseract_config_var.set(tesseract_config.config)
 
+        elif ocr_config.ocr_type == "rapidocr":
+            rapid_config = ocr_config.rapidocr_config
+
+            self.rapidocr_lang_var.set(rapid_config.lang_type)
+            self.rapidocr_version_var.set(rapid_config.ocr_version)
+            self.rapidocr_model_var.set(rapid_config.model_type)
+            self.rapidocr_use_det_var.set(rapid_config.use_det)
+            self.rapidocr_use_cls_var.set(rapid_config.use_cls)
+            self.rapidocr_use_rec_var.set(rapid_config.use_rec)
+            self.rapidocr_text_score_var.set(rapid_config.text_score)
+            self.rapidocr_min_height_var.set(rapid_config.min_height)
+            self.rapidocr_width_height_ratio_var.set(rapid_config.width_height_ratio)
+            self.rapidocr_max_side_len_var.set(rapid_config.max_side_len)
+            self.rapidocr_min_side_len_var.set(rapid_config.min_side_len)
+            self.rapidocr_limit_side_len_var.set(rapid_config.limit_side_len)
+            self.rapidocr_limit_type_var.set(rapid_config.limit_type)
+            self.rapidocr_thresh_var.set(rapid_config.thresh)
+            self.rapidocr_box_thresh_var.set(rapid_config.box_thresh)
+            self.rapidocr_max_candidates_var.set(rapid_config.max_candidates)
+            self.rapidocr_unclip_ratio_var.set(rapid_config.unclip_ratio)
+            self.rapidocr_use_dilation_var.set(rapid_config.use_dilation)
+            self.rapidocr_score_mode_var.set(rapid_config.score_mode)
+            self.rapidocr_cls_batch_num_var.set(rapid_config.cls_batch_num)
+            self.rapidocr_cls_thresh_var.set(rapid_config.cls_thresh)
+            self.rapidocr_rec_batch_num_var.set(rapid_config.rec_batch_num)
+
         else:
             easyocr_config = ocr_config.easyocr_config
 
@@ -137,6 +163,30 @@ class OCRPanel:
         self.psm_var = tk.IntVar(value=tesseract_config.psm)
         self.oem_var = tk.IntVar(value=tesseract_config.oem)
         self.tesseract_config_var = tk.StringVar(value=tesseract_config.config)
+
+        rapidocr_config = ocr_config.rapidocr_config
+        self.rapidocr_lang_var = tk.StringVar(value=rapidocr_config.lang_type)
+        self.rapidocr_version_var = tk.StringVar(value=rapidocr_config.ocr_version)
+        self.rapidocr_model_var = tk.StringVar(value=rapidocr_config.model_type)
+        self.rapidocr_use_det_var = tk.BooleanVar(value=rapidocr_config.use_det)
+        self.rapidocr_use_cls_var = tk.BooleanVar(value=rapidocr_config.use_cls)
+        self.rapidocr_use_rec_var = tk.BooleanVar(value=rapidocr_config.use_rec)
+        self.rapidocr_text_score_var = tk.DoubleVar(value=rapidocr_config.text_score)
+        self.rapidocr_min_height_var = tk.IntVar(value=rapidocr_config.min_height)
+        self.rapidocr_width_height_ratio_var = tk.DoubleVar(value=rapidocr_config.width_height_ratio)
+        self.rapidocr_max_side_len_var = tk.IntVar(value=rapidocr_config.max_side_len)
+        self.rapidocr_min_side_len_var = tk.IntVar(value=rapidocr_config.min_side_len)
+        self.rapidocr_limit_side_len_var = tk.IntVar(value=rapidocr_config.limit_side_len)
+        self.rapidocr_limit_type_var = tk.StringVar(value=rapidocr_config.limit_type)
+        self.rapidocr_thresh_var = tk.DoubleVar(value=rapidocr_config.thresh)
+        self.rapidocr_box_thresh_var = tk.DoubleVar(value=rapidocr_config.box_thresh)
+        self.rapidocr_max_candidates_var = tk.IntVar(value=rapidocr_config.max_candidates)
+        self.rapidocr_unclip_ratio_var = tk.DoubleVar(value=rapidocr_config.unclip_ratio)
+        self.rapidocr_use_dilation_var = tk.BooleanVar(value=rapidocr_config.use_dilation)
+        self.rapidocr_score_mode_var = tk.StringVar(value=rapidocr_config.score_mode)
+        self.rapidocr_cls_batch_num_var = tk.IntVar(value=rapidocr_config.cls_batch_num)
+        self.rapidocr_cls_thresh_var = tk.DoubleVar(value=rapidocr_config.cls_thresh)
+        self.rapidocr_rec_batch_num_var = tk.IntVar(value=rapidocr_config.rec_batch_num)
 
         easyocr_config = ocr_config.easyocr_config
         self.easyocr_lang_var = tk.StringVar(value=",".join(easyocr_config.lang_list))
@@ -195,7 +245,7 @@ class OCRPanel:
             scrollable_frame,
             "OCR Engine",
             self.ocr_type_var,
-            ["paddleocr", "tesseract", "easyocr"],
+            ["paddleocr", "tesseract", "easyocr", "rapidocr"],
             self._on_ocr_type_changed,
         )
         ocr_type_frame.pack(fill=tk.X, pady=(0, 5))
@@ -208,6 +258,9 @@ class OCRPanel:
 
         self.easyocr_frame = ttk.Frame(scrollable_frame)
         self._create_easyocr_settings(self.easyocr_frame)
+
+        self.rapidocr_frame = ttk.Frame(scrollable_frame)
+        self._create_rapidocr_settings(self.rapidocr_frame)
 
         self._update_visible_settings()
 
@@ -575,6 +628,228 @@ class OCRPanel:
         )
         adjust_contrast_frame.pack(fill=tk.X, pady=(0, 5))
 
+    def _create_rapidocr_settings(self, parent: ttk.Frame) -> None:
+        lang_frame, self.rapidocr_lang_combobox = create_combobox(
+            parent,
+            "Language",
+            self.rapidocr_lang_var,
+            ["ch", "en", "multi"],
+            self._on_rapidocr_lang_changed,
+        )
+        lang_frame.pack(fill=tk.X, pady=(0, 5))
+
+        version_frame, self.rapidocr_version_combobox = create_combobox(
+            parent,
+            "OCR Version",
+            self.rapidocr_version_var,
+            ["PP-OCRv4", "PP-OCRv5"],
+            self._on_rapidocr_version_changed,
+        )
+        version_frame.pack(fill=tk.X, pady=(0, 5))
+
+        model_frame, self.rapidocr_model_combobox = create_combobox(
+            parent,
+            "Model Type",
+            self.rapidocr_model_var,
+            ["mobile", "server"],
+            self._on_rapidocr_model_changed,
+        )
+        model_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
+
+        use_det_frame = ttk.Frame(parent)
+        use_det_frame.pack(fill=tk.X, pady=(0, 5))
+        self.rapidocr_use_det_checkbox = ttk.Checkbutton(
+            use_det_frame,
+            text="Use Text Detection",
+            variable=self.rapidocr_use_det_var,
+            command=self._on_rapidocr_use_det_changed,
+        )
+        self.rapidocr_use_det_checkbox.pack(anchor=tk.W)
+
+        use_cls_frame = ttk.Frame(parent)
+        use_cls_frame.pack(fill=tk.X, pady=(0, 5))
+        self.rapidocr_use_cls_checkbox = ttk.Checkbutton(
+            use_cls_frame,
+            text="Use Text Direction Classification",
+            variable=self.rapidocr_use_cls_var,
+            command=self._on_rapidocr_use_cls_changed,
+        )
+        self.rapidocr_use_cls_checkbox.pack(anchor=tk.W)
+
+        use_rec_frame = ttk.Frame(parent)
+        use_rec_frame.pack(fill=tk.X, pady=(0, 5))
+        self.rapidocr_use_rec_checkbox = ttk.Checkbutton(
+            use_rec_frame,
+            text="Use Text Recognition",
+            variable=self.rapidocr_use_rec_var,
+            command=self._on_rapidocr_use_rec_changed,
+        )
+        self.rapidocr_use_rec_checkbox.pack(anchor=tk.W)
+
+        text_score_frame, _, _ = create_slider(
+            parent,
+            "Text Score Threshold",
+            self.rapidocr_text_score_var,
+            0.0,
+            1.0,
+            self._on_rapidocr_text_score_changed,
+        )
+        text_score_frame.pack(fill=tk.X, pady=(0, 5))
+
+        min_height_frame, self.rapidocr_min_height_spinbox = create_spinbox(
+            parent,
+            "Min Height",
+            self.rapidocr_min_height_var,
+            10,
+            500,
+            self._on_rapidocr_min_height_changed,
+        )
+        min_height_frame.pack(fill=tk.X, pady=(0, 5))
+
+        width_height_ratio_frame, _, _ = create_slider(
+            parent,
+            "Width/Height Ratio",
+            self.rapidocr_width_height_ratio_var,
+            1.0,
+            20.0,
+            self._on_rapidocr_width_height_ratio_changed,
+        )
+        width_height_ratio_frame.pack(fill=tk.X, pady=(0, 5))
+
+        max_side_len_frame, self.rapidocr_max_side_len_spinbox = create_spinbox(
+            parent,
+            "Max Side Length",
+            self.rapidocr_max_side_len_var,
+            500,
+            5000,
+            self._on_rapidocr_max_side_len_changed,
+        )
+        max_side_len_frame.pack(fill=tk.X, pady=(0, 5))
+
+        min_side_len_frame, self.rapidocr_min_side_len_spinbox = create_spinbox(
+            parent,
+            "Min Side Length",
+            self.rapidocr_min_side_len_var,
+            10,
+            500,
+            self._on_rapidocr_min_side_len_changed,
+        )
+        min_side_len_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
+
+        limit_side_len_frame, self.rapidocr_limit_side_len_spinbox = create_spinbox(
+            parent,
+            "Detection Limit Side Length",
+            self.rapidocr_limit_side_len_var,
+            64,
+            4096,
+            self._on_rapidocr_limit_side_len_changed,
+        )
+        limit_side_len_frame.pack(fill=tk.X, pady=(0, 5))
+
+        limit_type_frame, self.rapidocr_limit_type_combobox = create_combobox(
+            parent,
+            "Detection Limit Type",
+            self.rapidocr_limit_type_var,
+            ["min", "max"],
+            self._on_rapidocr_limit_type_changed,
+        )
+        limit_type_frame.pack(fill=tk.X, pady=(0, 5))
+
+        thresh_frame, _, _ = create_slider(
+            parent,
+            "Detection Threshold",
+            self.rapidocr_thresh_var,
+            0.1,
+            0.9,
+            self._on_rapidocr_thresh_changed,
+        )
+        thresh_frame.pack(fill=tk.X, pady=(0, 5))
+
+        box_thresh_frame, _, _ = create_slider(
+            parent,
+            "Box Threshold",
+            self.rapidocr_box_thresh_var,
+            0.1,
+            0.9,
+            self._on_rapidocr_box_thresh_changed,
+        )
+        box_thresh_frame.pack(fill=tk.X, pady=(0, 5))
+
+        unclip_ratio_frame, _, _ = create_slider(
+            parent,
+            "Unclip Ratio",
+            self.rapidocr_unclip_ratio_var,
+            1.0,
+            3.0,
+            self._on_rapidocr_unclip_ratio_changed,
+        )
+        unclip_ratio_frame.pack(fill=tk.X, pady=(0, 5))
+
+        max_candidates_frame, self.rapidocr_max_candidates_spinbox = create_spinbox(
+            parent,
+            "Max Candidates",
+            self.rapidocr_max_candidates_var,
+            100,
+            5000,
+            self._on_rapidocr_max_candidates_changed,
+        )
+        max_candidates_frame.pack(fill=tk.X, pady=(0, 5))
+
+        use_dilation_frame = ttk.Frame(parent)
+        use_dilation_frame.pack(fill=tk.X, pady=(0, 5))
+        self.rapidocr_use_dilation_checkbox = ttk.Checkbutton(
+            use_dilation_frame,
+            text="Use Dilation",
+            variable=self.rapidocr_use_dilation_var,
+            command=self._on_rapidocr_use_dilation_changed,
+        )
+        self.rapidocr_use_dilation_checkbox.pack(anchor=tk.W)
+
+        score_mode_frame, self.rapidocr_score_mode_combobox = create_combobox(
+            parent,
+            "Score Mode",
+            self.rapidocr_score_mode_var,
+            ["fast", "slow"],
+            self._on_rapidocr_score_mode_changed,
+        )
+        score_mode_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
+
+        cls_batch_num_frame, self.rapidocr_cls_batch_num_spinbox = create_spinbox(
+            parent,
+            "Classification Batch Size",
+            self.rapidocr_cls_batch_num_var,
+            1,
+            32,
+            self._on_rapidocr_cls_batch_num_changed,
+        )
+        cls_batch_num_frame.pack(fill=tk.X, pady=(0, 5))
+
+        cls_thresh_frame, _, _ = create_slider(
+            parent,
+            "Classification Threshold",
+            self.rapidocr_cls_thresh_var,
+            0.5,
+            1.0,
+            self._on_rapidocr_cls_thresh_changed,
+        )
+        cls_thresh_frame.pack(fill=tk.X, pady=(0, 5))
+
+        rec_batch_num_frame, self.rapidocr_rec_batch_num_spinbox = create_spinbox(
+            parent,
+            "Recognition Batch Size",
+            self.rapidocr_rec_batch_num_var,
+            1,
+            32,
+            self._on_rapidocr_rec_batch_num_changed,
+        )
+        rec_batch_num_frame.pack(fill=tk.X, pady=(0, 5))
+
     def _update_visible_settings(self) -> None:
         """Update visible settings based on OCR type"""
         ocr_type = self.ocr_type_var.get()
@@ -582,11 +857,14 @@ class OCRPanel:
         self.paddleocr_frame.pack_forget()
         self.tesseract_frame.pack_forget()
         self.easyocr_frame.pack_forget()
+        self.rapidocr_frame.pack_forget()
 
         if ocr_type == "paddleocr":
             self.paddleocr_frame.pack(fill=tk.X, anchor=tk.NW)
         elif ocr_type == "tesseract":
             self.tesseract_frame.pack(fill=tk.X, anchor=tk.NW)
+        elif ocr_type == "rapidocr":
+            self.rapidocr_frame.pack(fill=tk.X, anchor=tk.NW)
         else:
             self.easyocr_frame.pack(fill=tk.X, anchor=tk.NW)
 
@@ -796,8 +1074,95 @@ class OCRPanel:
         self._invalidate_ocr_instance()
 
     def _on_easyocr_adjust_contrast_changed(self, value) -> None:
-        """Handle EasyOCR adjust contrast change"""
         self.app.ocr_config.easyocr_config.adjust_contrast = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_lang_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.lang_type = self.rapidocr_lang_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_version_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.ocr_version = self.rapidocr_version_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_model_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.model_type = self.rapidocr_model_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_use_cls_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.use_cls = self.rapidocr_use_cls_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_text_score_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.text_score = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_limit_side_len_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.limit_side_len = self.rapidocr_limit_side_len_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_limit_type_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.limit_type = self.rapidocr_limit_type_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_thresh_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.thresh = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_box_thresh_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.box_thresh = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_unclip_ratio_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.unclip_ratio = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_max_candidates_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.max_candidates = self.rapidocr_max_candidates_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_use_dilation_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.use_dilation = self.rapidocr_use_dilation_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_score_mode_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.score_mode = self.rapidocr_score_mode_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_cls_batch_num_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.cls_batch_num = self.rapidocr_cls_batch_num_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_cls_thresh_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.cls_thresh = round(float(value), 3)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_rec_batch_num_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.rec_batch_num = self.rapidocr_rec_batch_num_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_use_det_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.use_det = self.rapidocr_use_det_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_use_rec_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.use_rec = self.rapidocr_use_rec_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_min_height_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.min_height = self.rapidocr_min_height_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_width_height_ratio_changed(self, value) -> None:
+        self.app.ocr_config.rapidocr_config.width_height_ratio = round(float(value), 2)
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_max_side_len_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.max_side_len = self.rapidocr_max_side_len_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_rapidocr_min_side_len_changed(self) -> None:
+        self.app.ocr_config.rapidocr_config.min_side_len = self.rapidocr_min_side_len_var.get()
         self._invalidate_ocr_instance()
 
     def _invalidate_ocr_instance(self) -> None:
