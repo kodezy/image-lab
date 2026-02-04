@@ -22,7 +22,7 @@ Image Lab serves as a flexible platform for testing and applying various image p
 
 - **Python**: 3.13 or newer
 - **Operating System**: Windows, macOS, Linux
-- **Dependencies**: OpenCV, NumPy, Pillow, PaddleOCR, PyAutoGUI, scikit-image
+- **Dependencies**: See `requirements.txt`. Note: `pytesseract` requires [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) installed on your system.
 
 ## 📦 Installation
 
