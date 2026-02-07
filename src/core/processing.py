@@ -54,6 +54,23 @@ def _ensure_grayscale(image: np.ndarray) -> np.ndarray:
     return image
 
 
+def get_dimensions_before_crop(image: np.ndarray, config: ProcessingConfig) -> tuple[int, int]:
+    h, w = image.shape[:2]
+    if not config.resize_enabled:
+        return h, w
+    if config.resize_maintain_aspect_ratio:
+        aspect = w / h
+        if aspect > 1:
+            new_w = config.resize_width
+            new_h = int(config.resize_width / aspect)
+        else:
+            new_h = config.resize_height
+            new_w = int(config.resize_height * aspect)
+    else:
+        new_w, new_h = config.resize_width, config.resize_height
+    return new_h, new_w
+
+
 def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     if not config.crop_enabled or config.bbox is None:
         return image

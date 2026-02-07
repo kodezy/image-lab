@@ -186,18 +186,17 @@ class ImagePanel:
         self.canvas.bind("<Configure>", self._on_canvas_resize)
 
     def _on_mouse_wheel(self, event) -> None:
-        """Handle mouse wheel for zooming"""
         if self.app.processed_image is None:
             return
 
         old_zoom = self.zoom_factor
 
         if sys.platform == "darwin":
-            delta = event.delta
+            zoom_in = event.delta > 0
         else:
-            delta = event.delta if event.delta else (4 if event.num == 4 else 5)
+            zoom_in = getattr(event, "num", 0) == 4
 
-        if delta > 0 or (not sys.platform == "darwin" and event.num == 4):
+        if zoom_in:
             self.zoom_factor = min(self.zoom_factor * 1.1, 5.0)
         else:
             self.zoom_factor = max(self.zoom_factor / 1.1, 0.3)

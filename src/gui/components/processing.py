@@ -4,6 +4,7 @@ from typing import Any
 
 import numpy as np
 
+from src.core.processing import get_dimensions_before_crop
 from src.gui.utils import create_checkbox, create_combobox, create_labeled_frame, create_scrollable_frame, create_slider
 
 
@@ -455,12 +456,11 @@ class ProcessingPanel:
         self.app.update_image_display()
 
     def _update_crop_status(self) -> None:
-        """Update crop status label with real-time feedback"""
         if not self.crop_enabled_var.get():
             self.crop_status_label.config(text="Crop: Disabled", foreground="gray")
             return
 
-        if self.app.processed_image is None:
+        if self.app.current_image is None:
             self.crop_status_label.config(text="Crop: No image", foreground="gray")
             return
 
@@ -476,7 +476,10 @@ class ProcessingPanel:
 
         x1, y1, x2, y2 = bbox
 
-        img_height, img_width = self.app.processed_image.shape[:2]
+        img_height, img_width = get_dimensions_before_crop(
+            self.app.current_image,
+            self.app.processing_config,
+        )
 
         if x1 < 0 or y1 < 0 or x2 > img_width or y2 > img_height:
             self.crop_status_label.config(
@@ -2258,8 +2261,11 @@ class ProcessingPanel:
         unique_values = np.unique(self.app.processed_image)
         return len(unique_values) == 2 and set(unique_values) == {0, 255}
 
+    def sync_controls_from_image(self) -> None:
+        self._update_grayscale_dependent_controls()
+        self._update_binary_dependent_controls()
+
     def _update_grayscale_dependent_controls(self) -> None:
-        """Update state of controls that depend on grayscale"""
         is_grayscale_config = self.color_space_var.get() == "Grayscale"
         is_grayscale_image = self._is_image_grayscale()
         is_grayscale = is_grayscale_config or is_grayscale_image
@@ -2274,6 +2280,12 @@ class ProcessingPanel:
         self.local_binary_pattern_checkbox.config(state=state)
 
         if state == tk.DISABLED:
+            self.threshold_enabled_var.set(False)
+            self.edge_enhancement_var.set(False)
+            self.histogram_equalization_var.set(False)
+            self.adaptive_hist_eq_var.set(False)
+            self.multi_otsu_var.set(False)
+            self.local_binary_pattern_var.set(False)
             self.app.processing_config.threshold_enabled = False
             self.app.processing_config.edge_enhancement = False
             self.app.processing_config.histogram_equalization = False
@@ -2305,6 +2317,14 @@ class ProcessingPanel:
         self.local_binary_pattern_checkbox.config(state=state)
 
         if state == tk.DISABLED:
+            self.noise_dots_removal_var.set(False)
+            self.contour_filtering_var.set(False)
+            self.connected_components_filtering_var.set(False)
+            self.aspect_ratio_filtering_var.set(False)
+            self.distance_transform_var.set(False)
+            self.skeletonize_var.set(False)
+            self.watershed_markers_var.set(False)
+            self.local_binary_pattern_var.set(False)
             self.app.processing_config.noise_dots_removal = False
             self.app.processing_config.contour_filtering = False
             self.app.processing_config.connected_components_filtering = False

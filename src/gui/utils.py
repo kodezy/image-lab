@@ -122,7 +122,7 @@ def create_spinbox(
     spinbox.pack(side=tk.LEFT, padx=(10, 0))
 
     if command:
-        spinbox.configure(command=command)
+        variable.trace_add("write", lambda *_: command())
 
     return frame, spinbox
 
@@ -185,14 +185,17 @@ def create_scrollable_frame(parent: tk.Widget) -> tuple[tk.Canvas, ttk.Frame, tt
             canvas.itemconfig(canvas_window, width=canvas_width)
 
     def bind_to_all_children(widget: tk.Widget) -> None:
-        """Recursively bind mouse wheel to widget and all children"""
+        if getattr(widget, "_wheel_bound", False):
+            for child in widget.winfo_children():
+                bind_to_all_children(child)
+            return
         try:
             widget.bind("<MouseWheel>", on_mousewheel, add=True)
             widget.bind("<Button-4>", on_mousewheel, add=True)
             widget.bind("<Button-5>", on_mousewheel, add=True)
+            widget._wheel_bound = True
         except Exception:
             pass
-
         try:
             for child in widget.winfo_children():
                 bind_to_all_children(child)

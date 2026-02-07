@@ -200,6 +200,7 @@ class ImageLabGUI:
                         self.processing_config.update_from_dict(config_data)
 
             self._refresh_panels()
+            self.ocr_instance = None
             show_success("Configuration loaded")
 
         except Exception as exception:
@@ -213,6 +214,7 @@ class ImageLabGUI:
             self.processing_config = ProcessingConfig()
 
             self._refresh_panels()
+            self.ocr_instance = None
             show_success("Configurations reset to defaults")
 
     def update_image_display(self) -> None:
@@ -223,8 +225,7 @@ class ImageLabGUI:
         try:
             self.processed_image = process_image(self.current_image, self.processing_config)
             self.image_panel.update_image(self.processed_image)
-            self.processing_panel._update_grayscale_dependent_controls()
-            self.processing_panel._update_binary_dependent_controls()
+            self.processing_panel.sync_controls_from_image()
 
         except Exception as exception:
             show_error(f"Processing failed: {exception}")

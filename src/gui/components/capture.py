@@ -83,7 +83,6 @@ class CapturePanel:
         device_id_frame.pack(fill=tk.X, pady=2)
 
     def _on_device_id_changed(self) -> None:
-        """Handle device ID change"""
         self.app.capture_config.device_id = self.device_id_var.get()
 
     def _create_actions_section(self) -> None:
