@@ -282,7 +282,7 @@ def _apply_histogram_operations(image: np.ndarray, config: ProcessingConfig) -> 
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(config.adaptive_hist_kernel, config.adaptive_hist_kernel))
         image = clahe.apply(image)
 
-    if config.multi_otsu and len(image.shape) == 2:
+    if config.multi_otsu and len(image.shape) == 2 and config.multi_otsu_classes >= 2:
         thresholds = threshold_multiotsu(image, classes=config.multi_otsu_classes)
         regions = np.digitize(image, bins=thresholds)
         image = (regions * (255 // (config.multi_otsu_classes - 1))).astype(np.uint8)
@@ -352,10 +352,11 @@ def _apply_character_operations(image: np.ndarray, config: ProcessingConfig) -> 
     if config.noise_dots_removal:
         binary_image = _ensure_binary(image)
         contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        fill_black = 0 if len(image.shape) == 2 else (0, 0, 0)
 
         for contour in contours:
             if cv2.contourArea(contour) < config.min_contour_area:
-                cv2.drawContours(image, [contour], -1, (0,), -1)
+                cv2.drawContours(image, [contour], -1, fill_black, -1)
 
     return image
 
@@ -485,12 +486,13 @@ def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.
         binary_image = _ensure_binary(image)
         contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         mask = np.zeros_like(image)
+        fill_white = 255 if len(image.shape) == 2 else (255, 255, 255)
 
         for contour in contours:
             area = cv2.contourArea(contour)
 
             if config.contour_area_min <= area <= config.contour_area_max:
-                cv2.drawContours(mask, [contour], -1, (255,), -1)
+                cv2.drawContours(mask, [contour], -1, fill_white, -1)
 
         image = cv2.bitwise_and(image, mask)
 
@@ -511,13 +513,14 @@ def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.
         binary_image = _ensure_binary(image)
         contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         mask = np.zeros_like(image)
+        fill_white = 255 if len(image.shape) == 2 else (255, 255, 255)
 
         for contour in contours:
             _, _, w, h = cv2.boundingRect(contour)
             aspect_ratio = w / h if h > 0 else 0
 
             if config.min_aspect_ratio <= aspect_ratio <= config.max_aspect_ratio:
-                cv2.drawContours(mask, [contour], -1, (255,), -1)
+                cv2.drawContours(mask, [contour], -1, fill_white, -1)
 
         image = cv2.bitwise_and(image, mask)
 
