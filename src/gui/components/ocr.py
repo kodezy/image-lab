@@ -1001,14 +1001,14 @@ class OCRPanel:
         """Handle EasyOCR language change"""
         lang_str = self.easyocr_lang_var.get()
         lang_list = [lang.strip() for lang in lang_str.split(",") if lang.strip()]
-        self.app.ocr_config.easyocr_config.lang_list = lang_list if lang_list else ["en"]
+        self.app.ocr_config.easyocr_config.lang_list = lang_list or ["en"]
         self._invalidate_ocr_instance()
 
     def _on_easyocr_gpu_changed(self) -> None:
         """Handle EasyOCR GPU change"""
         if self.easyocr_gpu_var.get():
             gpu_str = self.easyocr_gpu_str_var.get()
-            self.app.ocr_config.easyocr_config.gpu = gpu_str if gpu_str else True
+            self.app.ocr_config.easyocr_config.gpu = gpu_str or True
         else:
             self.app.ocr_config.easyocr_config.gpu = False
         self._invalidate_ocr_instance()

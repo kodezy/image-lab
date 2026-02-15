@@ -17,6 +17,7 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
         _apply_resize,
         _apply_crop,
         _apply_color_space,
+        _apply_deskew,
         _apply_gamma_correction,
         _apply_denoising,
         _apply_filters,
@@ -26,6 +27,7 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
         _apply_character_operations,
         _apply_enhancement_operations,
         _apply_threshold,
+        _apply_invert,
         _apply_advanced_morphology,
         _apply_contour_filtering,
         _apply_advanced_operations,
@@ -135,6 +137,75 @@ def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarra
             return cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
         case _:
             return image
+
+
+def _apply_deskew(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
+    if not config.deskew_enabled:
+        return image
+
+    gray = _ensure_grayscale(image)
+    h, w = gray.shape[:2]
+
+    if config.deskew_method == "min_area_rect":
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        if not contours:
+            return image
+
+        largest = max(contours, key=cv2.contourArea)
+
+        if cv2.contourArea(largest) < 100:
+            return image
+
+        rect = cv2.minAreaRect(largest)
+        angle = rect[-1]
+
+        if angle < -45:
+            angle = 90 + angle
+
+        if abs(angle) < 0.5:
+            return image
+    else:
+        edges = cv2.Canny(gray, 50, 150)
+        lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
+
+        if lines is None or len(lines) == 0:
+            return image
+
+        angles = []
+        for line in lines:
+            rho, theta = line[0]
+            angle_deg = np.degrees(theta) - 90
+            if -45 <= angle_deg <= 45:
+                angles.append(angle_deg)
+
+        if not angles:
+            return image
+
+        angle = float(np.median(angles))
+
+        if abs(angle) < 0.5:
+            return image
+
+    center = (w // 2, h // 2)
+    matrix = cv2.getRotationMatrix2D(center, -angle, 1.0)
+    rotated = cv2.warpAffine(
+        image,
+        matrix,
+        (w, h),
+        flags=cv2.INTER_CUBIC,
+        borderMode=cv2.BORDER_REPLICATE,
+    )
+
+    return rotated
+
+
+def _apply_invert(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
+    if not config.invert_colors:
+        return image
+
+    return cv2.bitwise_not(image)
 
 
 def _apply_gamma_correction(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
@@ -455,8 +526,9 @@ def _apply_contour_filtering(image: np.ndarray, config: ProcessingConfig) -> np.
 
 def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
     if config.hough_lines_removal:
+        gray_for_hough = _ensure_grayscale(image)
         lines = cv2.HoughLinesP(
-            image,
+            gray_for_hough,
             1,
             np.pi / 180,
             config.hough_threshold,
@@ -465,10 +537,11 @@ def _apply_advanced_operations(image: np.ndarray, config: ProcessingConfig) -> n
         )
 
         if lines is not None:
+            line_color = 0 if len(image.shape) == 2 else (0, 0, 0)
             for line in lines:
                 coords = line.flatten()
                 x1, y1, x2, y2 = int(coords[0]), int(coords[1]), int(coords[2]), int(coords[3])
-                cv2.line(image, (x1, y1), (x2, y2), (0,), 2)
+                cv2.line(image, (x1, y1), (x2, y2), line_color, 2)
 
     if config.intensity_normalization:
         image = cv2.normalize(image, image, config.norm_min, config.norm_max, cv2.NORM_MINMAX)

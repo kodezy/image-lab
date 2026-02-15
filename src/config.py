@@ -182,6 +182,9 @@ class ProcessingConfig(Config):
     resize_maintain_aspect_ratio: bool = True
     gamma_correction: bool = False
     gamma_value: float = 1.0
+    deskew_enabled: bool = False
+    deskew_method: Literal["min_area_rect", "hough"] = "min_area_rect"
+    invert_colors: bool = False
 
     # Noise reduction
     denoise_nl_means: bool = False

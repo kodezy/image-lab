@@ -68,6 +68,9 @@ class ProcessingPanel:
         self.resize_maintain_aspect_var.set(config.resize_maintain_aspect_ratio)
         self.gamma_correction_var.set(config.gamma_correction)
         self.gamma_value_var.set(config.gamma_value)
+        self.deskew_enabled_var.set(config.deskew_enabled)
+        self.deskew_method_var.set(config.deskew_method)
+        self.invert_colors_var.set(config.invert_colors)
 
         self.denoise_nl_means_var.set(config.denoise_nl_means)
         self.denoise_h_var.set(config.denoise_h)
@@ -174,6 +177,9 @@ class ProcessingPanel:
         self.resize_maintain_aspect_var = tk.BooleanVar(value=config.resize_maintain_aspect_ratio)
         self.gamma_correction_var = tk.BooleanVar(value=config.gamma_correction)
         self.gamma_value_var = tk.DoubleVar(value=config.gamma_value)
+        self.deskew_enabled_var = tk.BooleanVar(value=config.deskew_enabled)
+        self.deskew_method_var = tk.StringVar(value=config.deskew_method)
+        self.invert_colors_var = tk.BooleanVar(value=config.invert_colors)
 
         self.denoise_nl_means_var = tk.BooleanVar(value=config.denoise_nl_means)
         self.denoise_h_var = tk.DoubleVar(value=config.denoise_h)
@@ -415,6 +421,31 @@ class ProcessingPanel:
         )
         gamma_frame.pack(fill=tk.X, pady=2)
 
+        ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
+
+        create_checkbox(
+            preprocess_frame,
+            "Deskew",
+            self.deskew_enabled_var,
+            self._on_deskew_enabled_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        deskew_method_frame, self.deskew_method_combobox = create_combobox(
+            preprocess_frame,
+            "Deskew Method",
+            self.deskew_method_var,
+            ["min_area_rect", "hough"],
+            self._on_deskew_method_changed,
+        )
+        deskew_method_frame.pack(fill=tk.X, pady=2)
+
+        create_checkbox(
+            preprocess_frame,
+            "Invert Colors",
+            self.invert_colors_var,
+            self._on_invert_colors_changed,
+        ).pack(anchor=tk.W, pady=2)
+
     def _on_resize_enabled_changed(self) -> None:
         """Handle resize enabled change"""
         self.app.processing_config.resize_enabled = self.resize_enabled_var.get()
@@ -447,6 +478,18 @@ class ProcessingPanel:
     def _on_gamma_value_changed(self, value) -> None:
         """Handle gamma value change"""
         self.app.processing_config.gamma_value = float(value)
+        self.app.update_image_display()
+
+    def _on_deskew_enabled_changed(self) -> None:
+        self.app.processing_config.deskew_enabled = self.deskew_enabled_var.get()
+        self.app.update_image_display()
+
+    def _on_deskew_method_changed(self, value) -> None:
+        self.app.processing_config.deskew_method = value
+        self.app.update_image_display()
+
+    def _on_invert_colors_changed(self) -> None:
+        self.app.processing_config.invert_colors = self.invert_colors_var.get()
         self.app.update_image_display()
 
     def _on_crop_enabled_changed(self) -> None:
