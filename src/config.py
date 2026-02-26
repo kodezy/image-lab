@@ -185,6 +185,8 @@ class ProcessingConfig(Config):
     deskew_enabled: bool = False
     deskew_method: Literal["min_area_rect", "hough"] = "min_area_rect"
     invert_colors: bool = False
+    trim_borders_enabled: bool = False
+    trim_borders_tolerance: int = 5
 
     # Noise reduction
     denoise_nl_means: bool = False

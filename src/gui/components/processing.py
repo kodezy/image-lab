@@ -71,6 +71,8 @@ class ProcessingPanel:
         self.deskew_enabled_var.set(config.deskew_enabled)
         self.deskew_method_var.set(config.deskew_method)
         self.invert_colors_var.set(config.invert_colors)
+        self.trim_borders_enabled_var.set(config.trim_borders_enabled)
+        self.trim_borders_tolerance_var.set(config.trim_borders_tolerance)
 
         self.denoise_nl_means_var.set(config.denoise_nl_means)
         self.denoise_h_var.set(config.denoise_h)
@@ -163,6 +165,7 @@ class ProcessingPanel:
         self._update_grayscale_dependent_controls()
         self._update_binary_dependent_controls()
         self._update_crop_status()
+        self._update_trim_borders_tolerance_visibility()
 
     def _setup_variables(self) -> None:
         """Setup tkinter variables for all processing options"""
@@ -180,6 +183,8 @@ class ProcessingPanel:
         self.deskew_enabled_var = tk.BooleanVar(value=config.deskew_enabled)
         self.deskew_method_var = tk.StringVar(value=config.deskew_method)
         self.invert_colors_var = tk.BooleanVar(value=config.invert_colors)
+        self.trim_borders_enabled_var = tk.BooleanVar(value=config.trim_borders_enabled)
+        self.trim_borders_tolerance_var = tk.IntVar(value=config.trim_borders_tolerance)
 
         self.denoise_nl_means_var = tk.BooleanVar(value=config.denoise_nl_means)
         self.denoise_h_var = tk.DoubleVar(value=config.denoise_h)
@@ -445,6 +450,39 @@ class ProcessingPanel:
             self.invert_colors_var,
             self._on_invert_colors_changed,
         ).pack(anchor=tk.W, pady=2)
+
+        create_checkbox(
+            preprocess_frame,
+            "Trim borders",
+            self.trim_borders_enabled_var,
+            self._on_trim_borders_enabled_changed,
+        ).pack(anchor=tk.W, pady=2)
+
+        self.trim_borders_tolerance_frame, _, _ = create_slider(
+            preprocess_frame,
+            "Trim tolerance",
+            self.trim_borders_tolerance_var,
+            0,
+            30,
+            self._on_trim_borders_tolerance_changed,
+        )
+        self.trim_borders_tolerance_frame.pack(fill=tk.X, pady=2)
+        self._update_trim_borders_tolerance_visibility()
+
+    def _update_trim_borders_tolerance_visibility(self) -> None:
+        if self.trim_borders_enabled_var.get():
+            self.trim_borders_tolerance_frame.pack(fill=tk.X, pady=2)
+        else:
+            self.trim_borders_tolerance_frame.pack_forget()
+
+    def _on_trim_borders_enabled_changed(self) -> None:
+        self.app.processing_config.trim_borders_enabled = self.trim_borders_enabled_var.get()
+        self._update_trim_borders_tolerance_visibility()
+        self.app.update_image_display()
+
+    def _on_trim_borders_tolerance_changed(self, value) -> None:
+        self.app.processing_config.trim_borders_tolerance = int(float(value))
+        self.app.update_image_display()
 
     def _on_resize_enabled_changed(self) -> None:
         """Handle resize enabled change"""

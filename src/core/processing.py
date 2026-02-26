@@ -14,6 +14,8 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
     image_processed = image.copy()
 
     processors = [
+        _apply_input_normalization,
+        _apply_trim_borders,
         _apply_resize,
         _apply_crop,
         _apply_color_space,
@@ -37,6 +39,70 @@ def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> 
         image_processed = processor(image_processed, config)
 
     return image_processed
+
+
+def _apply_input_normalization(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
+    if not isinstance(image, np.ndarray) or image.ndim not in (2, 3):
+        return image
+
+    out = image.copy()
+
+    if out.shape[-1] == 4:
+        out = cv2.cvtColor(out, cv2.COLOR_RGBA2BGR)
+
+    if out.dtype != np.uint8:
+        if out.size == 0:
+            return out
+        out = cv2.normalize(out, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+    return out
+
+
+def _apply_trim_borders(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
+    if not config.trim_borders_enabled:
+        return image
+
+    gray = _ensure_grayscale(image)
+    h, w = gray.shape[:2]
+
+    if h < 2 or w < 2:
+        return image
+
+    top_median = float(np.median(gray[0, :]))
+    bottom_median = float(np.median(gray[-1, :]))
+    left_median = float(np.median(gray[:, 0]))
+    right_median = float(np.median(gray[:, -1]))
+
+    tolerance = max(0, config.trim_borders_tolerance)
+
+    y1 = 0
+    for r in range(h):
+        if abs(float(np.median(gray[r, :])) - top_median) > tolerance:
+            y1 = r
+            break
+
+    y2 = h
+    for r in range(h - 1, -1, -1):
+        if abs(float(np.median(gray[r, :])) - bottom_median) > tolerance:
+            y2 = r + 1
+            break
+
+    x1 = 0
+    for c in range(w):
+        if abs(float(np.median(gray[:, c])) - left_median) > tolerance:
+            x1 = c
+            break
+
+    x2 = w
+    for c in range(w - 1, -1, -1):
+        if abs(float(np.median(gray[:, c])) - right_median) > tolerance:
+            x2 = c + 1
+            break
+
+    if x2 <= x1 or y2 <= y1:
+        return image
+
+    return image[y1:y2, x1:x2].copy()
 
 
 def _ensure_binary(image: np.ndarray) -> np.ndarray:
