@@ -29,14 +29,20 @@ class OCRPanel:
         if result and result[0] and "rec_texts" in result[0]:
             texts = result[0]["rec_texts"]
             confidence_scores = result[0].get("rec_scores", [])
+            min_conf = self.min_confidence_var.get() / 100.0
 
             formatted_results = []
 
             for i, text in enumerate(texts):
                 if i < len(confidence_scores):
-                    confidence = confidence_scores[i] * 100
+                    score = confidence_scores[i]
+                    if score < min_conf:
+                        continue
+                    confidence = score * 100
                     formatted_results.append(f"{text} ({confidence:.1f}%)")
                 else:
+                    if min_conf > 0:
+                        continue
                     formatted_results.append(text)
 
             self.result_text.insert(tk.END, "\n".join(formatted_results))
@@ -209,6 +215,8 @@ class OCRPanel:
         self.easyocr_mag_ratio_var = tk.DoubleVar(value=easyocr_config.mag_ratio)
         self.easyocr_contrast_ths_var = tk.DoubleVar(value=easyocr_config.contrast_ths)
         self.easyocr_adjust_contrast_var = tk.DoubleVar(value=easyocr_config.adjust_contrast)
+
+        self.min_confidence_var = tk.DoubleVar(value=0.0)
 
     def _create_frame(self) -> None:
         """Create OCR frame"""
@@ -1173,6 +1181,16 @@ class OCRPanel:
         """Create OCR results section"""
         results_frame = create_labeled_frame(self.frame, "📄 Results")
         results_frame.pack(fill=tk.BOTH, expand=True, pady=5, padx=5)
+
+        min_conf_frame, _, _ = create_slider(
+            results_frame,
+            "Min confidence (%)",
+            self.min_confidence_var,
+            0,
+            100,
+            None,
+        )
+        min_conf_frame.pack(fill=tk.X, pady=(0, 5))
 
         text_frame = ttk.Frame(results_frame)
         text_frame.pack(fill=tk.BOTH, expand=True, pady=5)
