@@ -149,6 +149,7 @@ class EasyOCRConfig(Config):
 @dataclass
 class OCRConfig(Config):
     ocr_type: Literal["paddleocr", "tesseract", "easyocr", "rapidocr"] = "paddleocr"
+    min_display_confidence_percent: float = 0.0
     paddleocr_config: PaddleOCRConfig = field(default_factory=PaddleOCRConfig)
     tesseract_config: TesseractConfig = field(default_factory=TesseractConfig)
     easyocr_config: EasyOCRConfig = field(default_factory=EasyOCRConfig)
