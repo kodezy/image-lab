@@ -54,6 +54,7 @@ class OCRPanel:
         """Refresh panel with current configuration"""
         ocr_config = self.app.ocr_config
 
+        self.min_confidence_var.set(ocr_config.min_display_confidence_percent)
         self.ocr_type_var.set(ocr_config.ocr_type)
 
         if ocr_config.ocr_type == "paddleocr":
@@ -194,6 +195,9 @@ class OCRPanel:
         self.rapidocr_cls_thresh_var = tk.DoubleVar(value=rapidocr_config.cls_thresh)
         self.rapidocr_rec_batch_num_var = tk.IntVar(value=rapidocr_config.rec_batch_num)
 
+        self.min_confidence_var = tk.DoubleVar(value=ocr_config.min_display_confidence_percent)
+        self.min_confidence_var.trace_add("write", self._on_min_display_confidence_changed)
+
         easyocr_config = ocr_config.easyocr_config
         self.easyocr_lang_var = tk.StringVar(value=",".join(easyocr_config.lang_list))
         self.easyocr_gpu_var = tk.BooleanVar(
@@ -215,8 +219,6 @@ class OCRPanel:
         self.easyocr_mag_ratio_var = tk.DoubleVar(value=easyocr_config.mag_ratio)
         self.easyocr_contrast_ths_var = tk.DoubleVar(value=easyocr_config.contrast_ths)
         self.easyocr_adjust_contrast_var = tk.DoubleVar(value=easyocr_config.adjust_contrast)
-
-        self.min_confidence_var = tk.DoubleVar(value=0.0)
 
     def _create_frame(self) -> None:
         """Create OCR frame"""
@@ -1176,6 +1178,9 @@ class OCRPanel:
     def _invalidate_ocr_instance(self) -> None:
         """Invalidate current OCR instance to force recreation"""
         self.app.ocr_instance = None
+
+    def _on_min_display_confidence_changed(self, *_args: object) -> None:
+        self.app.ocr_config.min_display_confidence_percent = float(self.min_confidence_var.get())
 
     def _create_results_section(self) -> None:
         """Create OCR results section"""
