@@ -55,17 +55,30 @@ class ImageLabGUI:
             show_error("No image to process")
             return
 
+        self.ocr_panel.set_busy(True)
+
         try:
+            self.ocr_panel.show_processing("Processing...")
+            self.root.update_idletasks()
+
             if self.ocr_instance is None:
+                self.ocr_panel.show_processing("Loading OCR engine...")
+                self.root.update_idletasks()
                 self.ocr_instance = create_ocr(self.ocr_config)
+
+            self.ocr_panel.show_processing("Running OCR...")
+            self.root.update_idletasks()
 
             ocr_image = self._prepare_image_for_ocr(self.processed_image)
             result = self.ocr_instance.predict(ocr_image)
-
             self.ocr_panel.display_results(result)
 
         except Exception as exception:
+            self.ocr_panel.show_error(str(exception))
             show_error(f"OCR failed: {exception}")
+
+        finally:
+            self.ocr_panel.set_busy(False)
 
     def capture_new_image(self) -> None:
         """Capture new image using current config"""

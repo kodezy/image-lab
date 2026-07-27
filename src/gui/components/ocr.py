@@ -15,6 +15,11 @@ from src.gui.utils import (
 class OCRPanel:
     """Panel for OCR configuration and results"""
 
+    _IDLE_MESSAGE = "Run OCR to see results here."
+    _PROCESSING_TAG = "processing"
+    _ERROR_TAG = "error"
+    _MUTED_TAG = "muted"
+
     def __init__(self, parent: tk.Widget, app: Any) -> None:
         self.parent = parent
         self.app = app
@@ -22,33 +27,69 @@ class OCRPanel:
         self._setup_variables()
         self._create_frame()
 
+    def set_busy(self, busy: bool) -> None:
+        state = tk.DISABLED if busy else tk.NORMAL
+        self.ocr_button.configure(state=state)
+
+    def show_processing(self, message: str = "Processing...") -> None:
+        self._set_result_message(message, self._PROCESSING_TAG)
+
+    def show_error(self, message: str) -> None:
+        self._set_result_message(f"OCR failed:\n{message}", self._ERROR_TAG)
+
     def display_results(self, result) -> None:
         """Display OCR results"""
+        if not result or not result[0]:
+            self._set_result_message("No text detected.", self._MUTED_TAG)
+            return
+
+        block = result[0]
+        if "rec_texts" not in block:
+            self._set_result_message("OCR returned no readable output.", self._MUTED_TAG)
+            return
+
+        texts = block.get("rec_texts") or []
+        confidence_scores = block.get("rec_scores", [])
+        min_conf = self.min_confidence_var.get() / 100.0
+
+        if not texts:
+            self._set_result_message("No text detected in the image.", self._MUTED_TAG)
+            return
+
+        formatted_results = []
+
+        for i, text in enumerate(texts):
+            if i < len(confidence_scores):
+                score = confidence_scores[i]
+                if score < min_conf:
+                    continue
+                confidence = score * 100
+                formatted_results.append(f"{text} ({confidence:.1f}%)")
+            elif min_conf <= 0:
+                formatted_results.append(text)
+
+        if not formatted_results:
+            threshold = self.min_confidence_var.get()
+            self._set_result_message(
+                f"No text above the confidence threshold ({threshold:.0f}%).\n"
+                f"Detected {len(texts)} line(s) below the threshold.",
+                self._MUTED_TAG,
+            )
+            return
+
+        header = f"{len(formatted_results)} line(s) detected:\n\n"
+        self._set_result_message(header + "\n".join(formatted_results))
+
+    def _set_result_message(self, message: str, tag: str | None = None) -> None:
+        self.result_text.configure(state=tk.NORMAL)
         self.result_text.delete(1.0, tk.END)
+        self.result_text.insert(tk.END, message, tag or ())
+        self.result_text.configure(state=tk.DISABLED)
 
-        if result and result[0] and "rec_texts" in result[0]:
-            texts = result[0]["rec_texts"]
-            confidence_scores = result[0].get("rec_scores", [])
-            min_conf = self.min_confidence_var.get() / 100.0
-
-            formatted_results = []
-
-            for i, text in enumerate(texts):
-                if i < len(confidence_scores):
-                    score = confidence_scores[i]
-                    if score < min_conf:
-                        continue
-                    confidence = score * 100
-                    formatted_results.append(f"{text} ({confidence:.1f}%)")
-                else:
-                    if min_conf > 0:
-                        continue
-                    formatted_results.append(text)
-
-            self.result_text.insert(tk.END, "\n".join(formatted_results))
-
-        else:
-            self.result_text.insert(tk.END, "No text detected")
+    def _configure_result_tags(self) -> None:
+        self.result_text.tag_configure(self._PROCESSING_TAG, foreground="#6c757d")
+        self.result_text.tag_configure(self._ERROR_TAG, foreground="#c0392b")
+        self.result_text.tag_configure(self._MUTED_TAG, foreground="#6c757d")
 
     def refresh(self) -> None:
         """Refresh panel with current configuration"""
@@ -1321,7 +1362,10 @@ class OCRPanel:
 
         self.result_text = tk.Text(text_frame, wrap=tk.WORD, font=("Consolas", 10), height=8)
         scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, command=self.result_text.yview)
-        self.result_text.configure(yscrollcommand=scrollbar.set)
+        self.result_text.configure(yscrollcommand=scrollbar.set, state=tk.DISABLED)
 
         self.result_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self._configure_result_tags()
+        self._set_result_message(self._IDLE_MESSAGE, self._MUTED_TAG)
