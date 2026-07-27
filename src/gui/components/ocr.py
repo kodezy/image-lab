@@ -37,15 +37,26 @@ class OCRPanel:
     def show_error(self, message: str) -> None:
         self._set_result_message(f"OCR failed:\n{message}", self._ERROR_TAG)
 
-    def display_results(self, result) -> None:
+    def display_results(
+        self,
+        result,
+        *,
+        ocr_seconds: float | None = None,
+        engine_load_seconds: float | None = None,
+    ) -> None:
         """Display OCR results"""
+        timing_suffix = self._format_timing_suffix(ocr_seconds, engine_load_seconds)
+
         if not result or not result[0]:
-            self._set_result_message("No text detected.", self._MUTED_TAG)
+            self._set_result_message(f"No text detected.{timing_suffix}", self._MUTED_TAG)
             return
 
         block = result[0]
         if "rec_texts" not in block:
-            self._set_result_message("OCR returned no readable output.", self._MUTED_TAG)
+            self._set_result_message(
+                f"OCR returned no readable output.{timing_suffix}",
+                self._MUTED_TAG,
+            )
             return
 
         texts = block.get("rec_texts") or []
@@ -53,7 +64,7 @@ class OCRPanel:
         min_conf = self.min_confidence_var.get() / 100.0
 
         if not texts:
-            self._set_result_message("No text detected in the image.", self._MUTED_TAG)
+            self._set_result_message(f"No text detected in the image.{timing_suffix}", self._MUTED_TAG)
             return
 
         formatted_results = []
@@ -72,13 +83,34 @@ class OCRPanel:
             threshold = self.min_confidence_var.get()
             self._set_result_message(
                 f"No text above the confidence threshold ({threshold:.0f}%).\n"
-                f"Detected {len(texts)} line(s) below the threshold.",
+                f"Detected {len(texts)} line(s) below the threshold.{timing_suffix}",
                 self._MUTED_TAG,
             )
             return
 
-        header = f"{len(formatted_results)} line(s) detected:\n\n"
+        header = f"{len(formatted_results)} line(s) detected{timing_suffix}:\n\n"
         self._set_result_message(header + "\n".join(formatted_results))
+
+    @staticmethod
+    def _format_duration(seconds: float) -> str:
+        if seconds < 1:
+            return f"{seconds * 1000:.0f} ms"
+        return f"{seconds:.2f} s"
+
+    @classmethod
+    def _format_timing_suffix(
+        cls,
+        ocr_seconds: float | None,
+        engine_load_seconds: float | None,
+    ) -> str:
+        parts: list[str] = []
+        if engine_load_seconds is not None:
+            parts.append(f"engine load: {cls._format_duration(engine_load_seconds)}")
+        if ocr_seconds is not None:
+            parts.append(f"OCR: {cls._format_duration(ocr_seconds)}")
+        if not parts:
+            return ""
+        return f" ({', '.join(parts)})"
 
     def _set_result_message(self, message: str, tag: str | None = None) -> None:
         self.result_text.configure(state=tk.NORMAL)

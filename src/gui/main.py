@@ -1,4 +1,5 @@
 import sys
+import time
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -61,17 +62,26 @@ class ImageLabGUI:
             self.ocr_panel.show_processing("Processing...")
             self.root.update_idletasks()
 
+            engine_load_seconds: float | None = None
             if self.ocr_instance is None:
                 self.ocr_panel.show_processing("Loading OCR engine...")
                 self.root.update_idletasks()
+                load_started = time.perf_counter()
                 self.ocr_instance = create_ocr(self.ocr_config)
+                engine_load_seconds = time.perf_counter() - load_started
 
             self.ocr_panel.show_processing("Running OCR...")
             self.root.update_idletasks()
 
             ocr_image = self._prepare_image_for_ocr(self.processed_image)
+            ocr_started = time.perf_counter()
             result = self.ocr_instance.predict(ocr_image)
-            self.ocr_panel.display_results(result)
+            ocr_seconds = time.perf_counter() - ocr_started
+            self.ocr_panel.display_results(
+                result,
+                ocr_seconds=ocr_seconds,
+                engine_load_seconds=engine_load_seconds,
+            )
 
         except Exception as exception:
             self.ocr_panel.show_error(str(exception))
