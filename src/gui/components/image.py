@@ -1,4 +1,5 @@
 import sys
+import time
 import tkinter as tk
 from tkinter import ttk
 from typing import Any
@@ -14,7 +15,7 @@ ZOOM_MIN = 0.1
 ZOOM_MAX = 5.0
 MAX_BITMAP = 8000
 FIT_MARGIN = 50
-ZOOM_COALESCE_MS = 16
+ZOOM_WHEEL_MIN_INTERVAL = 0.05
 
 
 class ImagePanel:
@@ -28,13 +29,13 @@ class ImagePanel:
         self._photo: ImageTk.PhotoImage | None = None
         self._image_id: int | None = None
         self._base_rgb: np.ndarray | None = None
-        self._zoom_job: str | None = None
         self._drag_start_x = 0
         self._drag_start_y = 0
         self._drag_origin_x = 0.0
         self._drag_origin_y = 0.0
         self._last_canvas_width = 0
         self._last_canvas_height = 0
+        self._last_wheel_zoom_at = 0.0
 
         self._create_frame()
 
@@ -123,17 +124,24 @@ class ImagePanel:
         self.canvas = tk.Canvas(canvas_frame, bg=bg_color, highlightthickness=0, borderwidth=0)
         self.canvas.grid(row=0, column=0, sticky="nsew")
 
-        self.canvas.bind("<MouseWheel>", self._on_mouse_wheel)
-        self.canvas.bind("<Button-4>", self._on_mouse_wheel)
-        self.canvas.bind("<Button-5>", self._on_mouse_wheel)
         self.canvas.bind("<Motion>", self._on_mouse_move)
         self.canvas.bind("<Button-1>", self._start_drag)
         self.canvas.bind("<B1-Motion>", self._do_drag)
         self.canvas.bind("<ButtonRelease-1>", self._stop_drag)
         self.canvas.bind("<Double-Button-1>", self._on_double_click)
-        self.canvas.bind("<Enter>", lambda _e: self.canvas.configure(cursor="crosshair"))
+        self.canvas.bind("<Enter>", self._on_canvas_enter)
         self.canvas.bind("<Leave>", self._on_canvas_leave)
         self.canvas.bind("<Configure>", self._on_canvas_resize)
+
+        # bind_all: macOS may deliver wheel to the focused control, not the canvas.
+        # Tk 9+ sends trackpad two-finger scroll as <TouchpadScroll>, not <MouseWheel>.
+        self.canvas.bind_all("<MouseWheel>", self._on_mouse_wheel, add=True)
+        self.canvas.bind_all("<Button-4>", self._on_mouse_wheel, add=True)
+        self.canvas.bind_all("<Button-5>", self._on_mouse_wheel, add=True)
+        try:
+            self.canvas.bind_all("<TouchpadScroll>", self._on_touchpad_scroll, add=True)
+        except tk.TclError:
+            pass
 
     def _get_canvas_bg_color(self) -> str:
         if sys.platform == "darwin":
@@ -167,6 +175,26 @@ class ImagePanel:
     def _clamp_zoom(self, zoom: float) -> float:
         return max(ZOOM_MIN, min(self._max_zoom_for_image(), zoom))
 
+    def _display_size(self) -> tuple[float, float]:
+        img_h, img_w = self._base_rgb.shape[:2]
+        return img_w * self.zoom, img_h * self.zoom
+
+    def _clamp_offset(self) -> None:
+        if self._base_rgb is None:
+            return
+        canvas_w, canvas_h = self._canvas_size()
+        disp_w, disp_h = self._display_size()
+
+        if disp_w <= canvas_w:
+            self.offset_x = min(max(self.offset_x, 0.0), canvas_w - disp_w)
+        else:
+            self.offset_x = min(0.0, max(canvas_w - disp_w, self.offset_x))
+
+        if disp_h <= canvas_h:
+            self.offset_y = min(max(self.offset_y, 0.0), canvas_h - disp_h)
+        else:
+            self.offset_y = min(0.0, max(canvas_h - disp_h, self.offset_y))
+
     def _rebuild_bitmap(self) -> None:
         if self._base_rgb is None:
             return
@@ -185,18 +213,19 @@ class ImagePanel:
     def _place_image(self) -> None:
         if self._image_id is None:
             return
+        self._clamp_offset()
         self.canvas.coords(self._image_id, self.offset_x, self.offset_y)
 
     def _center_image(self) -> None:
         if self._base_rgb is None:
             return
         canvas_w, canvas_h = self._canvas_size()
-        img_h, img_w = self._base_rgb.shape[:2]
-        self.offset_x = (canvas_w - img_w * self.zoom) / 2.0
-        self.offset_y = (canvas_h - img_h * self.zoom) / 2.0
+        disp_w, disp_h = self._display_size()
+        self.offset_x = (canvas_w - disp_w) / 2.0
+        self.offset_y = (canvas_h - disp_h) / 2.0
 
     def _zoom_at_canvas_point(self, point: tuple[float, float], factor: float) -> None:
-        if self._base_rgb is None:
+        if self._base_rgb is None or factor == 1.0:
             return
         cx, cy = point
         img_x = (cx - self.offset_x) / self.zoom
@@ -207,31 +236,74 @@ class ImagePanel:
         self.zoom = new_zoom
         self.offset_x = cx - img_x * self.zoom
         self.offset_y = cy - img_y * self.zoom
-        self._schedule_zoom_rebuild()
-
-    def _schedule_zoom_rebuild(self) -> None:
-        if self._zoom_job is not None:
-            self.canvas.after_cancel(self._zoom_job)
-        self._zoom_job = self.canvas.after(ZOOM_COALESCE_MS, self._apply_zoom_rebuild)
-
-    def _apply_zoom_rebuild(self) -> None:
-        self._zoom_job = None
         self._rebuild_bitmap()
         self._place_image()
 
-    def _on_mouse_wheel(self, event: tk.Event) -> None:
-        if self._base_rgb is None:
+    def _pointer_over_canvas(self) -> bool:
+        try:
+            px, py = self.canvas.winfo_pointerxy()
+            containing = self.canvas.winfo_containing(px, py)
+            if containing == self.canvas:
+                return True
+            rx = self.canvas.winfo_rootx()
+            ry = self.canvas.winfo_rooty()
+            w = self.canvas.winfo_width()
+            h = self.canvas.winfo_height()
+            return rx <= px < rx + w and ry <= py < ry + h
+        except tk.TclError:
+            return False
+
+    def _pointer_canvas_point(self) -> tuple[float, float] | None:
+        try:
+            x = self.canvas.winfo_pointerx() - self.canvas.winfo_rootx()
+            y = self.canvas.winfo_pointery() - self.canvas.winfo_rooty()
+        except tk.TclError:
+            return None
+        return float(self.canvas.canvasx(x)), float(self.canvas.canvasy(y))
+
+    def _zoom_direction_factor(self, direction: int) -> float:
+        if direction == 0:
+            return 1.0
+        now = time.monotonic()
+        if now - self._last_wheel_zoom_at < ZOOM_WHEEL_MIN_INTERVAL:
+            return 1.0
+        self._last_wheel_zoom_at = now
+        return ZOOM_STEP if direction > 0 else 1.0 / ZOOM_STEP
+
+    def _apply_wheel_zoom(self, direction: int) -> None:
+        if self._base_rgb is None or not self._pointer_over_canvas():
             return
-        if sys.platform == "darwin":
-            zoom_in = event.delta > 0
-        elif getattr(event, "num", None) in (4, 5):
-            zoom_in = event.num == 4
-        else:
-            zoom_in = event.delta > 0
-        factor = ZOOM_STEP if zoom_in else 1.0 / ZOOM_STEP
-        cx = float(self.canvas.canvasx(event.x))
-        cy = float(self.canvas.canvasy(event.y))
-        self._zoom_at_canvas_point((cx, cy), factor)
+        factor = self._zoom_direction_factor(direction)
+        if factor == 1.0:
+            return
+        point = self._pointer_canvas_point()
+        if point is None:
+            return
+        self._zoom_at_canvas_point(point, factor)
+
+    def _wheel_direction(self, event: tk.Event) -> int:
+        if getattr(event, "num", None) in (4, 5):
+            return 1 if event.num == 4 else -1
+        delta = getattr(event, "delta", 0) or 0
+        if delta == 0:
+            return 0
+        return 1 if delta > 0 else -1
+
+    def _touchpad_scroll_direction(self, event: tk.Event) -> int:
+        try:
+            _delta_x, delta_y = self.canvas.tk.call("tk::PreciseScrollDeltas", event.delta)
+            delta_y = int(delta_y)
+        except (tk.TclError, TypeError, ValueError):
+            return 0
+        if delta_y == 0:
+            return 0
+        return 1 if delta_y > 0 else -1
+
+    def _on_mouse_wheel(self, event: tk.Event) -> None:
+        self._apply_wheel_zoom(self._wheel_direction(event))
+
+    def _on_touchpad_scroll(self, event: tk.Event) -> None:
+        self._apply_wheel_zoom(self._touchpad_scroll_direction(event))
 
     def _on_mouse_move(self, event: tk.Event) -> None:
         if self._base_rgb is None:
@@ -246,6 +318,10 @@ class ImagePanel:
             self.cursor_label.config(text=f"({int(img_x_f)}, {int(img_y_f)})")
         else:
             self.cursor_label.config(text="")
+
+    def _on_canvas_enter(self, _event: tk.Event) -> None:
+        self.canvas.focus_set()
+        self.canvas.configure(cursor="crosshair")
 
     def _on_canvas_leave(self, _event: tk.Event) -> None:
         self.canvas.configure(cursor="")
@@ -289,9 +365,6 @@ class ImagePanel:
         self.fit_to_window()
 
     def _clear_display(self) -> None:
-        if self._zoom_job is not None:
-            self.canvas.after_cancel(self._zoom_job)
-            self._zoom_job = None
         self.canvas.delete("all")
         self._photo = None
         self._image_id = None
