@@ -43,6 +43,11 @@ class PaddleOCRConfig(Config):
     use_doc_orientation_classify: bool = False
     use_doc_unwarping: bool = False
     use_textline_orientation: bool = False
+    return_word_box: bool = False
+
+    engine: Literal["paddle", "paddle_static", "paddle_dynamic", "transformers"] | None = None
+    enable_cinn: bool = False
+    paddlex_config: str | None = None
 
     text_det_limit_side_len: int = 960
     text_det_limit_type: Literal["min", "max"] = "max"

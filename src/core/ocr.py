@@ -17,40 +17,46 @@ class OCRProtocol(Protocol):
 
 class PaddleOCRWrapper:
     def __init__(self, config: PaddleOCRConfig) -> None:
-        self._ocr = PaddleOCR(
-            ocr_version=config.ocr_version,
-            lang=config.lang,
-            device=config.device,
-            doc_orientation_classify_model_name=config.doc_orientation_classify_model_name,
-            doc_orientation_classify_model_dir=config.doc_orientation_classify_model_dir,
-            doc_unwarping_model_name=config.doc_unwarping_model_name,
-            doc_unwarping_model_dir=config.doc_unwarping_model_dir,
-            text_detection_model_name=config.text_detection_model_name,
-            text_detection_model_dir=config.text_detection_model_dir,
-            textline_orientation_model_name=config.textline_orientation_model_name,
-            textline_orientation_model_dir=config.textline_orientation_model_dir,
-            text_recognition_model_name=config.text_recognition_model_name,
-            text_recognition_model_dir=config.text_recognition_model_dir,
-            use_doc_orientation_classify=config.use_doc_orientation_classify,
-            use_doc_unwarping=config.use_doc_unwarping,
-            use_textline_orientation=config.use_textline_orientation,
-            text_det_limit_side_len=config.text_det_limit_side_len,
-            text_det_limit_type=config.text_det_limit_type,
-            text_det_thresh=config.text_det_thresh,
-            text_det_box_thresh=config.text_det_box_thresh,
-            text_det_unclip_ratio=config.text_det_unclip_ratio,
-            text_det_input_shape=config.text_det_input_shape,
-            text_rec_score_thresh=config.text_rec_score_thresh,
-            text_recognition_batch_size=config.text_recognition_batch_size,
-            text_rec_input_shape=config.text_rec_input_shape,
-            textline_orientation_batch_size=config.textline_orientation_batch_size,
-            enable_hpi=config.enable_hpi,
-            enable_mkldnn=config.enable_mkldnn,
-            mkldnn_cache_capacity=config.mkldnn_cache_capacity,
-            cpu_threads=config.cpu_threads,
-            use_tensorrt=config.use_tensorrt,
-            precision=config.precision,
-        )
+        init_kwargs: dict[str, Any] = {
+            "paddlex_config": config.paddlex_config,
+            "ocr_version": config.ocr_version,
+            "lang": config.lang,
+            "device": config.device,
+            "doc_orientation_classify_model_name": config.doc_orientation_classify_model_name,
+            "doc_orientation_classify_model_dir": config.doc_orientation_classify_model_dir,
+            "doc_unwarping_model_name": config.doc_unwarping_model_name,
+            "doc_unwarping_model_dir": config.doc_unwarping_model_dir,
+            "text_detection_model_name": config.text_detection_model_name,
+            "text_detection_model_dir": config.text_detection_model_dir,
+            "textline_orientation_model_name": config.textline_orientation_model_name,
+            "textline_orientation_model_dir": config.textline_orientation_model_dir,
+            "text_recognition_model_name": config.text_recognition_model_name,
+            "text_recognition_model_dir": config.text_recognition_model_dir,
+            "use_doc_orientation_classify": config.use_doc_orientation_classify,
+            "use_doc_unwarping": config.use_doc_unwarping,
+            "use_textline_orientation": config.use_textline_orientation,
+            "return_word_box": config.return_word_box,
+            "text_det_limit_side_len": config.text_det_limit_side_len,
+            "text_det_limit_type": config.text_det_limit_type,
+            "text_det_thresh": config.text_det_thresh,
+            "text_det_box_thresh": config.text_det_box_thresh,
+            "text_det_unclip_ratio": config.text_det_unclip_ratio,
+            "text_det_input_shape": config.text_det_input_shape,
+            "text_rec_score_thresh": config.text_rec_score_thresh,
+            "text_recognition_batch_size": config.text_recognition_batch_size,
+            "text_rec_input_shape": config.text_rec_input_shape,
+            "textline_orientation_batch_size": config.textline_orientation_batch_size,
+            "enable_hpi": config.enable_hpi,
+            "enable_mkldnn": config.enable_mkldnn,
+            "mkldnn_cache_capacity": config.mkldnn_cache_capacity,
+            "cpu_threads": config.cpu_threads,
+            "use_tensorrt": config.use_tensorrt,
+            "precision": config.precision,
+            "enable_cinn": config.enable_cinn,
+        }
+        if config.engine is not None:
+            init_kwargs["engine"] = config.engine
+        self._ocr = PaddleOCR(**init_kwargs)
 
     def predict(self, image: np.ndarray) -> Any:
         return self._ocr.predict(image)
@@ -198,13 +204,24 @@ def _to_model_type(value: str) -> ModelType:
     return {"mobile": ModelType.MOBILE, "server": ModelType.SERVER}[value]
 
 
+def _rapidocr_task_langs(lang_type: str, ocr_version: str) -> tuple[LangDet, LangRec]:
+    if ocr_version == "PP-OCRv5":
+        if lang_type == "en":
+            return LangDet.CH, LangRec.EN
+        return LangDet.CH, LangRec.CH
+
+    det_lang = _to_lang_det(lang_type)
+    rec_lang = LangRec.CH if lang_type == "multi" else _to_lang_rec(lang_type)
+    return det_lang, rec_lang
+
+
 class RapidOCRWrapper:
     def __init__(self, config: RapidOCRConfig) -> None:
         self._config = config
-        rec_lang = LangRec.CH if config.lang_type == "multi" else _to_lang_rec(config.lang_type)
+        det_lang, rec_lang = _rapidocr_task_langs(config.lang_type, config.ocr_version)
         self._engine = RapidOCR(
             params={
-                "Det.lang_type": _to_lang_det(config.lang_type),
+                "Det.lang_type": det_lang,
                 "Rec.lang_type": rec_lang,
                 "Det.ocr_version": _to_ocr_version(config.ocr_version),
                 "Rec.ocr_version": _to_ocr_version(config.ocr_version),

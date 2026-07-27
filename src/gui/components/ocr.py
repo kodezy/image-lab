@@ -80,6 +80,13 @@ class OCRPanel:
             self.use_tensorrt_var.set(paddle_config.use_tensorrt)
             self.enable_mkldnn_var.set(paddle_config.enable_mkldnn)
             self.textline_orientation_batch_var.set(paddle_config.textline_orientation_batch_size)
+            self.use_doc_orientation_classify_var.set(paddle_config.use_doc_orientation_classify)
+            self.use_doc_unwarping_var.set(paddle_config.use_doc_unwarping)
+            self.use_textline_orientation_var.set(paddle_config.use_textline_orientation)
+            self.return_word_box_var.set(paddle_config.return_word_box)
+            self.engine_var.set(paddle_config.engine or "default")
+            self.enable_cinn_var.set(paddle_config.enable_cinn)
+            self.paddlex_config_var.set(paddle_config.paddlex_config or "")
 
         elif ocr_config.ocr_type == "tesseract":
             tesseract_config = ocr_config.tesseract_config
@@ -164,6 +171,13 @@ class OCRPanel:
         self.use_tensorrt_var = tk.BooleanVar(value=paddle_config.use_tensorrt)
         self.enable_mkldnn_var = tk.BooleanVar(value=paddle_config.enable_mkldnn)
         self.textline_orientation_batch_var = tk.IntVar(value=paddle_config.textline_orientation_batch_size)
+        self.use_doc_orientation_classify_var = tk.BooleanVar(value=paddle_config.use_doc_orientation_classify)
+        self.use_doc_unwarping_var = tk.BooleanVar(value=paddle_config.use_doc_unwarping)
+        self.use_textline_orientation_var = tk.BooleanVar(value=paddle_config.use_textline_orientation)
+        self.return_word_box_var = tk.BooleanVar(value=paddle_config.return_word_box)
+        self.engine_var = tk.StringVar(value=paddle_config.engine or "default")
+        self.enable_cinn_var = tk.BooleanVar(value=paddle_config.enable_cinn)
+        self.paddlex_config_var = tk.StringVar(value=paddle_config.paddlex_config or "")
 
         tesseract_config = ocr_config.tesseract_config
         self.tesseract_lang_var = tk.StringVar(value=tesseract_config.lang)
@@ -303,6 +317,69 @@ class OCRPanel:
         )
         version_frame.pack(fill=tk.X, pady=(0, 5))
 
+        engine_frame, self.engine_combobox = create_combobox(
+            parent,
+            "Inference Engine",
+            self.engine_var,
+            ["default", "paddle", "paddle_static", "paddle_dynamic", "transformers"],
+            self._on_engine_changed,
+        )
+        engine_frame.pack(fill=tk.X, pady=(0, 5))
+
+        paddlex_config_frame = ttk.Frame(parent)
+        paddlex_config_frame.pack(fill=tk.X, pady=(0, 5))
+        paddlex_config_label = ttk.Label(paddlex_config_frame, text="PaddleX Config Path:")
+        paddlex_config_label.pack(side=tk.LEFT)
+        self.paddlex_config_entry = ttk.Entry(
+            paddlex_config_frame,
+            textvariable=self.paddlex_config_var,
+            width=20,
+        )
+        self.paddlex_config_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(10, 0))
+        self.paddlex_config_entry.bind("<KeyRelease>", self._on_paddlex_config_changed)
+
+        ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
+
+        use_doc_orientation_frame = ttk.Frame(parent)
+        use_doc_orientation_frame.pack(fill=tk.X, pady=(0, 5))
+        self.use_doc_orientation_classify_checkbox = ttk.Checkbutton(
+            use_doc_orientation_frame,
+            text="Use Document Orientation Classification",
+            variable=self.use_doc_orientation_classify_var,
+            command=self._on_use_doc_orientation_classify_changed,
+        )
+        self.use_doc_orientation_classify_checkbox.pack(anchor=tk.W)
+
+        use_doc_unwarping_frame = ttk.Frame(parent)
+        use_doc_unwarping_frame.pack(fill=tk.X, pady=(0, 5))
+        self.use_doc_unwarping_checkbox = ttk.Checkbutton(
+            use_doc_unwarping_frame,
+            text="Use Document Unwarping",
+            variable=self.use_doc_unwarping_var,
+            command=self._on_use_doc_unwarping_changed,
+        )
+        self.use_doc_unwarping_checkbox.pack(anchor=tk.W)
+
+        use_textline_orientation_frame = ttk.Frame(parent)
+        use_textline_orientation_frame.pack(fill=tk.X, pady=(0, 5))
+        self.use_textline_orientation_checkbox = ttk.Checkbutton(
+            use_textline_orientation_frame,
+            text="Use Textline Orientation",
+            variable=self.use_textline_orientation_var,
+            command=self._on_use_textline_orientation_changed,
+        )
+        self.use_textline_orientation_checkbox.pack(anchor=tk.W)
+
+        return_word_box_frame = ttk.Frame(parent)
+        return_word_box_frame.pack(fill=tk.X, pady=(0, 5))
+        self.return_word_box_checkbox = ttk.Checkbutton(
+            return_word_box_frame,
+            text="Return Word Boxes",
+            variable=self.return_word_box_var,
+            command=self._on_return_word_box_changed,
+        )
+        self.return_word_box_checkbox.pack(anchor=tk.W)
+
         ttk.Separator(parent, orient="horizontal").pack(fill=tk.X, pady=(5, 10))
 
         det_thresh_frame, _, _ = create_slider(
@@ -434,6 +511,16 @@ class OCRPanel:
             command=self._on_enable_mkldnn_changed,
         )
         self.enable_mkldnn_checkbox.pack(anchor=tk.W)
+
+        enable_cinn_frame = ttk.Frame(parent)
+        enable_cinn_frame.pack(fill=tk.X, pady=(0, 5))
+        self.enable_cinn_checkbox = ttk.Checkbutton(
+            enable_cinn_frame,
+            text="Enable CINN",
+            variable=self.enable_cinn_var,
+            command=self._on_enable_cinn_changed,
+        )
+        self.enable_cinn_checkbox.pack(anchor=tk.W)
 
         textline_orientation_batch_frame, self.textline_orientation_batch_spinbox = create_spinbox(
             parent,
@@ -915,6 +1002,38 @@ class OCRPanel:
     def _on_version_changed(self, value) -> None:
         """Handle version change"""
         self.app.ocr_config.paddleocr_config.ocr_version = self.version_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_engine_changed(self, value) -> None:
+        engine = self.engine_var.get()
+        self.app.ocr_config.paddleocr_config.engine = None if engine == "default" else engine
+        self._invalidate_ocr_instance()
+
+    def _on_paddlex_config_changed(self, event) -> None:
+        path = self.paddlex_config_var.get().strip()
+        self.app.ocr_config.paddleocr_config.paddlex_config = path or None
+        self._invalidate_ocr_instance()
+
+    def _on_use_doc_orientation_classify_changed(self) -> None:
+        self.app.ocr_config.paddleocr_config.use_doc_orientation_classify = (
+            self.use_doc_orientation_classify_var.get()
+        )
+        self._invalidate_ocr_instance()
+
+    def _on_use_doc_unwarping_changed(self) -> None:
+        self.app.ocr_config.paddleocr_config.use_doc_unwarping = self.use_doc_unwarping_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_use_textline_orientation_changed(self) -> None:
+        self.app.ocr_config.paddleocr_config.use_textline_orientation = self.use_textline_orientation_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_return_word_box_changed(self) -> None:
+        self.app.ocr_config.paddleocr_config.return_word_box = self.return_word_box_var.get()
+        self._invalidate_ocr_instance()
+
+    def _on_enable_cinn_changed(self) -> None:
+        self.app.ocr_config.paddleocr_config.enable_cinn = self.enable_cinn_var.get()
         self._invalidate_ocr_instance()
 
     def _on_det_thresh_changed(self, value) -> None:
