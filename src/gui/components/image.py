@@ -239,11 +239,11 @@ class ImagePanel:
             return
         cx = float(self.canvas.canvasx(event.x))
         cy = float(self.canvas.canvasy(event.y))
-        img_x = int((cx - self.offset_x) / self.zoom)
-        img_y = int((cy - self.offset_y) / self.zoom)
+        img_x_f = (cx - self.offset_x) / self.zoom
+        img_y_f = (cy - self.offset_y) / self.zoom
         img_h, img_w = self._base_rgb.shape[:2]
-        if 0 <= img_x < img_w and 0 <= img_y < img_h:
-            self.cursor_label.config(text=f"({img_x}, {img_y})")
+        if 0 <= img_x_f < img_w and 0 <= img_y_f < img_h:
+            self.cursor_label.config(text=f"({int(img_x_f)}, {int(img_y_f)})")
         else:
             self.cursor_label.config(text="")
 
