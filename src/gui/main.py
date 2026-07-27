@@ -72,7 +72,7 @@ class ImageLabGUI:
         try:
             self.current_image = capture_image(self.capture_config)
             self.update_image_display()
-            self.image_panel.reset_zoom()
+            self.image_panel.fit_to_window()
 
         except Exception as exception:
             show_error(f"Capture failed: {exception}")
@@ -97,7 +97,7 @@ class ImageLabGUI:
             if image is not None:
                 self.current_image = image
                 self.update_image_display()
-                self.image_panel.reset_zoom()
+                self.image_panel.fit_to_window()
             else:
                 show_error("Failed to load image")
 
@@ -112,7 +112,7 @@ class ImageLabGUI:
             if image is not None:
                 self.current_image = image
                 self.update_image_display()
-                self.image_panel.reset_zoom()
+                self.image_panel.fit_to_window()
             else:
                 show_error("No image found in clipboard")
 
