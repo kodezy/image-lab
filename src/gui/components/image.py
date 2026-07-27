@@ -44,7 +44,12 @@ class ImagePanel:
             self._clear_display()
             return
         try:
+            old_size = None if self._base_rgb is None else self._base_rgb.shape[:2]
             self._set_base_image(image)
+            new_h, new_w = self._base_rgb.shape[:2]
+            if old_size is not None and old_size != (new_h, new_w) and new_w > 0:
+                old_w = old_size[1]
+                self.zoom = self._clamp_zoom(self.zoom * (old_w / new_w))
             self._update_image_info(image)
             self._rebuild_bitmap()
             self._place_image()
@@ -198,6 +203,7 @@ class ImagePanel:
     def _rebuild_bitmap(self) -> None:
         if self._base_rgb is None:
             return
+        self.zoom = self._clamp_zoom(self.zoom)
         img_h, img_w = self._base_rgb.shape[:2]
         new_w = max(1, int(round(img_w * self.zoom)))
         new_h = max(1, int(round(img_h * self.zoom)))
