@@ -63,9 +63,8 @@ class ProcessingPanel:
 
         # Basic transformations
         self.resize_enabled_var.set(config.resize_enabled)
-        self.resize_width_var.set(config.resize_width)
-        self.resize_height_var.set(config.resize_height)
-        self.resize_maintain_aspect_var.set(config.resize_maintain_aspect_ratio)
+        self.resize_scale_var.set(config.resize_scale)
+        self.resize_interpolation_var.set(config.resize_interpolation)
         self.gamma_correction_var.set(config.gamma_correction)
         self.gamma_value_var.set(config.gamma_value)
         self.deskew_enabled_var.set(config.deskew_enabled)
@@ -175,9 +174,8 @@ class ProcessingPanel:
         self.crop_enabled_var = tk.BooleanVar(value=config.crop_enabled)
         self.bbox_var = tk.StringVar(value=self._format_bbox(config.bbox))
         self.resize_enabled_var = tk.BooleanVar(value=config.resize_enabled)
-        self.resize_width_var = tk.IntVar(value=config.resize_width)
-        self.resize_height_var = tk.IntVar(value=config.resize_height)
-        self.resize_maintain_aspect_var = tk.BooleanVar(value=config.resize_maintain_aspect_ratio)
+        self.resize_scale_var = tk.DoubleVar(value=config.resize_scale)
+        self.resize_interpolation_var = tk.StringVar(value=config.resize_interpolation)
         self.gamma_correction_var = tk.BooleanVar(value=config.gamma_correction)
         self.gamma_value_var = tk.DoubleVar(value=config.gamma_value)
         self.deskew_enabled_var = tk.BooleanVar(value=config.deskew_enabled)
@@ -350,33 +348,24 @@ class ProcessingPanel:
         resize_controls = ttk.Frame(preprocess_frame)
         resize_controls.pack(fill=tk.X, pady=2)
 
-        self.resize_maintain_aspect_checkbox = create_checkbox(
+        scale_frame, self.resize_scale_slider, _ = create_slider(
             resize_controls,
-            "Maintain Ratio",
-            self.resize_maintain_aspect_var,
-            self._on_resize_maintain_aspect_ratio_changed,
+            "Scale",
+            self.resize_scale_var,
+            0.25,
+            4.0,
+            self._on_resize_scale_changed,
         )
-        self.resize_maintain_aspect_checkbox.pack(anchor=tk.W, pady=2)
+        scale_frame.pack(fill=tk.X, pady=1)
 
-        width_frame, _, _ = create_slider(
+        interpolation_frame, self.resize_interpolation_combobox = create_combobox(
             resize_controls,
-            "Width",
-            self.resize_width_var,
-            320,
-            3840,
-            self._on_resize_width_changed,
+            "Interpolation",
+            self.resize_interpolation_var,
+            ["Nearest", "Linear", "Cubic", "Area", "Lanczos4"],
+            self._on_resize_interpolation_changed,
         )
-        width_frame.pack(fill=tk.X, pady=1)
-
-        height_frame, _, _ = create_slider(
-            resize_controls,
-            "Height",
-            self.resize_height_var,
-            240,
-            2160,
-            self._on_resize_height_changed,
-        )
-        height_frame.pack(fill=tk.X, pady=1)
+        interpolation_frame.pack(fill=tk.X, pady=1)
 
         ttk.Separator(preprocess_frame, orient="horizontal").pack(fill=tk.X, pady=5)
 
@@ -491,21 +480,13 @@ class ProcessingPanel:
         self._update_resize_dependent_controls()
         self.app.update_image_display()
 
-    def _on_resize_width_changed(self, value) -> None:
-        """Handle resize width change"""
-        self.app.processing_config.resize_width = int(float(value))
+    def _on_resize_scale_changed(self, value) -> None:
+        self.app.processing_config.resize_scale = float(value)
         self.app.update_image_display()
         self._update_crop_status()
 
-    def _on_resize_height_changed(self, value) -> None:
-        """Handle resize height change"""
-        self.app.processing_config.resize_height = int(float(value))
-        self.app.update_image_display()
-        self._update_crop_status()
-
-    def _on_resize_maintain_aspect_ratio_changed(self) -> None:
-        """Handle maintain aspect ratio change"""
-        self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_var.get()
+    def _on_resize_interpolation_changed(self, value: str) -> None:
+        self.app.processing_config.resize_interpolation = value
         self.app.update_image_display()
 
     def _on_gamma_correction_changed(self) -> None:
@@ -2316,16 +2297,12 @@ class ProcessingPanel:
         self.app.update_image_display()
 
     def _update_resize_dependent_controls(self) -> None:
-        """Update state of controls that depend on resize"""
         is_resize = self.resize_enabled_var.get()
-        state = tk.NORMAL if is_resize else tk.DISABLED
+        scale_state = tk.NORMAL if is_resize else tk.DISABLED
+        interpolation_state = "readonly" if is_resize else tk.DISABLED
 
-        self.resize_maintain_aspect_checkbox.config(state=state)
-
-        if state == tk.DISABLED:
-            self.app.processing_config.resize_maintain_aspect_ratio = False
-        else:
-            self.app.processing_config.resize_maintain_aspect_ratio = self.resize_maintain_aspect_var.get()
+        self.resize_scale_slider.config(state=scale_state)
+        self.resize_interpolation_combobox.config(state=interpolation_state)
 
     def _is_image_grayscale(self) -> bool:
         """Check if processed image is grayscale"""

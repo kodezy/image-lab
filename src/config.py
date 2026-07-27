@@ -178,9 +178,8 @@ class ProcessingConfig(Config):
     crop_enabled: bool = False
     bbox: tuple[int, int, int, int] | None = None  # (x1, y1, x2, y2) or None
     resize_enabled: bool = False
-    resize_width: int = 1920
-    resize_height: int = 1080
-    resize_maintain_aspect_ratio: bool = True
+    resize_scale: float = 1.0
+    resize_interpolation: Literal["Nearest", "Linear", "Cubic", "Area", "Lanczos4"] = "Linear"
     gamma_correction: bool = False
     gamma_value: float = 1.0
     deskew_enabled: bool = False

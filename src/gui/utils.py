@@ -74,8 +74,9 @@ def create_slider(
     def update_label(*args: Any) -> None:
         value = variable.get()
         if isinstance(variable, tk.IntVar):
-            value = int(value)
-        value_label.config(text=str(value))
+            value_label.config(text=str(int(value)))
+        else:
+            value_label.config(text=f"{float(value):.2f}")
 
     variable.trace_add("write", update_label)
 

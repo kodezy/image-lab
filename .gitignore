@@ -201,6 +201,10 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Nexus local memories / preferences
+.nexus/
+
+
 # Marimo
 marimo/_static/
 marimo/_lsp/

@@ -5,6 +5,14 @@ from skimage.filters import threshold_multiotsu
 from src.config import ProcessingConfig
 from src.infra.cache import image_cache
 
+_RESIZE_INTERPOLATION = {
+    "Nearest": cv2.INTER_NEAREST,
+    "Linear": cv2.INTER_LINEAR,
+    "Cubic": cv2.INTER_CUBIC,
+    "Area": cv2.INTER_AREA,
+    "Lanczos4": cv2.INTER_LANCZOS4,
+}
+
 
 @image_cache(max_size=128)
 def process_image(image: np.ndarray, config: ProcessingConfig | None = None) -> np.ndarray:
@@ -122,20 +130,15 @@ def _ensure_grayscale(image: np.ndarray) -> np.ndarray:
     return image
 
 
+def _scaled_size(width: int, height: int, scale: float) -> tuple[int, int]:
+    return max(1, int(round(width * scale))), max(1, int(round(height * scale)))
+
+
 def get_dimensions_before_crop(image: np.ndarray, config: ProcessingConfig) -> tuple[int, int]:
     h, w = image.shape[:2]
-    if not config.resize_enabled:
+    if not config.resize_enabled or config.resize_scale == 1.0:
         return h, w
-    if config.resize_maintain_aspect_ratio:
-        aspect = w / h
-        if aspect > 1:
-            new_w = config.resize_width
-            new_h = int(config.resize_width / aspect)
-        else:
-            new_h = config.resize_height
-            new_w = int(config.resize_height * aspect)
-    else:
-        new_w, new_h = config.resize_width, config.resize_height
+    new_w, new_h = _scaled_size(w, h, config.resize_scale)
     return new_h, new_w
 
 
@@ -158,30 +161,16 @@ def _apply_crop(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
 
 
 def _apply_resize(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
-    if not config.resize_enabled:
+    if not config.resize_enabled or config.resize_scale == 1.0:
         return image
 
     h, w = image.shape[:2]
+    new_w, new_h = _scaled_size(w, h, config.resize_scale)
+    if (w, h) == (new_w, new_h):
+        return image
 
-    if config.resize_maintain_aspect_ratio:
-        aspect = w / h
-
-        if aspect > 1:
-            new_w = config.resize_width
-            new_h = int(config.resize_width / aspect)
-        else:
-            new_h = config.resize_height
-            new_w = int(config.resize_height * aspect)
-    else:
-        new_w, new_h = config.resize_width, config.resize_height
-
-    if (w, h) != (new_w, new_h):
-        is_upscaling = w < new_w or h < new_h
-        interpolation = cv2.INTER_LANCZOS4 if is_upscaling else cv2.INTER_AREA
-
-        image = cv2.resize(image, (new_w, new_h), interpolation=interpolation)
-
-    return image
+    interpolation = _RESIZE_INTERPOLATION.get(config.resize_interpolation, cv2.INTER_LINEAR)
+    return cv2.resize(image, (new_w, new_h), interpolation=interpolation)
 
 
 def _apply_color_space(image: np.ndarray, config: ProcessingConfig) -> np.ndarray:
