@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "image-lab"
+version = "0.1.0"
+description = "Modular image processing toolkit with GUI"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+dependencies = [
+    "numpy",
+    "scikit-image",
+    "pillow",
+    "pyautogui",
+    "paddleocr",
+    "paddlepaddle",
+    "pytesseract",
+    "easyocr",
+    "rapidocr",
+    "onnxruntime",
+]
+
+[project.scripts]
+image-lab = "src.gui.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]

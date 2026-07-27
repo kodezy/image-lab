@@ -354,6 +354,6 @@ class ImageLabGUI:
         self.image_panel.frame.grid(row=0, column=1, sticky="nsew")
 
 
-if __name__ == "__main__":
+def main() -> None:
     app = ImageLabGUI()
     app.run()

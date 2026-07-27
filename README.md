@@ -22,7 +22,7 @@ Image Lab serves as a flexible platform for testing and applying various image p
 
 - **Python**: 3.13 or newer
 - **Operating System**: Windows, macOS, Linux
-- **Dependencies**: See `requirements.txt`. Note: `pytesseract` requires [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) installed on your system.
+- **Dependencies**: Managed in `pyproject.toml`. Note: `pytesseract` requires [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) installed on your system.
 
 ## 📦 Installation
 
@@ -34,23 +34,23 @@ Image Lab serves as a flexible platform for testing and applying various image p
 
 2. **Create virtual environment**
    ```bash
-   python -m venv venv
+   python -m venv .venv
    
    # Windows
-   venv\Scripts\activate
+   .venv\Scripts\activate
    
    # macOS/Linux
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
-3. **Install dependencies**
+3. **Install the application**
    ```bash
-   pip install -r requirements.txt
+   pip install -e .
    ```
 
 4. **Run the application**
    ```bash
-   python image_lab.py
+   image-lab
    ```
 
 ## ⚙️ Configuration
@@ -77,8 +77,7 @@ image-lab/
 │   ├── infra/             # Infrastructure layer
 │   └── config.py          # Configuration classes
 ├── assets/                # Application resources
-├── requirements.txt       # Python dependencies
-└── image_lab.py           # Application entry point
+└── pyproject.toml         # Project metadata, dependencies, and CLI
 ```
 
 ## 📄 License
