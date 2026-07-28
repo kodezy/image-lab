@@ -15,8 +15,31 @@ class OCRProtocol(Protocol):
     def predict(self, image: np.ndarray) -> Any: ...
 
 
+PADDLEOCR_V6_MODEL_TYPES = ("tiny", "small", "medium")
+
+
+def paddleocr_model_types_for_version(ocr_version: str) -> list[str]:
+    if ocr_version == "PP-OCRv6":
+        return list(PADDLEOCR_V6_MODEL_TYPES)
+    return []
+
+
+def paddleocr_v6_model_names(model_type: str) -> tuple[str, str]:
+    tier = model_type if model_type in PADDLEOCR_V6_MODEL_TYPES else "medium"
+    return f"PP-OCRv6_{tier}_det", f"PP-OCRv6_{tier}_rec"
+
+
+def resolve_paddleocr_model_names(config: PaddleOCRConfig) -> tuple[str | None, str | None]:
+    if config.text_detection_model_name or config.text_recognition_model_name:
+        return config.text_detection_model_name, config.text_recognition_model_name
+    if config.ocr_version == "PP-OCRv6":
+        return paddleocr_v6_model_names(config.model_type)
+    return None, None
+
+
 class PaddleOCRWrapper:
     def __init__(self, config: PaddleOCRConfig) -> None:
+        det_model_name, rec_model_name = resolve_paddleocr_model_names(config)
         init_kwargs: dict[str, Any] = {
             "paddlex_config": config.paddlex_config,
             "ocr_version": config.ocr_version,
@@ -26,11 +49,11 @@ class PaddleOCRWrapper:
             "doc_orientation_classify_model_dir": config.doc_orientation_classify_model_dir,
             "doc_unwarping_model_name": config.doc_unwarping_model_name,
             "doc_unwarping_model_dir": config.doc_unwarping_model_dir,
-            "text_detection_model_name": config.text_detection_model_name,
+            "text_detection_model_name": det_model_name,
             "text_detection_model_dir": config.text_detection_model_dir,
             "textline_orientation_model_name": config.textline_orientation_model_name,
             "textline_orientation_model_dir": config.textline_orientation_model_dir,
-            "text_recognition_model_name": config.text_recognition_model_name,
+            "text_recognition_model_name": rec_model_name,
             "text_recognition_model_dir": config.text_recognition_model_dir,
             "use_doc_orientation_classify": config.use_doc_orientation_classify,
             "use_doc_unwarping": config.use_doc_unwarping,
@@ -196,16 +219,45 @@ def _to_lang_rec(value: str) -> LangRec:
     return {"ch": LangRec.CH, "en": LangRec.EN}[value]
 
 
+RAPIDOCR_LEGACY_MODEL_TYPES = ("mobile", "server")
+RAPIDOCR_V6_MODEL_TYPES = ("tiny", "small", "medium")
+
+
+def rapidocr_model_types_for_version(ocr_version: str) -> list[str]:
+    if ocr_version == "PP-OCRv6":
+        return list(RAPIDOCR_V6_MODEL_TYPES)
+    return list(RAPIDOCR_LEGACY_MODEL_TYPES)
+
+
+def normalize_rapidocr_model_type(ocr_version: str, model_type: str) -> str:
+    valid = rapidocr_model_types_for_version(ocr_version)
+    if model_type in valid:
+        return model_type
+    if ocr_version == "PP-OCRv6":
+        return {"mobile": "small", "server": "medium"}.get(model_type, "small")
+    return {"tiny": "mobile", "small": "mobile", "medium": "server"}.get(model_type, "mobile")
+
+
 def _to_ocr_version(value: str) -> OCRVersion:
-    return {"PP-OCRv4": OCRVersion.PPOCRV4, "PP-OCRv5": OCRVersion.PPOCRV5}[value]
+    return {
+        "PP-OCRv4": OCRVersion.PPOCRV4,
+        "PP-OCRv5": OCRVersion.PPOCRV5,
+        "PP-OCRv6": OCRVersion.PPOCRV6,
+    }[value]
 
 
 def _to_model_type(value: str) -> ModelType:
-    return {"mobile": ModelType.MOBILE, "server": ModelType.SERVER}[value]
+    return {
+        "mobile": ModelType.MOBILE,
+        "server": ModelType.SERVER,
+        "tiny": ModelType.TINY,
+        "small": ModelType.SMALL,
+        "medium": ModelType.MEDIUM,
+    }[value]
 
 
 def _rapidocr_task_langs(lang_type: str, ocr_version: str) -> tuple[LangDet, LangRec]:
-    if ocr_version == "PP-OCRv5":
+    if ocr_version in ("PP-OCRv5", "PP-OCRv6"):
         if lang_type == "en":
             return LangDet.CH, LangRec.EN
         return LangDet.CH, LangRec.CH

@@ -2,6 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Any
 
+from src.core.ocr import (
+    normalize_rapidocr_model_type,
+    paddleocr_model_types_for_version,
+    rapidocr_model_types_for_version,
+)
 from src.gui.utils import (
     create_button,
     create_combobox,
@@ -136,6 +141,8 @@ class OCRPanel:
             self.paddle_lang_var.set(paddle_config.lang)
             self.device_var.set(paddle_config.device)
             self.version_var.set(paddle_config.ocr_version)
+            self.paddle_model_var.set(paddle_config.model_type)
+            self._update_paddleocr_model_visibility(paddle_config.ocr_version)
 
             self.det_thresh_var.set(paddle_config.text_det_thresh)
             self.box_thresh_var.set(paddle_config.text_det_box_thresh)
@@ -174,7 +181,10 @@ class OCRPanel:
 
             self.rapidocr_lang_var.set(rapid_config.lang_type)
             self.rapidocr_version_var.set(rapid_config.ocr_version)
-            self.rapidocr_model_var.set(rapid_config.model_type)
+            self.rapidocr_model_var.set(
+                normalize_rapidocr_model_type(rapid_config.ocr_version, rapid_config.model_type),
+            )
+            self._update_rapidocr_model_combobox(rapid_config.ocr_version)
             self.rapidocr_use_det_var.set(rapid_config.use_det)
             self.rapidocr_use_cls_var.set(rapid_config.use_cls)
             self.rapidocr_use_rec_var.set(rapid_config.use_rec)
@@ -227,6 +237,7 @@ class OCRPanel:
         self.paddle_lang_var = tk.StringVar(value=paddle_config.lang)
         self.device_var = tk.StringVar(value=paddle_config.device)
         self.version_var = tk.StringVar(value=paddle_config.ocr_version)
+        self.paddle_model_var = tk.StringVar(value=paddle_config.model_type)
 
         self.det_thresh_var = tk.DoubleVar(value=paddle_config.text_det_thresh)
         self.box_thresh_var = tk.DoubleVar(value=paddle_config.text_det_box_thresh)
@@ -381,14 +392,23 @@ class OCRPanel:
         )
         device_frame.pack(fill=tk.X, pady=(0, 5))
 
-        version_frame, self.version_combobox = create_combobox(
+        self.paddle_version_frame, self.version_combobox = create_combobox(
             parent,
             "OCR Version",
             self.version_var,
-            ["PP-OCRv5", "PP-OCRv4", "PP-OCRv3"],
+            ["PP-OCRv6", "PP-OCRv5", "PP-OCRv4", "PP-OCRv3"],
             self._on_version_changed,
         )
-        version_frame.pack(fill=tk.X, pady=(0, 5))
+        self.paddle_version_frame.pack(fill=tk.X, pady=(0, 5))
+
+        self.paddle_model_frame, self.paddle_model_combobox = create_combobox(
+            parent,
+            "Model Type",
+            self.paddle_model_var,
+            paddleocr_model_types_for_version(self.version_var.get()),
+            self._on_paddle_model_changed,
+        )
+        self._update_paddleocr_model_visibility(self.version_var.get())
 
         engine_frame, self.engine_combobox = create_combobox(
             parent,
@@ -812,16 +832,17 @@ class OCRPanel:
             parent,
             "OCR Version",
             self.rapidocr_version_var,
-            ["PP-OCRv4", "PP-OCRv5"],
+            ["PP-OCRv4", "PP-OCRv5", "PP-OCRv6"],
             self._on_rapidocr_version_changed,
         )
         version_frame.pack(fill=tk.X, pady=(0, 5))
 
+        initial_model_types = rapidocr_model_types_for_version(self.rapidocr_version_var.get())
         model_frame, self.rapidocr_model_combobox = create_combobox(
             parent,
             "Model Type",
             self.rapidocr_model_var,
-            ["mobile", "server"],
+            initial_model_types,
             self._on_rapidocr_model_changed,
         )
         model_frame.pack(fill=tk.X, pady=(0, 5))
@@ -1072,9 +1093,25 @@ class OCRPanel:
         self.app.ocr_config.paddleocr_config.device = self.device_var.get()
         self._invalidate_ocr_instance()
 
+    def _update_paddleocr_model_visibility(self, ocr_version: str) -> None:
+        if ocr_version == "PP-OCRv6":
+            self.paddle_model_combobox["values"] = paddleocr_model_types_for_version(ocr_version)
+            if self.paddle_model_var.get() not in self.paddle_model_combobox["values"]:
+                self.paddle_model_var.set("medium")
+                self.app.ocr_config.paddleocr_config.model_type = "medium"
+            self.paddle_model_frame.pack(fill=tk.X, pady=(0, 5), after=self.paddle_version_frame)
+        else:
+            self.paddle_model_frame.pack_forget()
+
     def _on_version_changed(self, value) -> None:
         """Handle version change"""
-        self.app.ocr_config.paddleocr_config.ocr_version = self.version_var.get()
+        ocr_version = self.version_var.get()
+        self.app.ocr_config.paddleocr_config.ocr_version = ocr_version
+        self._update_paddleocr_model_visibility(ocr_version)
+        self._invalidate_ocr_instance()
+
+    def _on_paddle_model_changed(self, value) -> None:
+        self.app.ocr_config.paddleocr_config.model_type = self.paddle_model_var.get()
         self._invalidate_ocr_instance()
 
     def _on_engine_changed(self, value) -> None:
@@ -1279,12 +1316,21 @@ class OCRPanel:
         self.app.ocr_config.easyocr_config.adjust_contrast = round(float(value), 3)
         self._invalidate_ocr_instance()
 
+    def _update_rapidocr_model_combobox(self, ocr_version: str) -> None:
+        model_types = rapidocr_model_types_for_version(ocr_version)
+        self.rapidocr_model_combobox["values"] = model_types
+        normalized = normalize_rapidocr_model_type(ocr_version, self.rapidocr_model_var.get())
+        self.rapidocr_model_var.set(normalized)
+        self.app.ocr_config.rapidocr_config.model_type = normalized
+
     def _on_rapidocr_lang_changed(self, value) -> None:
         self.app.ocr_config.rapidocr_config.lang_type = self.rapidocr_lang_var.get()
         self._invalidate_ocr_instance()
 
     def _on_rapidocr_version_changed(self, value) -> None:
-        self.app.ocr_config.rapidocr_config.ocr_version = self.rapidocr_version_var.get()
+        ocr_version = self.rapidocr_version_var.get()
+        self.app.ocr_config.rapidocr_config.ocr_version = ocr_version
+        self._update_rapidocr_model_combobox(ocr_version)
         self._invalidate_ocr_instance()
 
     def _on_rapidocr_model_changed(self, value) -> None:

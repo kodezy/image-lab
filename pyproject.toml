@@ -14,11 +14,11 @@ dependencies = [
     "scikit-image",
     "pillow",
     "pyautogui",
-    "paddleocr",
+    "paddleocr>=3.7.0",
     "paddlepaddle",
     "pytesseract",
     "easyocr",
-    "rapidocr",
+    "rapidocr>=3.9.0",
     "onnxruntime",
 ]
 

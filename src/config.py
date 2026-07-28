@@ -25,7 +25,8 @@ class CaptureConfig(Config):
 class PaddleOCRConfig(Config):
     """PaddleOCR configuration based on official documentation"""
 
-    ocr_version: Literal["PP-OCRv5", "PP-OCRv4", "PP-OCRv3"] = "PP-OCRv5"
+    ocr_version: Literal["PP-OCRv6", "PP-OCRv5", "PP-OCRv4", "PP-OCRv3"] = "PP-OCRv6"
+    model_type: Literal["tiny", "small", "medium"] = "medium"
     lang: str = "en"
     device: str = "cpu"
 
@@ -82,8 +83,8 @@ class TesseractConfig(Config):
 @dataclass
 class RapidOCRConfig(Config):
     lang_type: Literal["ch", "en", "multi"] = "en"
-    ocr_version: Literal["PP-OCRv4", "PP-OCRv5"] = "PP-OCRv4"
-    model_type: Literal["mobile", "server"] = "mobile"
+    ocr_version: Literal["PP-OCRv4", "PP-OCRv5", "PP-OCRv6"] = "PP-OCRv6"
+    model_type: Literal["mobile", "server", "tiny", "small", "medium"] = "small"
 
     use_det: bool = True
     use_cls: bool = True
